@@ -15,16 +15,16 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // Importe useRouter
-import axios from "axios"; // Importe o axios
+// REMOVA: import axios from "axios"; // Não precisamos mais do axios
 
 export function LoginForm({
     className,
     ...props
 }) {
     const [cpf, setCpf] = useState("");
-    const [senha, setSenha] = useState(""); // Estado para a senha
-    const [error, setError] = useState(""); // Estado para mensagens de erro
-    const router = useRouter(); // Inicialize o router
+    const [senha, setSenha] = useState("");
+    const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleCpfChange = (e) => {
         let value = e.target.value;
@@ -45,32 +45,41 @@ export function LoginForm({
     };
 
     const handleLogin = async (e) => {
-        e.preventDefault(); // Previne o comportamento padrão do formulário
-        setError(""); // Limpa erros anteriores
+        e.preventDefault();
+        setError("");
 
-        // Remove a formatação do CPF antes de enviar para o backend
         const rawCpf = cpf.replace(/\D/g, '');
 
         try {
-            const response = await axios.post("http://localhost:3001/login", {
-                cpf: rawCpf,
-                senha
-            }, {
-                withCredentials: true // Muito importante para enviar e receber cookies
+            const response = await fetch("http://localhost:3001/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    cpf: rawCpf,
+                    senha,
+                }),
+                credentials: "include", // ESSENCIAL para enviar e receber cookies com fetch
             });
 
-            if (response.status === 200) {
-                // Se o login for bem-sucedido, o token estará no cookie httpOnly.
-                // Não precisamos acessá-lo aqui.
-                router.push("/dashboard"); // Redireciona para o dashboard
+            
+            if (!response.ok) {
+                const errorData = await response.json(); 
+                setError(errorData.erro || "Erro desconhecido ao fazer login.");
+                console.error("Erro no login:", errorData);
+                return; 
             }
+
+
+
+            router.push("/dashboard");
+
         } catch (err) {
-            if (err.response && err.response.data && err.response.data.erro) {
-                setError(err.response.data.erro);
-            } else {
-                setError("Erro ao fazer login. Tente novamente.");
-            }
-            console.error("Erro no login:", err);
+            // Este catch será apenas para erros de rede (sem resposta do servidor) ou
+            // erros antes da requisição ser enviada.
+            console.error("Erro de rede ou antes da requisição:", err);
+            setError("Não foi possível conectar ao servidor. Verifique sua conexão.");
         }
     };
 
@@ -84,7 +93,7 @@ export function LoginForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleLogin}> {/* Adicione onSubmit */}
+                    <form onSubmit={handleLogin}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-3">
                                 <Label htmlFor="CPF">CPF</Label>
@@ -111,13 +120,12 @@ export function LoginForm({
                                     id="password"
                                     type="password"
                                     required
-                                    value={senha} // Use o estado para a senha
-                                    onChange={(e) => setSenha(e.target.value)} // Atualiza o estado da senha
+                                    value={senha}
+                                    onChange={(e) => setSenha(e.target.value)}
                                 />
                             </div>
-                            {error && <p className="text-red-500 text-sm">{error}</p>} {/* Exibe erros */}
+                            {error && <p className="text-red-500 text-sm">{error}</p>}
                             <div className="flex flex-col gap-3">
-                                {/* O Link aqui não é mais necessário para o login */}
                                 <Button type="submit" className="w-full cursor-pointer">
                                     Login
                                 </Button>
