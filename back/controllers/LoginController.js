@@ -34,6 +34,7 @@ const login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
+
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -41,9 +42,15 @@ const login = async (req, res) => {
       maxAge: 3600000
     });
 
-    // Em caso de sucesso, também é bom enviar um JSON.
-    // Assim, o frontend sempre espera um JSON.
-    return res.status(200).json({ mensagem: "Login realizado com sucesso!" });
+    return res.status(200).json({
+      message: "Login realizado com sucesso!",
+      user: {
+        nome: user.nome, // Envie o nome para uma mensagem de boas-vindas!
+        cargo: user.cargo, // ESSENCIAL para o roteamento no front-end
+        // NUNCA envie a senha ou dados sensíveis!
+      }
+    });
+
 
   } catch (err) {
     console.error("Erro no login:", err);

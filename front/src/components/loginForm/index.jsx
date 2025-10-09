@@ -63,17 +63,21 @@ export function LoginForm({
                 credentials: "include", // ESSENCIAL para enviar e receber cookies com fetch
             });
 
-            
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json(); 
+                const errorData = await response.json();
                 setError(errorData.erro || "Erro desconhecido ao fazer login.");
                 console.error("Erro no login:", errorData);
-                return; 
+                return;
             }
 
 
 
-            router.push("/dashboard");
+            const userRole = data.user.cargo;
+
+            
+                router.push(`/dashboard/${userRole}`) 
 
         } catch (err) {
             // Este catch será apenas para erros de rede (sem resposta do servidor) ou
