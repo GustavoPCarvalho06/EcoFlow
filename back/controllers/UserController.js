@@ -95,7 +95,7 @@ const readFilterUserController = async (req,res) =>{
     try {
         return res.status(200).json( await readUser(req.params.id))
     } catch (err) {
-        console.error("Erro ao Ler meus Chamdos: ", err)
+        console.error("Erro ao Ler meus Chamados: ", err)
         return res.status(400).json({mensagem:"Erro ao ler meus Usuarios"})
     }
 };

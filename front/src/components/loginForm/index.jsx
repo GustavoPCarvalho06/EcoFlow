@@ -66,9 +66,8 @@ export function LoginForm({
             const data = await response.json();
 
             if (!response.ok) {
-                const errorData = await response.json();
-                setError(errorData.erro || "Erro desconhecido ao fazer login.");
-                console.error("Erro no login:", errorData);
+                setError(data.erro || "Erro desconhecido ao fazer login.");
+                console.warn("Erro no login:", data);
                 return;
             }
 
@@ -80,8 +79,8 @@ export function LoginForm({
                 router.push(`/dashboard/${userRole}`) 
 
         } catch (err) {
-            // Este catch será apenas para erros de rede (sem resposta do servidor) ou
-            // erros antes da requisição ser enviada.
+
+            
             console.error("Erro de rede ou antes da requisição:", err);
             setError("Não foi possível conectar ao servidor. Verifique sua conexão.");
         }
