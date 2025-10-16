@@ -9,7 +9,7 @@ CREATE TABLE usuarios (
     nome VARCHAR(100),
 	cpf VARCHAR(14) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    cargo ENUM ("administrador","coordenador","coletor","residente") default "residente",
+    cargo ENUM ("administrador","coordenador","coletor") default "coletor",
     statusConta ENUM ("ativo","desligado") default "ativo"
 );
 
@@ -38,30 +38,18 @@ CREATE TABLE historico_sensores (
 
 
 #--- VIEWS -----------------------------------------------------------------------------------------------------------------
-# Pais e respectivos Alunos.
+# Relatorio das Rotas
 CREATE VIEW RotasRelatorio AS
 SELECT SistemaSensor.id_Sensor AS ID, SistemaSensor.statusLixo AS Stats, SistemaSensor.localizacao AS Coordenadas
 FROM SistemaSensor;
 
 # Relatório de Usuários Ativos
-CREATE VIEW UsuariosAtivos AS
+CREATE VIEW UsuariosTrampo AS
 SELECT usuarios.id_admin AS ID, usuarios.nome AS Nome, usuarios.cargo AS Cargo, usuarios.statusConta AS Status
-FROM usuarios
-WHERE usuarios.statusConta = 'ativo';
-
-# Relatório de Coordenadores
-CREATE VIEW CoordenadoresRelatorio AS
-SELECT usuarios.id_admin AS ID, usuarios.nome AS Nome, usuarios.cpf AS CPF, usuarios.statusConta AS Status
-FROM usuarios
-WHERE usuarios.cargo = 'coordenador';
-
-# Relatório de Coletores
-CREATE VIEW ColetoresRelatorio AS
-SELECT usuarios.id_admin AS ID, usuarios.nome AS Nome, usuarios.cpf AS CPF, usuarios.statusConta AS Status
-FROM usuarios
-WHERE usuarios.cargo = 'coletor';
+FROM usuarios;
 
 # Relatório de Mensagens Pendentes de Suporte
+
 CREATE VIEW MensagensPendentes AS
 SELECT mensagens_suporte.id_mensagem_suporte AS ID, mensagens_suporte.nome AS Remetente, mensagens_suporte.mensagem AS Mensagem, mensagens_suporte.status_mensagem AS Resolvida
 FROM mensagens_suporte
@@ -92,3 +80,17 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+SELECT * FROM usuarios;
+SELECT * FROM RotasRelatorio;
+
+
+#--- INSERTS PARA TEST -----------------------------------------------------------------------------------------------------------------
+INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
+('Vazia', ST_GeomFromText('POINT(-46.557282 -23.647222)')),
+('Quase Cheia', ST_GeomFromText('POINT(-46.555083 -23.645723)')),
+('Cheia', ST_GeomFromText('POINT(-46.552413 -23.644962)')),
+('Vazia', ST_GeomFromText('POINT(-46.556209 -23.640472)')),
+('Quase Cheia', ST_GeomFromText('POINT(-46.560171 -23.643114)')),
+('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)'));

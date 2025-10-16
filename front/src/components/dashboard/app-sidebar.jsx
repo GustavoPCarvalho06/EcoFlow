@@ -19,7 +19,7 @@ import {
     IconSettings,
     IconUsers,
 } from "@tabler/icons-react"
-
+import Image from "next/image"
 import { NavDocuments } from "@/components/dashboard/nav-documents"
 import { NavMain } from "@/components/dashboard/nav-main"
 import { NavSecondary } from "@/components//dashboard/nav-secondary"
@@ -168,7 +168,13 @@ export function AppSidebar({ ...props }) {
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
                             <a href="#">
-                                <IconInnerShadowTop className="!size-5" />
+                                <Image
+                                    src="/logo.png"
+                                    alt="EcoFlow logo"
+                                    width={50}
+                                    height={50}
+                                    className="rounded-sm"
+                                />
                                 <span className="text-base font-semibold">EcoFlow.</span>
                             </a>
                         </SidebarMenuButton>
