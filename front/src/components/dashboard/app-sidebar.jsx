@@ -1,5 +1,6 @@
 "use client"
 
+import { cookies } from "next/headers"
 import * as React from "react"
 import {
     IconCamera,
@@ -33,12 +34,18 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+
+const cookiesStore = await cookies();
+const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }), // Só adiciona Authorization se existir token
+    ...fetchOptions.headers,
+  };
+
+  const userData = headers.json(() => {
+    nome: headers.name
+  })
 const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
     navMain: [
         {
             title: "Dashboard",
@@ -174,7 +181,7 @@ export function AppSidebar({ ...props }) {
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={userData.name} />
             </SidebarFooter>
         </Sidebar>
     )

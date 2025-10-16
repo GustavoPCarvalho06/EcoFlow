@@ -47,7 +47,7 @@ const readUser = async (id) => {
 
 const readUserEmail = async (email) => {
     try {
-        const usuario = await read("usuarios", `emai = '${email}'`)
+        const usuario = await read("usuarios", `email = '${email}'`)
         if (!usuario) {
             return 'ERRO ao consultar'
         }
