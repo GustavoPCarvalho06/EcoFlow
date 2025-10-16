@@ -47,7 +47,7 @@ const data = {
         },
         {
             title: "Lifecycle",
-            url: "https://www.youtube.com/",
+            url: "#",
             icon: IconListDetails,
         },
         {

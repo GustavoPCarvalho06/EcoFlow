@@ -83,3 +83,14 @@ DELIMITER ;
 
 
 SELECT * FROM usuarios;
+SELECT * FROM RotasRelatorio;
+
+
+#--- INSERTS PARA TEST -----------------------------------------------------------------------------------------------------------------
+INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
+('Vazia', ST_GeomFromText('POINT(-46.557282 -23.647222)')),
+('Quase Cheia', ST_GeomFromText('POINT(-46.555083 -23.645723)')),
+('Cheia', ST_GeomFromText('POINT(-46.552413 -23.644962)')),
+('Vazia', ST_GeomFromText('POINT(-46.556209 -23.640472)')),
+('Quase Cheia', ST_GeomFromText('POINT(-46.560171 -23.643114)')),
+('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)'));

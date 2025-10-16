@@ -75,12 +75,12 @@ export function LoginForm({
 
             const userRole = data.user.cargo;
 
-            
-                router.push(`/dashboard/${userRole}`) 
+
+            router.push(`/dashboard/${userRole}`)
 
         } catch (err) {
 
-            
+
             console.error("Erro de rede ou antes da requisição:", err);
             setError("Não foi possível conectar ao servidor. Verifique sua conexão.");
         }
