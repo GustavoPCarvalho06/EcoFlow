@@ -94,3 +94,37 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 ('Vazia', ST_GeomFromText('POINT(-46.556209 -23.640472)')),
 ('Quase Cheia', ST_GeomFromText('POINT(-46.560171 -23.643114)')),
 ('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)'));
+
+
+# Usuários
+INSERT INTO usuarios (nome, cpf, senha, cargo, statusConta) VALUES
+('João Martins', '123.456.789-00', '123senha', 'administrador', 'ativo'),
+('Maria Santos', '987.654.321-00', 'senha456', 'coordenador', 'ativo'),
+('Carlos Nunes', '555.666.777-88', 'senha789', 'coletor', 'ativo'),
+('Ana Silva', '222.333.444-55', '1234abcd', 'coletor', 'desligado');
+
+
+
+# Mensagens de suporte
+INSERT INTO mensagens_suporte (nome, mensagem, status_mensagem) VALUES
+('Lucas Ribeiro', 'O sensor da praça central não está respondendo.', 0),
+('Fernanda Lima', 'Preciso de acesso ao painel de coordenador.', 1),
+('Diego Souza', 'Aplicativo travando na tela de login.', 0),
+('Patrícia Gomes', 'Sensor próximo ao mercado indica cheio o tempo todo.', 0);
+
+
+
+# Histórico inicial (simulação)
+INSERT INTO historico_sensores (id_sensor, statusLixo, data_registro) VALUES
+(1, 'Vazia', NOW() - INTERVAL 2 DAY),
+(2, 'Quase Cheia', NOW() - INTERVAL 1 DAY),
+(3, 'Cheia', NOW() - INTERVAL 1 DAY),
+(4, 'Vazia', NOW() - INTERVAL 3 DAY),
+(5, 'Cheia', NOW());
+
+
+#--- CONSULTAS DE TESTE -----------------------------------------------------------------------------------------------------------------
+SELECT * FROM UsuariosTrampo;
+SELECT * FROM RotasRelatorio;
+SELECT * FROM MensagensPendentes;
+SELECT * FROM StatusPorDia;
