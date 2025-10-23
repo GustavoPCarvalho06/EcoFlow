@@ -112,8 +112,6 @@ INSERT INTO mensagens_suporte (nome, mensagem, status_mensagem) VALUES
 ('Diego Souza', 'Aplicativo travando na tela de login.', 0),
 ('Patrícia Gomes', 'Sensor próximo ao mercado indica cheio o tempo todo.', 0);
 
-
-
 # Histórico inicial (simulação)
 INSERT INTO historico_sensores (id_sensor, statusLixo, data_registro) VALUES
 (1, 'Vazia', NOW() - INTERVAL 2 DAY),
@@ -121,7 +119,6 @@ INSERT INTO historico_sensores (id_sensor, statusLixo, data_registro) VALUES
 (3, 'Cheia', NOW() - INTERVAL 1 DAY),
 (4, 'Vazia', NOW() - INTERVAL 3 DAY),
 (5, 'Cheia', NOW());
-
 
 #--- CONSULTAS DE TESTE -----------------------------------------------------------------------------------------------------------------
 SELECT * FROM UsuariosTrampo;
