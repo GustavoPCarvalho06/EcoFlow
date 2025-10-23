@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import user from "./routes/userRotas.js"
 import login from "./routes/loginRotas.js"
 import sensor from "./routes/statusSensorRotas.js"
-
+import lixo from "./routes/lixoRotas.js"
 
 app.use(cors({
   origin: 'http://localhost:3000', 
@@ -18,6 +18,8 @@ app.use(express.json());
 app.use(cookieParser()); 
 
 //Rotas
+
+app.use('/lixo', lixo)
 app.use('/user', user)
 app.use('/login', login)
 
