@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 
 import user from "./routes/userRotas.js"
 import login from "./routes/loginRotas.js"
-import Sensor from "./routes/statusSensorRotas.js"
+import sensor from "./routes/statusSensorRotas.js"
 
 
 app.use(cors({
@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use('/user', user)
 app.use('/login', login)
 
-app.use('/statusSensor', user)
+app.use('/statusSensor', sensor)
 
 
 app.use((req, res) => {

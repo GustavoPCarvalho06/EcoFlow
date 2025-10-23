@@ -1,18 +1,14 @@
 import express from "express";
-import { login } from "../controllers/LoginController.js";
+import sensor from "../controllers/statusSensorController.js";
 
 const router = express.Router();
 
 // Rota de login
-<<<<<<< HEAD
-router.post("/sla", login);
+router.get('/', sensor.readAllUserController);
+
+router.post("/getFilter", /*auth , */ sensor.readFilterstatusSensorRotasController)
+router.post("/getFilterBetween", /*auth,*/ sensor.readFilterBetweenStatusSensorRotasController)
 
 export default router;
-=======
-router.post("/", login);
-
-export default router;
 
 
-/* TUDO TMEPORARIO PARA EU PODER INICIAR O BACK */
->>>>>>> feeae97a2038e6a76b5be97edb5c26ab4be8a171
