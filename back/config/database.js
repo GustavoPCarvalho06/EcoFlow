@@ -121,4 +121,28 @@ async function compare(senha, hash) {
     }
 }
 
-export { create, readAll, read, update, deleteRecord, compare };
+const createLixoDB = async (table, data) => {
+  const connection = await getConnection(); // ✅ pega conexão do pool
+  try {
+    const keys = Object.keys(data).join(", ");
+    const values = Object.values(data)
+      .map((v) => (typeof v === "string" && !v.startsWith("ST_GeomFromText") ? `'${v}'` : v))
+      .join(", ");
+
+    const sql = `INSERT INTO ${table} (${keys}) VALUES (${values})`;
+    console.log("🧩 SQL gerado:", sql);
+
+    const [result] = await connection.query(sql);
+    return result;
+  } catch (err) {
+    console.error("Erro no CREATE:", err);
+    throw err;
+  } finally {
+    connection.release(); // ✅ libera conexão
+  }
+};
+
+
+
+
+export { create, readAll, read, update, deleteRecord, compare,createLixoDB };
