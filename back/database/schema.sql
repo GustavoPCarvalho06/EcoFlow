@@ -5,8 +5,8 @@ USE EcoFlowBD;
 
 #--- Administrador -----------------------------------------------------------------------------------------------------------------
 CREATE TABLE usuarios (
-	id_admin INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100),
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),	
 	cpf VARCHAR(14) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     cargo ENUM ("administrador","coordenador","coletor") default "coletor",
@@ -45,7 +45,7 @@ FROM SistemaSensor;
 
 # Relatório de Usuários Ativos
 CREATE VIEW UsuariosTrampo AS
-SELECT usuarios.id_admin AS ID, usuarios.nome AS Nome, usuarios.cargo AS Cargo, usuarios.statusConta AS Status
+SELECT usuarios.id AS ID, usuarios.nome AS Nome, usuarios.cargo AS Cargo, usuarios.statusConta AS Status
 FROM usuarios;
 
 # Relatório de Mensagens Pendentes de Suporte

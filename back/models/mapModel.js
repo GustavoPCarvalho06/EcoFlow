@@ -1,14 +1,11 @@
-import { readAll } from "../config/database.js";
+import { readAll } from '../config/database.js';
 
-const readCordinates = async (lixo_id) => {
-    try {
-
-        const dataCordinates = await readAll('RotasRelatorio', `ID = ${lixo_id}`);
-        return dataCordinates;
-    } catch (err) {
-        console.error("Houve um erro ao buscar os checkpoints: ", err);
-        return [];
-    }
-};
-
-export default { readCordinates };
+export async function getAllPoints() {
+  try {
+    const pontos = await readAll('RotasRelatorio');
+    return pontos;
+  } catch (error) {
+    console.error('Erro ao buscar pontos:', error);
+    throw error;
+  }
+}

@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use('/user', user)
 app.use('/login', login)
 
-app.use('/statusSensor', sensor)
+app.use('/statusSensor', Sensor)
 
 
 app.use((req, res) => {

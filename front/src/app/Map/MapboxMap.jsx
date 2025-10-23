@@ -1,53 +1,81 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { MAPBOX_STYLES } from "./mapStyles.js";
 
-export default function MapboxMap({
-  latitude = -23.647222,
-  longitude = -46.557282,
-  zoom = 15,
-  height = "400px",
-  styleType = "streets",
-  enable3D = true,
-}) {
+export default function MapboxMap() {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
 
   useEffect(() => {
     let mapboxgl;
-    import("mapbox-gl").then((module) => {
+
+    (async () => {
+      const module = await import("mapbox-gl");
       mapboxgl = module.default;
       mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-      if (!mapContainer.current) return;
+      // busca pontos
+      const response = await fetch("http://localhost:3001/statusSensor");
+      const data = await response.json();
 
+      if (!data || data.length === 0) {
+        console.warn("Nenhum ponto recebido.");
+        return;
+      }
+
+      // MUDAR DPS - PONTO INICIAL
+      const center = [
+        data[0].Coordenadas.x,
+        data[0].Coordenadas.y
+      ];
+
+      // start no mapa
       mapRef.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: MAPBOX_STYLES[styleType] || MAPBOX_STYLES.streets,
-        center: [longitude, latitude],
-        zoom: zoom,
-        pitch: enable3D ? 45 : 0,
-        bearing: enable3D ? -17.6 : 0,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center,
+        zoom: 14.8,
+        pitch: 0,
+        bearing: 40
       });
 
       mapRef.current.addControl(new mapboxgl.NavigationControl());
 
-      if (enable3D) {
-        mapRef.current.on("load", () => {
-          // Add terrain
-          mapRef.current.addSource("mapbox-dem", {
-            type: "raster-dem",
-            url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-            tileSize: 512,
-            maxzoom: 14,
-          });
-          mapRef.current.setTerrain({ source: "mapbox-dem", exaggeration: 1.5 });
+      // adiciona os pontos
+      data.forEach((ponto) => {
+        const { x, y } = ponto.Coordenadas;
 
-          // Add 3D buildings
-          mapRef.current.addLayer({
-            id: "3d-buildings",
+        // Cor dos status
+        let color = "gray";
+        if (ponto.Stats === "Vazia") color = "green";
+        else if (ponto.Stats === "Quase Cheia") color = "orange";
+        else if (ponto.Stats === "Cheia") color = "red";
+
+        // pontos de coleta
+        const marker = new mapboxgl.Marker({ color })
+          .setLngLat([x, y])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(`
+              <strong>ID:</strong> ${ponto.ID}<br/>
+              <strong>Status:</strong> ${ponto.Stats}<br/>
+              <strong>Lat:</strong> ${y}<br/>
+              <strong>Lng:</strong> ${x}
+            `)
+          )
+          .addTo(mapRef.current);
+      });
+
+      // 3D
+      mapRef.current.on("style.load", () => {
+        const layers = mapRef.current.getStyle().layers;
+        const labelLayerId = layers.find(
+          (layer) => layer.type === "symbol" && layer.layout["text-field"]
+        )?.id;
+
+        mapRef.current.addLayer(
+          {
+            id: "add-3d-buildings",
             source: "composite",
             "source-layer": "building",
             filter: ["==", "extrude", "true"],
@@ -55,24 +83,46 @@ export default function MapboxMap({
             minzoom: 15,
             paint: {
               "fill-extrusion-color": "#aaa",
-              "fill-extrusion-height": ["get", "height"],
-              "fill-extrusion-base": ["get", "min_height"],
+              "fill-extrusion-height": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                15,
+                0,
+                15.05,
+                ["get", "height"],
+              ],
+              "fill-extrusion-base": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                15,
+                0,
+                15.05,
+                ["get", "min_height"],
+              ],
               "fill-extrusion-opacity": 0.6,
             },
-          });
-        });
-      }
-    });
+          },
+          labelLayerId
+        );
+      });
+    })();
 
     return () => {
       if (mapRef.current) mapRef.current.remove();
     };
-  }, [latitude, longitude, zoom, styleType, enable3D]);
+  }, []);
 
   return (
     <div
       ref={mapContainer}
-      style={{ width: "100%", height: height, borderRadius: "8px" }}
+      style={{
+        width: "100%",
+        height: "500px",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
     />
   );
 }

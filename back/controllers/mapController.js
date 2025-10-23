@@ -1,13 +1,11 @@
-import mapa from '../models/rotasModel.js';
+import { getAllPoints } from '../models/mapModel.js';
 
-const readCordenadas = async (req, res) => {
-    try {
-        const dataCordenadas = await mapa.readCordinates(req.params.id);
-        res.status(200).json({ mensagem: dataCordenadas });
-    } catch (err) {
-        console.error("Houve um erro ao buscar os sensores: ", err);
-        res.status(500).json({ mensagem: 'Houve um erro ao buscar os sensores' });
-    }
-};
-
-export default { readCordenadas };
+export async function listarPontos(req, res) {
+  try {
+    const pontos = await getAllPoints();
+    res.json(pontos);
+  } catch (err) {
+    console.error('Erro ao listar pontos:', err);
+    res.status(500).json({ error: 'Erro ao buscar pontos no banco de dados' });
+  }
+}
