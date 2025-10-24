@@ -6,8 +6,13 @@ import cookieParser from 'cookie-parser';
 
 import user from "./routes/userRotas.js"
 import login from "./routes/loginRotas.js"
-import sensor from "./routes/statusSensorRotas.js"
 import lixo from "./routes/lixoRotas.js"
+
+import sensor from "./routes/statusSensorRotas.js"
+import userStatus from "./routes/statusUserRotas.js"
+import msgStatus from "./routes/statusMsgRotas.js"
+import diaStatus from "./routes/statusDiaRotas.js"
+
 
 app.use(cors({
   origin: 'http://localhost:3000', 
@@ -23,7 +28,11 @@ app.use('/lixo', lixo)
 app.use('/user', user)
 app.use('/login', login)
 
+//View
 app.use('/statusSensor', sensor)
+app.use('/userStatus', userStatus)
+app.use('/msgStatus', msgStatus)
+app.use('/diaStatus', diaStatus)
 
 
 app.use((req, res) => {
