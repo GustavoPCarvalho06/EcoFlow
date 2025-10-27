@@ -3,7 +3,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function logout () {
-    const cookieStore = cookies();
-    cookieStore.delete('token');
-    redirect('/')
+    try {
+        const cookieStore = cookies('');
+        cookieStore.delete('token') ;
+        redirect('/')
+    } catch (error) {
+        console.error('erro ao efetuar logout: ', error)
+    }
+    
+    
 };

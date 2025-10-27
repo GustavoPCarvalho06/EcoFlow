@@ -28,7 +28,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-
+import { logout } from "@/hooks/logout"
 export function NavUser({
   usuario,
 }) {
@@ -86,18 +86,14 @@ export function NavUser({
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
                 <IconNotification />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}> 
               <IconLogout />
-              Log out
+                Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
