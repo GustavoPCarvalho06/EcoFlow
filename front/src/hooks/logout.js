@@ -6,10 +6,8 @@ export async function logout () {
     try {
         const cookieStore = cookies('');
         cookieStore.delete('token') ;
-        redirect('/')
     } catch (error) {
         console.error('erro ao efetuar logout: ', error)
     }
-    
-    
+    redirect('/')
 };
