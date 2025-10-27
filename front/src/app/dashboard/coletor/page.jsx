@@ -1,6 +1,6 @@
 "use client";
 
-import MapboxMap from "@/app/Map/MapboxMap.jsx";
+import MapboxMap from "@/components/Map/MapboxMap.jsx";
 
 export default function ColetorPage() {
   return (
