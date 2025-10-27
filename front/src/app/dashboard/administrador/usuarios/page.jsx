@@ -5,7 +5,7 @@ import { UserManagementTable } from "@/components/dashboard/UserManagementTable"
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 
-export default function UsuariosPage() {
+export default async function UsuariosPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
 

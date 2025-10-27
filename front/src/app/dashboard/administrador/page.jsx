@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
 import { UserPreviewTable } from "@/components/dashboard/UserPreviewTable"; // <-- MUDANÇA AQUI
 
-export default function Page() {
+export default async function Page() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
 
