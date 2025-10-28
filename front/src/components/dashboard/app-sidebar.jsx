@@ -1,28 +1,20 @@
 "use client"
 
 import * as React from "react"
-import {
-    IconCamera,
-    IconChartBar,
-    IconDashboard,
-    IconDatabase,
-    IconFileAi,
-    IconFileDescription,
-    IconFileWord,
-    IconFolder,
-    IconHelp,
-    IconInnerShadowTop,
-    IconListDetails,
-    IconReport,
-    IconSearch,
-    IconSettings,
-    IconUsers,
-} from "@tabler/icons-react"
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import Image from "next/image"
-import { NavDocuments } from "@/components/dashboard/nav-documents"
-import { NavMain } from "@/components/dashboard/nav-main"
-import { NavSecondary } from "@/components//dashboard/nav-secondary"
+// 1. IMPORTAÇÃO ATUALIZADA: Trocamos IconMegaphone por IconBroadcast
+import { 
+    IconDashboard, 
+    IconUsers, 
+    IconPlus, 
+    IconBell, 
+    IconMail, 
+    IconBroadcast 
+} from "@tabler/icons-react" 
 import { NavUser } from "@/components/dashboard/nav-user"
+import { Button } from "@/components/ui/button"
 import {
     Sidebar,
     SidebarContent,
@@ -33,153 +25,91 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+// 2. LISTA DE NAVEGAÇÃO ATUALIZADA com o ícone correto
+const navItems = [
+    {
+        title: "Dashboard",
+        href: "/dashboard/administrador",
+        icon: IconDashboard,
+    },
+    {
+        title: "Usuários",
+        href: "/dashboard/administrador/usuarios",
+        icon: IconUsers,
+    },
+    {
+        title: "Mensagem",
+        href: "#",
+        icon: IconMail,
+    },
+    {
+        title: "Comunicados",
+        href: "#",
+        icon: IconBroadcast, // Ícone corrigido!
+    },
+]
 
-
-const data = {
-    navMain: [
-        {
-            title: "Dashboard",
-            url: "#",
-            icon: IconDashboard,
-        },
-        {
-            title: "Lifecycle",
-            url: "#",
-            icon: IconListDetails,
-        },
-        {
-            title: "Analytics",
-            url: "#",
-            icon: IconChartBar,
-        },
-        {
-            title: "Projects",
-            url: "#",
-            icon: IconFolder,
-        },
-        {
-            title: "Team",
-            url: "#",
-            icon: IconUsers,
-        },
-    ],
-    navClouds: [
-        {
-            title: "Capture",
-            icon: IconCamera,
-            isActive: true,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Proposal",
-            icon: IconFileDescription,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Prompts",
-            icon: IconFileAi,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-    ],
-    navSecondary: [
-        {
-            title: "Settings",
-            url: "#",
-            icon: IconSettings,
-        },
-        {
-            title: "Get Help",
-            url: "#",
-            icon: IconHelp,
-        },
-        {
-            title: "Search",
-            url: "#",
-            icon: IconSearch,
-        },
-    ],
-    documents: [
-        {
-            name: "Data Library",
-            url: "#",
-            icon: IconDatabase,
-        },
-        {
-            name: "Reports",
-            url: "#",
-            icon: IconReport,
-        },
-        {
-            name: "Word Assistant",
-            url: "#",
-            icon: IconFileWord,
-        },
-    ],
-}
-
+// MANTIDO: A assinatura da função que já funciona para você.
 export function AppSidebar( usuario, ...props ) {
+    const pathname = usePathname();
 
-    console.log("usuario no app-sidebar: ", usuario)
     return (
         <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader>
+            <SidebarHeader className="border-b">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="#">
+                            <Link href="/dashboard/administrador">
                                 <Image
                                     src="/logo.png"
                                     alt="EcoFlow logo"
-                                    width={50}
-                                    height={50}
+                                    width={40}
+                                    height={40}
                                     className="rounded-sm"
                                 />
-                                <span className="text-base font-semibold">EcoFlow.</span>
-                            </a>
+                                <span className="text-lg font-semibold">EcoFlow.</span>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavDocuments items={data.documents} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+
+            <SidebarContent className="p-4">
+                <div className="mb-4 flex items-center gap-2">
+
+                    <Button size="icon" variant="ghost" aria-label="Notifications">
+                        <IconBell className="h-5 w-5" />
+                    </Button>
+                </div>
+                
+                <nav className="flex flex-col gap-1">
+                    {navItems.map((item, index) => (
+                        <Link
+                            key={index}
+                            href={item.href}
+                            className={`
+                                flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium
+                                transition-colors
+                                ${pathname === item.href
+                                    ? 'bg-muted text-foreground' 
+                                    : 'text-muted-foreground hover:bg-muted/ ৫০ hover:text-foreground'
+                                }
+                            `}
+                        >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.title}</span>
+                        </Link>
+                    ))}
+                </nav>
+                
             </SidebarContent>
-            <SidebarFooter>
-                <NavUser  usuario = {usuario}/>
+
+            <SidebarFooter className="border-t">
+                {/* MANTIDO: A forma original de passar a prop para o NavUser. */}
+                <NavUser usuario={usuario}/>
             </SidebarFooter>
         </Sidebar>
     )

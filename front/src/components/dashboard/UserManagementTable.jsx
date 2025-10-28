@@ -103,7 +103,7 @@ export function UserManagementTable() {
                 Visualize, filtre, crie e gerencie todos os usuários do sistema.
               </CardDescription>
             </div>
-            <Button size="sm" className="gap-1" onClick={() => setIsCreateModalOpen(true)}>
+            <Button size="sm" className="gap-1 cursor-pointer" onClick={() => setIsCreateModalOpen(true)}>
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Criar Novo Usuário</span>
             </Button>
@@ -140,10 +140,10 @@ export function UserManagementTable() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(user)}>
+                    <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => handleOpenEditModal(user)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleOpenDeleteAlert(user)}>
+                    <Button variant="ghost" size="icon" className="text-red-500 cursor-pointer" onClick={() => handleOpenDeleteAlert(user)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>

@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 
-// Dados estáticos - voltamos para os 5 usuários originais
 const mockUsers = [
   { id: 1, nome: 'João Martins', cpf: '123.456.789-00', cargo: 'administrador', statusConta: 'ativo' },
   { id: 2, nome: 'Maria Santos', cpf: '987.654.321-00', cargo: 'coordenador', statusConta: 'ativo' },
@@ -57,10 +56,11 @@ export function UserPreviewTable() {
         </Table>
       </CardContent>
       {/* SEÇÃO DO FOOTER ATUALIZADA */}
-      <CardFooter className="flex justify-center border-t px-6 py-1">
-        <Button asChild variant="outline" size="icon" aria-label="Ver todos os usuários">
+      <CardFooter className="flex justify-center border-t px-6 py-2">
+        {/* BOTÃO COM FOCO NO TAMANHO HORIZONTAL */}
+        <Button asChild variant="outline" className="w-45 py-5" aria-label="Ver todos os usuários">
           <Link href="/dashboard/administrador/usuarios">
-            <Menu className="h-6 w-6" />
+            <Menu className="h-8 w-8" />
           </Link>
         </Button>
       </CardFooter>
