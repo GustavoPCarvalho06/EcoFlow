@@ -4,14 +4,14 @@ import * as React from "react"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from "next/image"
-// 1. IMPORTAÇÃO ATUALIZADA: Trocamos IconMegaphone por IconBroadcast
 import { 
     IconDashboard, 
     IconUsers, 
     IconPlus, 
     IconBell, 
     IconMail, 
-    IconBroadcast 
+    IconBroadcast,
+    IconMapPin 
 } from "@tabler/icons-react" 
 import { NavUser } from "@/components/dashboard/nav-user"
 import { Button } from "@/components/ui/button"
@@ -25,7 +25,6 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// 2. LISTA DE NAVEGAÇÃO ATUALIZADA com o ícone correto
 const navItems = [
     {
         title: "Dashboard",
@@ -39,17 +38,24 @@ const navItems = [
     },
     {
         title: "Mensagem",
-        href: "#",
+        href: "/dashboard/administrador/mensagens",
         icon: IconMail,
     },
     {
         title: "Comunicados",
-        href: "#",
-        icon: IconBroadcast, // Ícone corrigido!
+        href: "/dashboard/administrador/comunicados",
+        icon: IconBroadcast,
     },
 ]
 
-// MANTIDO: A assinatura da função que já funciona para você.
+const coletorNavItems = [
+    {
+        title: "Mapa",
+        href: "#",
+        icon: IconMapPin,
+    }
+]
+
 export function AppSidebar( usuario, ...props ) {
     const pathname = usePathname();
 
@@ -79,36 +85,65 @@ export function AppSidebar( usuario, ...props ) {
 
             <SidebarContent className="p-4">
                 <div className="mb-4 flex items-center gap-2">
-
                     <Button size="icon" variant="ghost" aria-label="Notifications">
-                        <IconBell className="h-5 w-5" />
+                        {/* MUDANÇA 1: Aumentamos o ícone de sino para consistência */}
+                        <IconBell className="h-6 w-6" /> 
                     </Button>
                 </div>
                 
-                <nav className="flex flex-col gap-1">
+                {/* MUDANÇA 2: Aumentamos o espaçamento entre os links */}
+                <nav className="flex flex-col gap-2"> 
                     {navItems.map((item, index) => (
                         <Link
                             key={index}
                             href={item.href}
                             className={`
-                                flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium
+                                flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
                                 transition-colors
                                 ${pathname === item.href
                                     ? 'bg-muted text-foreground' 
-                                    : 'text-muted-foreground hover:bg-muted/ ৫০ hover:text-foreground'
+                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                                 }
                             `}
                         >
-                            <item.icon className="h-5 w-5" />
+                            {/* MUDANÇA 3: Aumentamos o tamanho dos ícones e o padding vertical (py-3) */}
+                            <item.icon className="h-6 w-6" /> 
                             <span>{item.title}</span>
                         </Link>
                     ))}
                 </nav>
+
+                <div className="mt-8"> {/* MUDANÇA 4: Aumentamos o espaço acima da seção "Coletor" */}
+                    <div className="px-3 pb-2">
+                        <span className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase">Coletor</span>
+                    </div>
+                    <div className="border-t mx-3 mb-2"></div>
+                    {/* MUDANÇA 2 (Repetida): Aumentamos o espaçamento entre os links */}
+                    <nav className="flex flex-col gap-2"> 
+                        {coletorNavItems.map((item, index) => (
+                            <Link
+                                key={index}
+                                href={item.href}
+                                className={`
+                                    flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
+                                    transition-colors
+                                    ${pathname === item.href
+                                        ? 'bg-muted text-foreground' 
+                                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                    }
+                                `}
+                            >
+                                {/* MUDANÇA 3 (Repetida): Aumentamos o tamanho dos ícones e o padding vertical (py-3) */}
+                                <item.icon className="h-6 w-6" />
+                                <span>{item.title}</span>
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
                 
             </SidebarContent>
 
             <SidebarFooter className="border-t">
-                {/* MANTIDO: A forma original de passar a prop para o NavUser. */}
                 <NavUser usuario={usuario}/>
             </SidebarFooter>
         </Sidebar>
