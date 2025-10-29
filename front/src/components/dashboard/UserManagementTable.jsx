@@ -1,70 +1,87 @@
 "use client";
 
-import { useState } from "react"; // Importa o useState para controlar o estado
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { PlusCircle, Pencil, Trash2, Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlusCircle, Pencil, Search, PowerOff, Power, ChevronLeft, ChevronRight } from "lucide-react";
 
-// Dados estáticos (mock) para preencher a tabela
-const mockUsers = [
-  { id: 1, nome: 'João Martins', cpf: '123.456.789-00', cargo: 'administrador', statusConta: 'ativo' },
-  { id: 2, nome: 'Maria Santos', cpf: '987.654.321-00', cargo: 'coordenador', statusConta: 'ativo' },
-  { id: 3, nome: 'Carlos Nunes', cpf: '555.666.777-88', cargo: 'coletor', statusConta: 'ativo' },
-  { id: 4, nome: 'Ana Silva', cpf: '222.333.444-55', cargo: 'coletor', statusConta: 'desligado' },
-  { id: 5, nome: 'Pedro Costa', cpf: '111.222.333-44', cargo: 'coletor', statusConta: 'ativo' },
-    { id: 6, nome: 'João Martines2', cpf: '123.456.789-00', cargo: 'administrador', statusConta: 'ativo' },
-  { id: 7, nome: 'Maria Santos3', cpf: '987.654.321-00', cargo: 'coordenador', statusConta: 'ativo' },
-  { id: 8, nome: 'Carlos Nunes4', cpf: '555.666.777-88', cargo: 'coletor', statusConta: 'ativo' },
-  { id: 9, nome: 'Ana Silva5', cpf: '222.333.444-55', cargo: 'coletor', statusConta: 'desligado' },
-  { id: 10, nome: 'Pedro Costa6', cpf: '111.222.333-44', cargo: 'coletor', statusConta: 'ativo' },
-];
+const formatCPF = (cpf) => {
+  if (!cpf) return "";
+  const cleanCpf = cpf.replace(/\D/g, '');
+  if (cleanCpf.length !== 11) return cpf; // Retorna o valor original se não for um CPF completo
+  return cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+};
 
 export function UserManagementTable() {
-  // --- Estados para controlar os modais e a pesquisa ---
+  // === ESTADOS PARA DADOS, FILTROS E PAGINAÇÃO ===
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [cargoFilter, setCargoFilter] = useState("todos");
+
+  // === ESTADOS PARA MODAIS ===
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [error, setError] = useState("");
+  const [createCpf, setCreateCpf] = useState("");
 
-  // --- Funções para manipular os modais ---
+  // === FUNÇÃO CENTRAL DE BUSCA DE DADOS ===
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page,
+        limit,
+        search: searchQuery,
+        statusConta: statusFilter,
+        cargo: cargoFilter,
+      });
+      const response = await fetch(`http://localhost:3001/user/paginated?${params.toString()}`);
+      if (!response.ok) throw new Error('Falha ao buscar dados dos usuários');
+      
+      const data = await response.json();
+      setUsers(data.users);
+      setTotalPages(data.totalPages);
+      setTotalUsers(data.total);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      setUsers([]); // Limpa os usuários em caso de erro
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, limit, searchQuery, statusFilter, cargoFilter]);
+
+  // Efeito que chama a busca sempre que um filtro ou página mudar
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+  
+  // Debounce para a pesquisa, para não fazer requisições a cada tecla digitada
+  useEffect(() => {
+    const handler = setTimeout(() => {
+        fetchUsers();
+    }, 500); // Aguarda 500ms após o usuário parar de digitar
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+
   const handleOpenEditModal = (user) => {
     setSelectedUser(user);
+    setError("");
     setIsEditModalOpen(true);
   };
 
@@ -73,23 +90,86 @@ export function UserManagementTable() {
     setIsDeleteAlertOpen(true);
   };
 
-  // --- Funções de "ação" (por enquanto, só exibem no console) ---
-  const handleCreateUser = (event) => {
-    event.preventDefault();
-    console.log("Criando novo usuário...");
-    setIsCreateModalOpen(false); // Fecha o modal após a ação
+  const handleCpfInputChange = (e) => {
+    const rawValue = e.target.value.replace(/\D/g, '');
+    let formattedValue = rawValue;
+    if (rawValue.length > 9) {
+      formattedValue = rawValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (rawValue.length > 6) {
+      formattedValue = rawValue.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    } else if (rawValue.length > 3) {
+      formattedValue = rawValue.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    }
+    setCreateCpf(formattedValue.slice(0, 14));
   };
   
-  const handleUpdateUser = (event) => {
-    event.preventDefault();
-    console.log("Atualizando usuário:", selectedUser.id);
-    setIsEditModalOpen(false);
+  // --- FUNÇÕES DE API ---
+  const handleApiCall = async (endpoint, method, body, successCallback) => {
+    try {
+      const response = await fetch(`http://localhost:3001/user/${endpoint}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensagem || 'Ocorreu um erro');
+      }
+      successCallback();
+    } catch (err) {
+      setError(err.message);
+      return false; // Indica falha
+    }
+    return true; // Indica sucesso
   };
 
-  const handleDeactivateUser = () => {
-    console.log("Desativando usuário:", selectedUser.id);
-    // Aqui viria a lógica para mudar o status de 'ativo' para 'desligado'
+  const handleCreateUser = async (event) => {
+    event.preventDefault();
+    setError("");
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+    data.cpf = data.cpf.replace(/\D/g, ''); 
+
+    const success = await handleApiCall('post', 'POST', data, () => {
+      setIsCreateModalOpen(false);
+      setCreateCpf("");
+      fetchUsers();
+    });
+  };
+  
+  const handleUpdateUser = async (event) => {
+    event.preventDefault();
+    setError("");
+    const formData = new FormData(event.currentTarget);
+    const data = {
+        nome: formData.get('nome'),
+        cpf: selectedUser.cpf, // CPF não pode ser alterado
+        cargo: formData.get('cargo'),
+        senha: formData.get('senha')
+    };
+    if (!data.senha) {
+        delete data.senha;
+    }
+
+    const success = await handleApiCall('put', 'PUT', data, () => {
+      setIsEditModalOpen(false);
+      fetchUsers();
+    });
+  };
+
+  const updateUserStatus = async (user, newStatus) => {
+    const updatedData = { cpf: user.cpf, statusConta: newStatus };
+    await handleApiCall('put', 'PUT', updatedData, fetchUsers);
+  };
+
+  const handleDeactivateUser = async () => {
+    if (!selectedUser) return;
+    await updateUserStatus(selectedUser, 'desligado');
     setIsDeleteAlertOpen(false);
+  };
+  
+  const handleReactivateUser = async (user) => {
+    await updateUserStatus(user, 'ativo');
   };
 
   return (
@@ -103,18 +183,39 @@ export function UserManagementTable() {
                 Visualize, filtre, crie e gerencie todos os usuários do sistema.
               </CardDescription>
             </div>
-            <Button size="sm" className="gap-1" onClick={() => setIsCreateModalOpen(true)}>
+            <Button size="sm" className="gap-1 cursor-pointer" onClick={() => { setError(""); setCreateCpf(""); setIsCreateModalOpen(true); }}>
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Criar Novo Usuário</span>
             </Button>
           </div>
-          <div className="relative mt-4">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Pesquisar por nome ou CPF..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-            />
+          <div className="flex items-center gap-4 mt-4">
+            <div className="relative flex-1 md:grow-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Pesquisar por nome ou CPF..."
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Select value={cargoFilter} onValueChange={(value) => { setCargoFilter(value); setPage(1); }}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Filtrar por Cargo" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os Cargos</SelectItem>
+                <SelectItem value="administrador">Administrador</SelectItem>
+                <SelectItem value="coordenador">Coordenador</SelectItem>
+                <SelectItem value="coletor">Coletor</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Filtrar por Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os Status</SelectItem>
+                <SelectItem value="ativo">Ativo</SelectItem>
+                <SelectItem value="desligado">Desligado</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent>
@@ -129,32 +230,73 @@ export function UserManagementTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.nome}</TableCell>
-                  <TableCell className="hidden md:table-cell">{user.cpf}</TableCell>
-                  <TableCell>{user.cargo.charAt(0).toUpperCase() + user.cargo.slice(1)}</TableCell>
-                  <TableCell>
-                    <Badge className={user.statusConta === 'ativo' ? 'bg-green-600 text-white' : 'bg-gray-700 text-white'}>
-                      {user.statusConta === 'ativo' ? 'Ativo' : 'Desligado'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(user)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleOpenDeleteAlert(user)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {isLoading ? (
+                <TableRow><TableCell colSpan={5} className="text-center h-24">Carregando...</TableCell></TableRow>
+              ) : users.length > 0 ? (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.nome}</TableCell>
+                    <TableCell className="hidden md:table-cell">{formatCPF(user.cpf)}</TableCell>
+                    <TableCell>{user.cargo ? user.cargo.charAt(0).toUpperCase() + user.cargo.slice(1) : '-'}</TableCell>
+                    <TableCell>
+                      <Badge className={user.statusConta === 'ativo' ? 'bg-green-600 text-white' : 'bg-gray-700 text-white'}>
+                        {user.statusConta === 'ativo' ? 'Ativo' : 'Desligado'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => handleOpenEditModal(user)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      {user.statusConta === 'ativo' ? (
+                        <Button variant="ghost" size="icon" className="text-red-500 cursor-pointer" onClick={() => handleOpenDeleteAlert(user)}>
+                          <PowerOff className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="icon" className="text-blue-500 cursor-pointer" onClick={() => handleReactivateUser(user)}>
+                          <Power className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow><TableCell colSpan={5} className="text-center h-24">Nenhum usuário encontrado.</TableCell></TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
+        <CardFooter className="flex items-center justify-between border-t p-4">
+          <div className="text-sm text-muted-foreground">
+            Total de <span className="font-semibold">{totalUsers}</span> usuário(s).
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="rows-per-page">Linhas por página:</Label>
+              <Select value={limit.toString()} onValueChange={(value) => { setLimit(Number(value)); setPage(1); }}>
+                <SelectTrigger id="rows-per-page" className="w-[70px]"><SelectValue/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm font-medium">
+              Página {page} de {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardFooter>
       </Card>
 
-      {/* --- MODAL DE CRIAR USUÁRIO --- */}
+      {/* MODAIS (com as correções necessárias) */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -165,22 +307,20 @@ export function UserManagementTable() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="nome" className="text-right">Nome</Label>
-                <Input id="nome" required className="col-span-3" />
+                <Input id="nome" name="nome" required className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cpf" className="text-right">CPF</Label>
-                <Input id="cpf" required className="col-span-3" />
+                <Input id="cpf" name="cpf" required className="col-span-3" value={createCpf} onChange={handleCpfInputChange} maxLength="14" placeholder="000.000.000-00"/>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="senha" className="text-right">Senha</Label>
-                <Input id="senha" type="password" required className="col-span-3" />
+                <Input id="senha" name="senha" type="password" required className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cargo" className="text-right">Cargo</Label>
-                <Select required>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecione um cargo" />
-                  </SelectTrigger>
+                <Select name="cargo" required>
+                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione um cargo" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="administrador">Administrador</SelectItem>
                     <SelectItem value="coordenador">Coordenador</SelectItem>
@@ -189,6 +329,7 @@ export function UserManagementTable() {
                 </Select>
               </div>
             </div>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancelar</Button>
               <Button type="submit">Salvar</Button>
@@ -197,7 +338,6 @@ export function UserManagementTable() {
         </DialogContent>
       </Dialog>
       
-      {/* --- MODAL DE EDITAR USUÁRIO --- */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -208,22 +348,16 @@ export function UserManagementTable() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-nome" className="text-right">Nome</Label>
-                <Input id="edit-nome" defaultValue={selectedUser?.nome} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-cpf" className="text-right">CPF</Label>
-                <Input id="edit-cpf" defaultValue={selectedUser?.cpf} className="col-span-3" />
+                <Input id="edit-nome" name="nome" defaultValue={selectedUser?.nome} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-senha" className="text-right">Nova Senha</Label>
-                <Input id="edit-senha" type="password" placeholder="********" className="col-span-3" />
+                <Input id="edit-senha" name="senha" type="password" placeholder="********" className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-cargo" className="text-right">Cargo</Label>
-                <Select defaultValue={selectedUser?.cargo}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecione um cargo" />
-                  </SelectTrigger>
+                <Select name="cargo" defaultValue={selectedUser?.cargo}>
+                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione um cargo" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="administrador">Administrador</SelectItem>
                     <SelectItem value="coordenador">Coordenador</SelectItem>
@@ -232,6 +366,7 @@ export function UserManagementTable() {
                 </Select>
               </div>
             </div>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancelar</Button>
               <Button type="submit">Salvar Alterações</Button>
@@ -240,21 +375,17 @@ export function UserManagementTable() {
         </DialogContent>
       </Dialog>
 
-      {/* --- ALERTA DE CONFIRMAÇÃO PARA DESATIVAR --- */}
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+          <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta ação irá desativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>. 
-              O usuário não poderá mais acessar o sistema. Esta ação pode ser revertida depois.
+              O usuário não poderá mais acessar o sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeactivateUser} className="bg-red-600 hover:bg-red-700">
-              Sim, desativar
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeactivateUser} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

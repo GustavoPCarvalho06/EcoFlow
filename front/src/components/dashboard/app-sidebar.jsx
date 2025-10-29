@@ -1,28 +1,20 @@
 "use client"
 
 import * as React from "react"
-import {
-    IconCamera,
-    IconChartBar,
-    IconDashboard,
-    IconDatabase,
-    IconFileAi,
-    IconFileDescription,
-    IconFileWord,
-    IconFolder,
-    IconHelp,
-    IconInnerShadowTop,
-    IconListDetails,
-    IconReport,
-    IconSearch,
-    IconSettings,
-    IconUsers,
-} from "@tabler/icons-react"
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import Image from "next/image"
-import { NavDocuments } from "@/components/dashboard/nav-documents"
-import { NavMain } from "@/components/dashboard/nav-main"
-import { NavSecondary } from "@/components//dashboard/nav-secondary"
+import { 
+    IconDashboard, 
+    IconUsers, 
+    IconPlus, 
+    IconBell, 
+    IconMail, 
+    IconBroadcast,
+    IconMapPin 
+} from "@tabler/icons-react" 
 import { NavUser } from "@/components/dashboard/nav-user"
+import { Button } from "@/components/ui/button"
 import {
     Sidebar,
     SidebarContent,
@@ -33,153 +25,126 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+const navItems = [
+    {
+        title: "Dashboard",
+        href: "/dashboard/administrador",
+        icon: IconDashboard,
+    },
+    {
+        title: "Usuários",
+        href: "/dashboard/administrador/usuarios",
+        icon: IconUsers,
+    },
+    {
+        title: "Mensagem",
+        href: "/dashboard/administrador/mensagens",
+        icon: IconMail,
+    },
+    {
+        title: "Comunicados",
+        href: "/dashboard/administrador/comunicados",
+        icon: IconBroadcast,
+    },
+]
 
-
-const data = {
-    navMain: [
-        {
-            title: "Dashboard",
-            url: "#",
-            icon: IconDashboard,
-        },
-        {
-            title: "Lifecycle",
-            url: "#",
-            icon: IconListDetails,
-        },
-        {
-            title: "Analytics",
-            url: "#",
-            icon: IconChartBar,
-        },
-        {
-            title: "Projects",
-            url: "#",
-            icon: IconFolder,
-        },
-        {
-            title: "Team",
-            url: "#",
-            icon: IconUsers,
-        },
-    ],
-    navClouds: [
-        {
-            title: "Capture",
-            icon: IconCamera,
-            isActive: true,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Proposal",
-            icon: IconFileDescription,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Prompts",
-            icon: IconFileAi,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-    ],
-    navSecondary: [
-        {
-            title: "Settings",
-            url: "#",
-            icon: IconSettings,
-        },
-        {
-            title: "Get Help",
-            url: "#",
-            icon: IconHelp,
-        },
-        {
-            title: "Search",
-            url: "#",
-            icon: IconSearch,
-        },
-    ],
-    documents: [
-        {
-            name: "Data Library",
-            url: "#",
-            icon: IconDatabase,
-        },
-        {
-            name: "Reports",
-            url: "#",
-            icon: IconReport,
-        },
-        {
-            name: "Word Assistant",
-            url: "#",
-            icon: IconFileWord,
-        },
-    ],
-}
+const coletorNavItems = [
+    {
+        title: "Mapa",
+        href: "/dashboard/administrador/mapa",
+        icon: IconMapPin,
+    }
+]
 
 export function AppSidebar( usuario, ...props ) {
+    const pathname = usePathname();
 
-    console.log("usuario no app-sidebar: ", usuario)
     return (
         <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader>
+            <SidebarHeader className="border-b">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="#">
+                            <Link href="/dashboard/administrador">
                                 <Image
-                                    src="/logo.png"
+                                    src="/imagen/logo.png"
                                     alt="EcoFlow logo"
-                                    width={50}
-                                    height={50}
+                                    width={40}
+                                    height={40}
                                     className="rounded-sm"
                                 />
-                                <span className="text-base font-semibold">EcoFlow.</span>
-                            </a>
+                                <span className="text-lg font-semibold">EcoFlow.</span>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavDocuments items={data.documents} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+
+            <SidebarContent className="p-4">
+                <div className="mb-4 flex items-center gap-2">
+                    <Button size="icon" variant="ghost" aria-label="Notifications">
+                        {/* MUDANÇA 1: Aumentamos o ícone de sino para consistência */}
+                        <IconBell className="h-6 w-6" /> 
+                    </Button>
+                </div>
+                
+                {/* MUDANÇA 2: Aumentamos o espaçamento entre os links */}
+                <nav className="flex flex-col gap-2"> 
+                    {navItems.map((item, index) => (
+                        <Link
+                            key={index}
+                            href={item.href}
+                            className={`
+                                flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
+                                transition-colors
+                                ${pathname === item.href
+                                    ? 'bg-muted text-foreground' 
+                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                }
+                            `}
+                        >
+                            {/* MUDANÇA 3: Aumentamos o tamanho dos ícones e o padding vertical (py-3) */}
+                            <item.icon className="h-6 w-6" /> 
+                            <span>{item.title}</span>
+                        </Link>
+                    ))}
+                </nav>
+
+                <div className="mt-8"> {/* MUDANÇA 4: Aumentamos o espaço acima da seção "Coletor" */}
+                    <div className="px-3 pb-2">
+                        <span className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase">Coletor</span>
+                    </div>
+                    <div className="border-t mx-3 mb-2"></div>
+                    {/* MUDANÇA 2 (Repetida): Aumentamos o espaçamento entre os links */}
+                    <nav className="flex flex-col gap-2"> 
+                        {coletorNavItems.map((item, index) => (
+                            <Link
+                                key={index}
+                                href={item.href}
+                                className={`
+                                    flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
+                                    transition-colors
+                                    ${pathname === item.href
+                                        ? 'bg-muted text-foreground' 
+                                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                    }
+                                `}
+                            >
+                                {/* MUDANÇA 3 (Repetida): Aumentamos o tamanho dos ícones e o padding vertical (py-3) */}
+                                <item.icon className="h-6 w-6" />
+                                <span>{item.title}</span>
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
+                
             </SidebarContent>
-            <SidebarFooter>
-                <NavUser  usuario = {usuario}/>
+
+            <SidebarFooter className="border-t">
+                <NavUser usuario={usuario}/>
             </SidebarFooter>
         </Sidebar>
     )

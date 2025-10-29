@@ -1,11 +1,12 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { SiteHeader } from "@/components/dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { UserManagementTable } from "@/components/dashboard/UserManagementTable";
+
+import MapboxMap from "@/components/Map/MapboxMap.jsx";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 
-export default async function UsuariosPage() {
+export default async function MapaPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
 
@@ -26,17 +27,18 @@ export default async function UsuariosPage() {
         "--header-height": "calc(var(--spacing) * 12)"
       }}
     >
-      {/* Passamos o 'user' para a sidebar, como de costume */}
       <AppSidebar usuario={user} />
-      
       <SidebarInset usuario={user}>
         <SiteHeader usuario={user} />
-        <main className="flex flex-1 flex-col gap-4 p-4 md-p-6">
-          {/* 
-            A tabela de gerenciamento agora é chamada sem props.
-            Ela mesma fará a busca de dados no backend.
-          */}
-          <UserManagementTable />
+        {/* Usamos 'overflow-hidden' para garantir que o mapa não ultrapasse os limites */}
+        <main className="flex flex-1 flex-col p-4 md:p-6 overflow-hidden">
+          <div className="flex items-center mb-4">
+            <h1 className="font-semibold text-lg md:text-2xl">Mapa de Coleta</h1>
+          </div>
+          {/* O componente do mapa ocupará todo o espaço restante */}
+          <div className="flex-1 rounded-lg border overflow-hidden">
+                 <MapboxMap latitude={-23.647222} longitude={-46.557282} zoom={14} height="px" />
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

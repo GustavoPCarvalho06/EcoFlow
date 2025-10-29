@@ -1,30 +1,66 @@
-import {readAllUser, readUser, createUser, updateUser, changeStatus, changeFuncao} from "../models/UserModels.js"
+import {readAllUser, readUser, createUser, updateUser, changeStatus, changeFuncao,findUsersPaginated} from "../models/UserModels.js"
 
 
 
 const createUserController = async (req, res) => {
-    try {
-        const userData = req.body;
-        
+  try {
+    const userData = req.body;
 
-        if (userData || userData.id_login ){
-            try{
-                console.log("RESPOSTA", req.body)
-                await createUser (req.body, req.params.id || userData )
-                return res.status(200).json({mensagem: "Usuario criado com sucesso"})
-            } catch (err) {
-                console.error("Erro ao criar um Usuario: ", err)
-                return res.status(400).json({mensagem: "Erro ao criar um Usuario"})
-            }
-        } else {
-            return res.status(400).json({mensagem: "Erro ao criar um Usuario, usuario não encontrado"})
-        }
-
-
-    } catch (err) {
-        console.error("Erro no controller ao atualizar usuário: ", err);
-        return res.status(500).json({ mensagem: "Erro interno ao tentar atualizar o usuário." });
+    if (!userData || !userData.cpf || !userData.senha || !userData.nome) {
+      return res.status(400).json({ mensagem: "Dados insuficientes para criar o usuário." });
     }
+
+    await createUser(userData);
+
+    return res.status(201).json({ mensagem: "Usuário criado com sucesso" });
+
+  } catch (err) {
+    // CAPTURA DO ERRO DE CPF INVÁLIDO (formato)
+    if (err.statusCode === 400) {
+      return res.status(400).json({ mensagem: err.message });
+    }
+    
+    // CAPTURA DO ERRO DE CPF DUPLICADO
+    if (err.statusCode === 409) {
+      return res.status(409).json({ mensagem: err.message });
+    }
+    
+    // CAPTURA DE OUTROS ERROS
+    console.error("Erro no controller ao criar usuário: ", err);
+    return res.status(500).json({ mensagem: "Erro interno ao tentar criar o usuário." });
+  }
+};
+
+
+const readPaginatedController = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      search = '', 
+      cargo = '', 
+      statusConta = '',
+      sortBy = 'statusConta', // Ordena por status por padrão
+      sortOrder = 'ASC'      // 'ativo' vem primeiro
+    } = req.query;
+
+    const filters = { search, cargo, statusConta };
+    // Remove filtros vazios
+    Object.keys(filters).forEach(key => (filters[key] === '' || filters[key] === 'todos') && delete filters[key]);
+    
+    const result = await findUsersPaginated({ 
+      filters, 
+      page: parseInt(page), 
+      limit: parseInt(limit),
+      sortBy,
+      sortOrder
+    });
+
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error("Erro ao ler usuários paginados: ", err);
+    return res.status(500).json({ mensagem: "Erro interno ao buscar usuários." });
+  }
 };
 
 
@@ -110,4 +146,4 @@ const readAllUserController = async (req,res) =>{
     }
 };
 
-export default{changeStatusUserController, readFilterUserController, readAllUserController, updateUserController, changeFuncaoUserController,createUserController}
+export default{changeStatusUserController, readFilterUserController, readAllUserController, updateUserController, changeFuncaoUserController,createUserController,readPaginatedController}

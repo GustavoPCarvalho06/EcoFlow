@@ -11,13 +11,10 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Função assíncrona que obtém uma conexão do pool.
-// Essa conexão é usada para executar as queries SQL.
 async function getConnection() {
     return pool.getConnection();
 }
 
-// Função para ler todos os registros
 async function readAll(table, where = null) {
     const connection = await getConnection();
     try {
@@ -25,7 +22,6 @@ async function readAll(table, where = null) {
         if (where) {
             sql += ` WHERE ${where}`;
         }
-
         const [rows] = await connection.execute(sql);
         return rows;
     } finally {
@@ -33,47 +29,35 @@ async function readAll(table, where = null) {
     }
 }
 
-// Função para ler um registro específico
-async function read(table, where) {
+// =======================================================
+// FUNÇÃO read ATUALIZADA E CORRIGIDA
+// =======================================================
+async function read(sql, params = []) {
     const connection = await getConnection();
     try {
-        let sql = `SELECT * FROM ${table}`;
-        if (where) {
-            sql += ` WHERE ${where}`;
-        }
-
-        const [rows] = await connection.execute(sql);
-        return rows || null;
+        // Agora, a função recebe a query SQL completa e um array de parâmetros.
+        // O método 'execute' do mysql2 substitui os '?' pelos valores em 'params' de forma segura.
+        const [rows] = await connection.execute(sql, params);
+        return rows;
+    } catch(err) {
+        console.error("Erro ao executar a query de leitura:", err);
+        throw err;
     } finally {
         connection.release();
     }
 }
+// =======================================================
 
-// Função para inserir um novo registro
-// Função assíncrona para inserir dados em uma tabela do banco de dados
 async function create(table, data) {
-    // Obtém uma conexão com o banco de dados
     const connection = await getConnection();
     try {
-        // Obtém as chaves do objeto 'data' e as junta em uma string separada por vírgulas
         const columns = Object.keys(data).join(', ');
-
-        // Cria um array de placeholders "?" com o mesmo número de colunas e o transforma em uma string
         const placeholders = Array(Object.keys(data).length).fill('?').join(', ');
-
-        // Monta a query SQL para inserção dos dados na tabela especificada
         const sql = `INSERT INTO ${table} (${columns}) VALUES (${placeholders})`;
-
-        // Obtém os valores do objeto 'data' para serem usados na query
         const values = Object.values(data);
-
-        // Executa a query SQL com os valores fornecidos e armazena o resultado
         const [result] = await connection.execute(sql, values);
-
-        // Retorna o ID do registro inserido
         return result.insertId;
     } finally {
-        // Libera a conexão com o banco de dados
         connection.release();
     }
 }
@@ -81,15 +65,11 @@ async function create(table, data) {
 async function update(table, data, where) {
     const connection = await getConnection();
     try {
-        // monta os SET
         const set = Object.keys(data)
             .map(column => `${column} = ?`)
             .join(', ');
-
-        // usa o where direto como string
         const sql = `UPDATE ${table} SET ${set} WHERE ${where}`;
         const values = Object.values(data);
-
         const [result] = await connection.execute(sql, values);
         return result.affectedRows;
     } finally {
@@ -97,9 +77,6 @@ async function update(table, data, where) {
     }
 }
 
-
-
-// Função para excluir um registro
 async function deleteRecord(table, where) {
     const connection = await getConnection();
     try {
@@ -113,36 +90,31 @@ async function deleteRecord(table, where) {
 
 async function compare(senha, hash) {
     try {
-        // Compare a senha com o hash usando bcrypt
         return await bcrypt.compare(senha, hash);
     } catch (error) {
         console.error('Erro ao comparar a senha com o hash:', error);
-        return false; // Em caso de erro, retorne falso para indicar que a senha não corresponde
+        return false;
     }
 }
 
 const createLixoDB = async (table, data) => {
-  const connection = await getConnection(); // ✅ pega conexão do pool
+  const connection = await getConnection();
   try {
     const keys = Object.keys(data).join(", ");
     const values = Object.values(data)
       .map((v) => (typeof v === "string" && !v.startsWith("ST_GeomFromText") ? `'${v}'` : v))
       .join(", ");
-
     const sql = `INSERT INTO ${table} (${keys}) VALUES (${values})`;
     console.log("🧩 SQL gerado:", sql);
-
     const [result] = await connection.query(sql);
     return result;
   } catch (err) {
     console.error("Erro no CREATE:", err);
     throw err;
   } finally {
-    connection.release(); // ✅ libera conexão
+    connection.release();
   }
 };
 
-
-
-
-export { create, readAll, read, update, deleteRecord, compare,createLixoDB };
+// Certifique-se de que a nova 'read' está sendo exportada
+export { create, readAll, read, update, deleteRecord, compare, createLixoDB };
