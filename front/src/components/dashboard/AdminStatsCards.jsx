@@ -1,15 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Briefcase } from "lucide-react"; // Ícones
+import { Users, UserCheck, UserX, Briefcase } from "lucide-react";
 
-export function AdminStatsCards() {
-  // Por enquanto, usaremos dados estáticos (mock)
-  const stats = {
-    totalUsers: 4,
-    activeCollectors: 2,
-    inactiveUsers: 1,
-    roles: 3,
-  };
-
+// O componente agora recebe um objeto 'stats' como prop
+export function AdminStatsCards({ stats }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -18,7 +11,8 @@ export function AdminStatsCards() {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalUsers}</div>
+          {/* Usamos os dados da prop, com um fallback para 0 */}
+          <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
           <p className="text-xs text-muted-foreground">
             Todas as contas do sistema
           </p>
@@ -30,7 +24,7 @@ export function AdminStatsCards() {
           <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.activeCollectors}</div>
+          <div className="text-2xl font-bold">{stats?.activeCollectors || 0}</div>
           <p className="text-xs text-muted-foreground">
             Usuários com cargo "coletor" e status "ativo"
           </p>
@@ -42,7 +36,7 @@ export function AdminStatsCards() {
           <UserX className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.inactiveUsers}</div>
+          <div className="text-2xl font-bold">{stats?.inactiveUsers || 0}</div>
           <p className="text-xs text-muted-foreground">
             Usuários com status "desligado"
           </p>
@@ -54,7 +48,7 @@ export function AdminStatsCards() {
           <Briefcase className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.roles}</div>
+          <div className="text-2xl font-bold">{stats?.roles || 3}</div>
           <p className="text-xs text-muted-foreground">
             Administrador, Coordenador, Coletor
           </p>
