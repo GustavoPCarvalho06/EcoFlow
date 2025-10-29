@@ -1,0 +1,22 @@
+/* src/app/dashboard/cordenador/Dashboard.module.css */
+.headerRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.kpiGrid{
+  display:flex;
+  gap:12px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+
+.card{
+  background:var(--panel, #fff);
+  padding:14px;
+  border-radius:12px;
+  box-shadow: var(--shadow, 0 6px 18px rgba(16,24,40,0.06));
+}

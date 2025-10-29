@@ -1,0 +1,29 @@
+/* src/app/dashboard/cordenador/components/Charts.module.css */
+.chartCard {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  border: 1px solid var(--border,#e6e9ef);
+  height: 100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.chartTitle {
+  margin: 0 0 12px 0;
+  font-size:14px;
+  color:var(--muted,#6b7280);
+}
+
+/* container helper when used side-by-side */
+.chartsRow {
+  display:grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+@media (max-width:980px){
+  .chartsRow { grid-template-columns: 1fr; }
+}
