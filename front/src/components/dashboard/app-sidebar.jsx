@@ -51,7 +51,7 @@ const navItems = [
 const coletorNavItems = [
     {
         title: "Mapa",
-        href: "#",
+        href: "/dashboard/administrador/mapa",
         icon: IconMapPin,
     }
 ]

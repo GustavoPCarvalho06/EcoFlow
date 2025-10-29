@@ -204,7 +204,7 @@ export default function MapboxMap() {
         ref={mapContainer}
         style={{
           width: "100%",
-          height: "1000px",
+          height: "800px",
           borderRadius: "12px",
           overflow: "hidden",
         }}
