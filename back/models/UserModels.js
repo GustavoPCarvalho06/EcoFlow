@@ -142,8 +142,15 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
     let queryParams = [];
 
     if (filters.search) {
+      // --- INÍCIO DA ALTERAÇÃO ---
+      // 1. Limpa o termo de busca, removendo pontos, traços, etc.
+      const searchTerm = filters.search.replace(/\D/g, '');
+
+      // 2. A busca por CPF agora usa o termo limpo.
+      //    A busca por nome continua usando o termo original.
       whereClauses.push(`(nome LIKE ? OR cpf LIKE ?)`);
-      queryParams.push(`%${filters.search}%`, `%${filters.search}%`);
+      queryParams.push(`%${filters.search}%`, `%${searchTerm}%`); // AQUI ESTÁ A MUDANÇA
+      // --- FIM DA ALTERAÇÃO ---
     }
     if (filters.cargo) {
       whereClauses.push(`cargo = ?`);
@@ -157,7 +164,7 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
     const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
     const offset = (page - 1) * limit;
 
-    // Query para buscar os dados da página atual
+    // O resto da função continua igual...
     const dataQuery = `
       SELECT id, nome, cpf, cargo, statusConta 
       FROM usuarios 
@@ -167,7 +174,6 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
     `;
     const users = await read(dataQuery, [...queryParams, limit, offset]);
 
-    // Query para contar o total de registros (para a paginação)
     const countQuery = `SELECT COUNT(*) as total FROM usuarios ${whereString}`;
     const [countResult] = await read(countQuery, queryParams);
     const total = countResult.total;

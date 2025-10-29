@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { PlusCircle, Pencil, Search, PowerOff, Power, ChevronLeft, ChevronRight 
 const formatCPF = (cpf) => {
   if (!cpf) return "";
   const cleanCpf = cpf.replace(/\D/g, '');
-  if (cleanCpf.length !== 11) return cpf; // Retorna o valor original se não for um CPF completo
+  if (cleanCpf.length !== 11) return cpf;
   return cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 };
 
@@ -35,6 +35,8 @@ export function UserManagementTable() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  // --- NOVO ESTADO PARA O ALERTA DE REATIVAÇÃO ---
+  const [isReactivateAlertOpen, setIsReactivateAlertOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState("");
   const [createCpf, setCreateCpf] = useState("");
@@ -59,26 +61,24 @@ export function UserManagementTable() {
       setTotalUsers(data.total);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
-      setUsers([]); // Limpa os usuários em caso de erro
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }
   }, [page, limit, searchQuery, statusFilter, cargoFilter]);
 
-  // Efeito que chama a busca sempre que um filtro ou página mudar
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
   
-  // Debounce para a pesquisa, para não fazer requisições a cada tecla digitada
   useEffect(() => {
     const handler = setTimeout(() => {
         fetchUsers();
-    }, 500); // Aguarda 500ms após o usuário parar de digitar
+    }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-
+  // --- FUNÇÕES PARA ABRIR MODAIS E ALERTAS ---
   const handleOpenEditModal = (user) => {
     setSelectedUser(user);
     setError("");
@@ -88,6 +88,12 @@ export function UserManagementTable() {
   const handleOpenDeleteAlert = (user) => {
     setSelectedUser(user);
     setIsDeleteAlertOpen(true);
+  };
+
+  // --- NOVA FUNÇÃO PARA ABRIR O ALERTA DE REATIVAÇÃO ---
+  const handleOpenReactivateAlert = (user) => {
+    setSelectedUser(user);
+    setIsReactivateAlertOpen(true);
   };
 
   const handleCpfInputChange = (e) => {
@@ -106,6 +112,7 @@ export function UserManagementTable() {
   // --- FUNÇÕES DE API ---
   const handleApiCall = async (endpoint, method, body, successCallback) => {
     try {
+      setError("");
       const response = await fetch(`http://localhost:3001/user/${endpoint}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -118,19 +125,18 @@ export function UserManagementTable() {
       successCallback();
     } catch (err) {
       setError(err.message);
-      return false; // Indica falha
+      return false;
     }
-    return true; // Indica sucesso
+    return true;
   };
 
   const handleCreateUser = async (event) => {
     event.preventDefault();
-    setError("");
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData.entries());
     data.cpf = data.cpf.replace(/\D/g, ''); 
 
-    const success = await handleApiCall('post', 'POST', data, () => {
+    await handleApiCall('post', 'POST', data, () => {
       setIsCreateModalOpen(false);
       setCreateCpf("");
       fetchUsers();
@@ -139,11 +145,10 @@ export function UserManagementTable() {
   
   const handleUpdateUser = async (event) => {
     event.preventDefault();
-    setError("");
     const formData = new FormData(event.currentTarget);
     const data = {
         nome: formData.get('nome'),
-        cpf: selectedUser.cpf, // CPF não pode ser alterado
+        cpf: selectedUser.cpf,
         cargo: formData.get('cargo'),
         senha: formData.get('senha')
     };
@@ -151,7 +156,7 @@ export function UserManagementTable() {
         delete data.senha;
     }
 
-    const success = await handleApiCall('put', 'PUT', data, () => {
+    await handleApiCall('put', 'PUT', data, () => {
       setIsEditModalOpen(false);
       fetchUsers();
     });
@@ -162,14 +167,17 @@ export function UserManagementTable() {
     await handleApiCall('put', 'PUT', updatedData, fetchUsers);
   };
 
-  const handleDeactivateUser = async () => {
+  const handleConfirmDeactivate = async () => {
     if (!selectedUser) return;
     await updateUserStatus(selectedUser, 'desligado');
     setIsDeleteAlertOpen(false);
   };
   
-  const handleReactivateUser = async (user) => {
-    await updateUserStatus(user, 'ativo');
+  // --- NOVA FUNÇÃO QUE EXECUTA A REATIVAÇÃO APÓS CONFIRMAÇÃO ---
+  const handleConfirmReactivate = async () => {
+    if (!selectedUser) return;
+    await updateUserStatus(selectedUser, 'ativo');
+    setIsReactivateAlertOpen(false);
   };
 
   return (
@@ -252,7 +260,8 @@ export function UserManagementTable() {
                           <PowerOff className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" className="text-blue-500 cursor-pointer" onClick={() => handleReactivateUser(user)}>
+                        // --- BOTÃO DE REATIVAR AGORA ABRE O ALERTA ---
+                        <Button variant="ghost" size="icon" className="text-blue-500 cursor-pointer" onClick={() => handleOpenReactivateAlert(user)}>
                           <Power className="h-4 w-4" />
                         </Button>
                       )}
@@ -281,9 +290,7 @@ export function UserManagementTable() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm font-medium">
-              Página {page} de {totalPages}
-            </div>
+            <div className="text-sm font-medium">Página {page} de {totalPages}</div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
                 <ChevronLeft className="h-4 w-4" />
@@ -296,7 +303,7 @@ export function UserManagementTable() {
         </CardFooter>
       </Card>
 
-      {/* MODAIS (com as correções necessárias) */}
+      {/* --- MODAIS E ALERTAS --- */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -307,7 +314,8 @@ export function UserManagementTable() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="nome" className="text-right">Nome</Label>
-                <Input id="nome" name="nome" required className="col-span-3" />
+                {/* --- ADICIONADO LIMITE DE CARACTERES --- */}
+                <Input id="nome" name="nome" required className="col-span-3" maxLength="50" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cpf" className="text-right">CPF</Label>
@@ -348,7 +356,8 @@ export function UserManagementTable() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-nome" className="text-right">Nome</Label>
-                <Input id="edit-nome" name="nome" defaultValue={selectedUser?.nome} className="col-span-3" />
+                 {/* --- ADICIONADO LIMITE DE CARACTERES --- */}
+                <Input id="edit-nome" name="nome" defaultValue={selectedUser?.nome} className="col-span-3" maxLength="50" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-senha" className="text-right">Nova Senha</Label>
@@ -385,7 +394,23 @@ export function UserManagementTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeactivateUser} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmDeactivate} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* --- NOVO ALERTA DE CONFIRMAÇÃO PARA REATIVAR USUÁRIO --- */}
+      <AlertDialog open={isReactivateAlertOpen} onOpenChange={setIsReactivateAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>Confirmar Reativação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja reativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>? 
+              O usuário voltará a ter acesso ao sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmReactivate} className="bg-blue-600 hover:bg-blue-700">Sim, reativar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
