@@ -70,7 +70,7 @@ export function AppSidebar( usuario, ...props ) {
                         >
                             <Link href="/dashboard/administrador">
                                 <Image
-                                    src="/imagen/logo.png"
+                                    src="/imagen/Logo.png"
                                     alt="EcoFlow logo"
                                     width={40}
                                     height={40}

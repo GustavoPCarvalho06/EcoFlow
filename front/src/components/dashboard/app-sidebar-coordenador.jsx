@@ -4,7 +4,7 @@ import * as React from "react"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from "next/image"
-import { IconDashboard, IconMapPin, IconBroadcast } from "@tabler/icons-react" 
+import { IconDashboard, IconMapPin, IconBroadcast ,IconMail} from "@tabler/icons-react" 
 import { NavUser } from "@/components/dashboard/nav-user"
 import {
     Sidebar,
@@ -18,6 +18,7 @@ import {
 
 const navItemsCoordenador = [
     { title: "Dashboard", href: "/dashboard/coordenador", icon: IconDashboard },
+    {title: "Mensagem",href: "#",icon: IconMail,},
     { title: "Mapa de Coleta", href: "/dashboard/coordenador/rotas", icon: IconMapPin },
     { title: "Gerenciar Comunicados", href: "#", icon: IconBroadcast },
 ];
@@ -34,7 +35,7 @@ export function AppSidebarCoordenador( usuario, ...props ) {
                         <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
                             <a href="/dashboard/coordenador">
                                 <Image
-                                    src="/logo.png"
+                                    src="/imagen/Logo.png"
                                     alt="EcoFlow logo"
                                     width={50}
                                     height={50}
