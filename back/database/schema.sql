@@ -93,7 +93,17 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 ('Cheia', ST_GeomFromText('POINT(-46.552413 -23.644962)')),
 ('Vazia', ST_GeomFromText('POINT(-46.556209 -23.640472)')),
 ('Quase Cheia', ST_GeomFromText('POINT(-46.560171 -23.643114)')),
-('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)'));
+('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)')),
+('Vazia', ST_GeomFromText('POINT(-46.556951 -23.646825)')), -- Rua São Paulo, Vila Barcelona
+('Quase Cheia', ST_GeomFromText('POINT(-46.554692 -23.645412)')), -- Rua Amazonas, Barcelona
+('Vazia', ST_GeomFromText('POINT(-46.556102 -23.641982)')), -- Rua Maranhão, Fundação
+('Quase Cheia', ST_GeomFromText('POINT(-46.559885 -23.642991)')), -- Rua Pernambuco, Cerâmica
+('Cheia', ST_GeomFromText('POINT(-46.560004 -23.646284)')), -- Rua Tapajós, Santa Paula
+('Vazia', ST_GeomFromText('POINT(-46.562110 -23.647802)')), -- Rua Tibagi, Olímpico
+('Quase Cheia', ST_GeomFromText('POINT(-46.557650 -23.642280)')), -- Rua Espírito Santo, Fundação
+('Cheia', ST_GeomFromText('POINT(-46.553951 -23.643820)')), -- Rua Amazonas, Centro
+('Vazia', ST_GeomFromText('POINT(-46.559430 -23.645920)')); -- Rua Alegre, Santa Paula
+
 
 
 # Usuários
