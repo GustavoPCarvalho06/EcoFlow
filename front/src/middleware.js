@@ -20,7 +20,7 @@ export function middleware(request) {
   if (isProtected) {
     // 1. Se não houver token ou perfil, redireciona para a página de login.
     if (!token || !perfil) {
-      const loginUrl = new URL("/login", request.url);
+      const loginUrl = new URL(`/`, request.url);
       // Opcional: informa para qual página o usuário tentava ir.
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
@@ -29,14 +29,14 @@ export function middleware(request) {
     // 2. Regra para a rota de Coordenador
     if (pathname.startsWith("/dashboard/coordenador") && perfil !== "coordenador") {
       // Se o usuário não for um coordenador, redireciona para "não autorizado".
-      const unauthorizedUrl = new URL("/unauthorized", request.url);
+      const unauthorizedUrl = new URL("/", request.url);
       return NextResponse.redirect(unauthorizedUrl);
     }
 
     // 3. Regra para a rota de Administrador
     if (pathname.startsWith("/dashboard/administrador") && perfil !== "administrador") {
       // Se o usuário não for um administrador, redireciona para "não autorizado".
-      const unauthorizedUrl = new URL("/unauthorized", request.url);
+      const unauthorizedUrl = new URL("/", request.url);
       return NextResponse.redirect(unauthorizedUrl);
     }
   }

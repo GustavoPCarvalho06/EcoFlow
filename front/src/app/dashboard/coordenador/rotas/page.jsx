@@ -1,14 +1,12 @@
-// src/app/dashboard/cordenador/rotas/page.jsx
-import React from "react";
-import Layout from "../Layout/Layout";
+"use client";
 
-export default function RotasPage() {
+import MapboxMap from "@/components/Map/MapboxMap.jsx";
+
+export default function ColetorPage() {
   return (
-    <Layout>
-      <main style={{ padding: 24 }}>
-        <h1>Rotas</h1>
-        <p>Rota: /dashboard/cordenador/rotas</p>
-      </main>
-    </Layout>
+    <div style={{ padding: "20px" }}>
+      <h1>Mapa dos Coletores</h1>
+      <MapboxMap latitude={-23.647222} longitude={-46.557282} zoom={14} height="500px" />
+    </div>
   );
 }
