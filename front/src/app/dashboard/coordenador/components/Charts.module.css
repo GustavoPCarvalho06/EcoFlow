@@ -13,7 +13,7 @@
 .chartTitle {
   margin: 0 0 12px 0;
   font-size:14px;
-  color:var(--muted,#6b7280);
+  color:black;
 }
 
 /* container helper when used side-by-side */
