@@ -30,7 +30,7 @@ export default function Sidebar({ onToggle }) {
 
       <nav className={styles.nav}>
 
-        <Link href="coordenador/rotas" className={styles.item}>
+        <Link href="/coordenador/rotas" className={styles.item}>
           <Map size={20} />
           {open && <span>Rotas</span>}
         </Link>

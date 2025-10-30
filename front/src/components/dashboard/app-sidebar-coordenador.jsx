@@ -18,7 +18,7 @@ import {
 
 const navItemsCoordenador = [
     { title: "Dashboard", href: "/dashboard/coordenador", icon: IconDashboard },
-    { title: "Mapa de Coleta", href: "/dashboard/administrador/mapa", icon: IconMapPin },
+    { title: "Mapa de Coleta", href: "/dashboard/coordenador/rotas", icon: IconMapPin },
     { title: "Gerenciar Comunicados", href: "#", icon: IconBroadcast },
 ];
 
