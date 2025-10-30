@@ -1,0 +1,76 @@
+"use client"
+
+import * as React from "react"
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import Image from "next/image"
+import { IconDashboard, IconMapPin, IconBroadcast } from "@tabler/icons-react" 
+import { NavUser } from "@/components/dashboard/nav-user"
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar"
+
+const navItemsCoordenador = [
+    { title: "Dashboard", href: "/dashboard/coordenador", icon: IconDashboard },
+    { title: "Mapa de Coleta", href: "/dashboard/administrador/mapa", icon: IconMapPin },
+    { title: "Gerenciar Comunicados", href: "#", icon: IconBroadcast },
+];
+
+// CORREÇÃO: Usando a assinatura de função que já funciona no seu projeto
+export function AppSidebarCoordenador( usuario, ...props ) {
+    const pathname = usePathname();
+
+    return (
+        <Sidebar collapsible="offcanvas" {...props}>
+            <SidebarHeader className="border-b">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+                            <a href="/dashboard/coordenador">
+                                <Image
+                                    src="/logo.png"
+                                    alt="EcoFlow logo"
+                                    width={50}
+                                    height={50}
+                                    className="rounded-sm"
+                                />
+                                <span className="text-base font-semibold">EcoFlow.</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+            <SidebarContent className="p-4">
+                 <nav className="flex flex-col gap-2">
+                    {navItemsCoordenador.map((item, index) => (
+                        <Link
+                            key={index}
+                            href={item.href}
+                            className={`
+                                flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
+                                transition-colors
+                                ${pathname === item.href
+                                    ? 'bg-muted text-foreground' 
+                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                }
+                            `}
+                        >
+                            <item.icon className="h-6 w-6" />
+                            <span>{item.title}</span>
+                        </Link>
+                    ))}
+                </nav>
+            </SidebarContent>
+            <SidebarFooter className="border-t">
+                {/* Agora está passando os dados da mesma forma que o admin */}
+                <NavUser usuario={usuario}/>
+            </SidebarFooter>
+        </Sidebar>
+    )
+}
