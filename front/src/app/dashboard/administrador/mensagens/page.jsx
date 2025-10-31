@@ -1,7 +1,10 @@
+// src/app/dashboard/administrador/mensagens/page.jsx (VERSÃO CORRIGIDA)
+
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { SiteHeader } from "@/components/dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { MessageComponent } from "@/components/dashboard/MessageComponent"; // Vamos criar este componente a seguir
+// 1. CORREÇÃO DA IMPORTAÇÃO
+import { ChatComponent } from "@/components/dashboard/ChatComponent"; 
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 
@@ -31,10 +34,12 @@ export default async function MensagensPage() {
         <SiteHeader usuario={user} />
         <main className="flex flex-1 flex-col p-4 md:p-6">
           <div className="flex items-center mb-4">
-            <h1 className="font-semibold text-lg md:text-2xl">Caixa de Entrada</h1>
+            <h1 className="font-semibold text-lg md:text-xl">Mensagens</h1>
           </div>
-          {/* O componente principal das mensagens será renderizado aqui */}
-          <MessageComponent />
+
+          {/* 2. CORREÇÃO DO NOME E PASSAGEM DOS DADOS (PROPS) */}
+          <ChatComponent user={user} token={tokenCookie?.value} />
+
         </main>
       </SidebarInset>
     </SidebarProvider>

@@ -4,9 +4,9 @@ import { cpf as cpfValidator } from 'cpf-cnpj-validator';
 import bcrypt from "bcryptjs"; 
 
 
-const deleteUser = async (id) => {
+const deleteMsg = async (id) => {
     try {
-        const usuario = await deleteRecord("usuarios", `id = '${id}'`)
+        const usuario = await deleteRecord("mensagens_suporte", `id = '${id}'`)
         if (!usuario) {
             return 'ERRO ao consultar'
         }
@@ -19,9 +19,9 @@ const deleteUser = async (id) => {
 }
 
 
-const readAllUser = async (id) => {
+const readAllMsg = async (id) => {
     try {
-        const usuario = await readAll("usuarios")
+        const usuario = await readAll("mensagens_suporte")
         if (!usuario) {
             return 'ERRO ao consultar'
         }
@@ -33,12 +33,12 @@ const readAllUser = async (id) => {
     }
 }
 
-// models/UserModels.js
+// models/MsgModels.js
 
-const readUser = async (id) => {
+const readMsg = async (id) => {
     try {
         // Agora passamos a query SQL completa e os parâmetros em um array
-        const sql = "SELECT * FROM usuarios WHERE id = ?";
+        const sql = "SELECT * FROM mensagens_suporte WHERE id = ?";
         const usuario = await read(sql, [id]); 
         
         // A 'read' retorna um array, então pegamos o primeiro elemento
@@ -50,9 +50,9 @@ const readUser = async (id) => {
     }
 };
 
-const readUserEmail = async (email) => {
+const readMsgEmail = async (email) => {
     try {
-        const usuario = await read("usuarios", `email = '${email}'`)
+        const usuario = await read("mensagens_suporte", `email = '${email}'`)
         if (!usuario) {
             return 'ERRO ao consultar'
         }
@@ -65,7 +65,7 @@ const readUserEmail = async (email) => {
 }
 
 
-const createUser = async (data) => {
+const createMsg = async (data) => {
   try {
     // 1. LIMPA O CPF: Remove todos os caracteres que não são dígitos.
     const cleanCPF = data.cpf.replace(/\D/g, '');
@@ -95,7 +95,7 @@ const createUser = async (data) => {
       statusConta: 'ativo'
     };
 
-    await create("usuarios", dataUsuario);
+    await create("mensagens_suporte", dataUsuario);
     return;
 
   } catch (err) {
@@ -103,7 +103,7 @@ const createUser = async (data) => {
   }
 };
 
-const updateUser = async (data, cpf) => {
+const updateMsg = async (data, cpf) => {
   try {
     // 1. COMEÇAMOS COM UM OBJETO VAZIO
     const conteudo = {};
@@ -126,7 +126,7 @@ const updateUser = async (data, cpf) => {
       return "Nenhum dado fornecido para atualização.";
     }
 
-    await update("usuarios", conteudo, `cpf = '${cpf}'`);
+    await update("mensagens_suporte", conteudo, `cpf = '${cpf}'`);
     return "Usuário atualizado com sucesso";
 
   } catch (err) {
@@ -136,34 +136,22 @@ const updateUser = async (data, cpf) => {
 };
   
 
-// Arquivo: models/UserModels.js
-
-const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy = 'id', sortOrder = 'ASC' }) => {
+const findMsgPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy = 'id', sortOrder = 'ASC' }) => {
   try {
     let whereClauses = [];
     let queryParams = [];
 
     if (filters.search) {
-      const originalSearchTerm = filters.search;
-      const numericSearchTerm = originalSearchTerm.replace(/\D/g, '');
+      // --- INÍCIO DA ALTERAÇÃO ---
+      // 1. Limpa o termo de busca, removendo pontos, traços, etc.
+      const searchTerm = filters.search.replace(/\D/g, '');
 
-      // Cria um array para as condições de busca (nome OU cpf)
-      const searchConditions = [];
-
-      // 1. Adiciona a condição de busca por NOME com o termo original
-      searchConditions.push(`nome LIKE ?`);
-      queryParams.push(`%${originalSearchTerm}%`);
-
-      // 2. SÓ adiciona a busca por CPF se o termo de busca contiver números
-      if (numericSearchTerm.length > 0) {
-        searchConditions.push(`cpf LIKE ?`);
-        queryParams.push(`%${numericSearchTerm}%`);
-      }
-      
-      // 3. Junta as condições com "OR" e as envolve em parênteses
-      whereClauses.push(`(${searchConditions.join(' OR ')})`);
+      // 2. A busca por CPF agora usa o termo limpo.
+      //    A busca por nome continua usando o termo original.
+      whereClauses.push(`(nome LIKE ? OR cpf LIKE ?)`);
+      queryParams.push(`%${filters.search}%`, `%${searchTerm}%`); // AQUI ESTÁ A MUDANÇA
+      // --- FIM DA ALTERAÇÃO ---
     }
-
     if (filters.cargo) {
       whereClauses.push(`cargo = ?`);
       queryParams.push(filters.cargo);
@@ -176,6 +164,7 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
     const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
     const offset = (page - 1) * limit;
 
+    // O resto da função continua igual...
     const dataQuery = `
       SELECT id, nome, cpf, cargo, statusConta 
       FROM usuarios 
@@ -183,12 +172,9 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
       ORDER BY ${sortBy} ${sortOrder} 
       LIMIT ? OFFSET ?
     `;
-    // Adiciona os parâmetros de limite e offset ao final
-    const finalDataParams = [...queryParams, limit, offset];
-    const users = await read(dataQuery, finalDataParams);
+    const users = await read(dataQuery, [...queryParams, limit, offset]);
 
     const countQuery = `SELECT COUNT(*) as total FROM usuarios ${whereString}`;
-    // A query de contagem não precisa de limit/offset
     const [countResult] = await read(countQuery, queryParams);
     const total = countResult.total;
 
@@ -208,7 +194,7 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
 const changeStatus = async (data, id) => {
     try {
 
-        update("usuarios", {status: data.status} , `id = '${id}'`)
+        update("mensagens_suporte", {status: data.status} , `id = '${id}'`)
         return ("Usuario atualizado com sucesso")
     } catch (err){
         console.log("Erro ao atualizar usuarios")
@@ -219,7 +205,7 @@ const changeStatus = async (data, id) => {
 const changeFuncao = async (data, id) => {
     try {
 
-        update("usuarios", {funcao: data.funcao} , `id = '${id}'`)
+        update("mensagens_suporte", {funcao: data.funcao} , `id = '${id}'`)
         return ("Usuario atualizado com sucesso")
     } catch (err){
         console.log("Erro ao atualizar usuarios")
@@ -229,4 +215,4 @@ const changeFuncao = async (data, id) => {
 
 
 
-export {readAllUser, readUser, readUserEmail,   createUser, updateUser, changeStatus, changeFuncao,deleteUser,findUsersPaginated}
+export {readAllMsg, readMsg, readMsgEmail,   createMsg, updateMsg, changeStatus, changeFuncao,deleteMsg,findMsgPaginated}
