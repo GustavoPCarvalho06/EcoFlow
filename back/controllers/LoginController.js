@@ -25,7 +25,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id_login, cpf: user.cpf, cargo: user.cargo, name: user.nome},
+      { id: user.id_login, cpf: user.cpf, cargo: user.cargo, name: user.nome, email:user.email},
       JWT_SECRET,
       { expiresIn: "1h" }
     );

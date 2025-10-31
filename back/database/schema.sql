@@ -9,9 +9,11 @@ CREATE TABLE usuarios (
     nome VARCHAR(100),	
 	cpf VARCHAR(14) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
+    email varchar (255) unique,
     cargo ENUM ("administrador","coordenador","coletor") default "coletor",
     statusConta ENUM ("ativo","desligado") default "ativo"
 );
+select *from usuarios;
 
 #--- Sensor IOT -----------------------------------------------------------------------------------------------------------------
 CREATE TABLE SistemaSensor(

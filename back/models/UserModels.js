@@ -92,6 +92,7 @@ const createUser = async (data) => {
       cpf: cleanCPF, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
       senha: senhaHash,
       cargo: data.cargo,
+      email: data.email,
       statusConta: 'ativo'
     };
 
