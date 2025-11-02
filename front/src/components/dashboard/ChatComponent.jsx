@@ -9,124 +9,141 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Send, UserSearch } from "lucide-react";
+import { useUnreadCount } from "@/context/UnreadCountContext";
 
-// Conectar ao servidor. O ideal é que a URL venha de uma variável de ambiente.
-const socket = io('http://localhost:3001');
+export function ChatComponent({ user }) {
+  const meuUserId = user?.id;
 
-// 1. O componente agora recebe 'user' e 'token' como propriedades
-export function ChatComponent({ user, token }) {
-  // === ESTADO DO COMPONENTE ===
-  
-  // 2. O ID do usuário logado agora vem da propriedade 'user'
-  const [meuUserId, setMeuUserId] = useState(user?.id);
-  
+  const [socket, setSocket] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [replyText, setReplyText] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const messageEndRef = useRef(null); // Referência para scrollar para a última mensagem
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const messageEndRef = useRef(null);
+  const selectedUserRef = useRef(null);
 
-  // === EFEITOS (LÓGICA PRINCIPAL) ===
+  const { fetchTotalUnreadCount } = useUnreadCount();
 
-  // Roda uma vez para buscar a lista de usuários e configurar o WebSocket
   useEffect(() => {
-    if (!meuUserId || !token) return; // Não faz nada se não tiver os dados do usuário
+    selectedUserRef.current = selectedUser;
+  }, [selectedUser]);
 
-    // A) Buscar todos os usuários para a lista de contatos
-    async function fetchUsers() {
+  useEffect(() => {
+    if (!meuUserId) return;
+
+    const newSocket = io('http://localhost:3001');
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      newSocket.emit('join', meuUserId);
+    });
+
+    const handleNewMessage = (novaMensagem) => {
+      const currentUser = selectedUserRef.current; 
+
+      const isForCurrentChat = 
+        (novaMensagem.remetente_id === currentUser?.id && novaMensagem.destinatario_id === meuUserId) ||
+        (novaMensagem.remetente_id === meuUserId && novaMensagem.destinatario_id === currentUser?.id);
+
+      if (isForCurrentChat) {
+        setMessages(mensagensAtuais => [...mensagensAtuais, novaMensagem]);
+      } else {
+        if (novaMensagem.remetente_id !== meuUserId) {
+          setUnreadCounts(prevCounts => ({
+            ...prevCounts,
+            [novaMensagem.remetente_id]: (prevCounts[novaMensagem.remetente_id] || 0) + 1,
+          }));
+          fetchTotalUnreadCount();
+        }
+      }
+    };
+    newSocket.on('new_message', handleNewMessage);
+
+    async function initializeChat() {
       try {
-        const response = await fetch('http://localhost:3001/user/get', {
-          headers: {
-            // 3. Usa o token real recebido via props
-            'Authorization': `Bearer ${token}`
-          }
+        // [MODIFICADO] Trocamos a rota para '/paginated' e adicionamos o filtro de status e um limite alto
+        const usersResponse = await fetch('http://localhost:3001/user/paginated?statusConta=ativo&limit=9999999');
+        if (!usersResponse.ok) throw new Error('Falha ao buscar usuários');
+        
+        // [MODIFICADO] A resposta agora é um objeto, então pegamos a propriedade 'users'
+        const data = await usersResponse.json();
+        const activeUsers = data.users;
+
+        setUsers(activeUsers.filter(u => u.id !== meuUserId));
+
+        const countsResponse = await fetch('http://localhost:3001/msg/unread-counts', {
+          headers: { 'x-user-id': meuUserId.toString() }
         });
-        const allUsers = await response.json();
-        setUsers(allUsers.filter(u => u.id !== meuUserId));
+        const initialCounts = await countsResponse.json();
+        setUnreadCounts(initialCounts);
       } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
+        console.error("Erro ao inicializar o chat:", error);
       }
     }
+    initializeChat();
 
-    fetchUsers();
-
-    // B) Conectar ao WebSocket e se identificar
-    socket.emit('join', meuUserId);
-
-    // C) Ouvir por novas mensagens em tempo real
-    const handleNewMessage = (novaMensagem) => {
-      if (novaMensagem.remetente_id === selectedUser?.id || novaMensagem.destinatario_id === selectedUser?.id) {
-          setMessages(mensagensAtuais => [...mensagensAtuais, novaMensagem]);
-      }
-    };
-    socket.on('new_message', handleNewMessage);
-    
-    // D) Função de limpeza ao sair do componente
     return () => {
-      socket.off('new_message', handleNewMessage);
+      newSocket.off('new_message', handleNewMessage);
+      newSocket.disconnect();
     };
-  }, [meuUserId, token, selectedUser]); // Re-executa se o usuário logado ou o token mudar
+  }, [meuUserId, fetchTotalUnreadCount]);
 
-  // Roda toda vez que o usuário selecionado muda, para buscar o histórico da conversa
   useEffect(() => {
-    if (!selectedUser || !token) return;
-
+    if (!selectedUser || !meuUserId) return;
     async function fetchHistory() {
       try {
         const response = await fetch(`http://localhost:3001/msg/historico/${selectedUser.id}`, {
-          headers: { 
-            // 4. Usa o token real aqui também
-            'Authorization': `Bearer ${token}` 
-          }
+          headers: { 'x-user-id': meuUserId.toString() }
         });
         const history = await response.json();
         setMessages(history);
       } catch (error) {
         console.error("Erro ao buscar histórico:", error);
-        setMessages([]);
       }
     }
-
     fetchHistory();
-  }, [selectedUser, token]);
+  }, [selectedUser, meuUserId]);
 
-  // Efeito para scrollar para o final da conversa quando uma nova mensagem chega
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-
-  // === FUNÇÕES DE MANIPULAÇÃO ===
-
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!replyText.trim() || !selectedUser) return;
-
-    const mensagemData = {
-      destinatarioId: selectedUser.id,
-      conteudo: replyText
-    };
-
+    if (!replyText.trim() || !selectedUser || !socket) return;
+    const mensagemData = { remetenteId: meuUserId, destinatarioId: selectedUser.id, conteudo: replyText };
     socket.emit('private_message', mensagemData);
     setReplyText("");
   };
 
-  const handleSelectUser = (user) => {
+  const handleSelectUser = async (user) => {
     setSelectedUser(user);
-    setMessages([]);
+    if (unreadCounts[user.id] > 0) {
+      try {
+        await fetch(`http://localhost:3001/msg/mark-as-read/${user.id}`, {
+          method: 'PUT',
+          headers: { 'x-user-id': meuUserId.toString() }
+        });
+        fetchTotalUnreadCount();
+      } catch (error) {
+        console.error("Falha ao marcar mensagens como lidas:", error);
+      }
+    }
+    setUnreadCounts(prevCounts => {
+      const newCounts = { ...prevCounts };
+      delete newCounts[user.id];
+      return newCounts;
+    });
   };
 
-  const filteredUsers = users.filter(user =>
-    user.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => user.nome.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // === RENDERIZAÇÃO (JSX) ===
-
+  // O JSX (a parte visual) permanece o mesmo.
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-12rem)]">
-      {/* Coluna da Lista de Usuários */}
-      <Card className="md:col-span-1 flex flex-col">
+      <Card className="md-col-span-1 flex flex-col overflow-hidden">
         <CardHeader>
           <CardTitle>Contatos</CardTitle>
           <div className="relative mt-2">
@@ -140,51 +157,54 @@ export function ChatComponent({ user, token }) {
             />
           </div>
         </CardHeader>
-        <CardContent className="p-0 flex-1 overflow-y-auto">
+        <CardContent className="flex-1 overflow-y-auto p-0">
           <div className="flex flex-col">
-            {filteredUsers.map((user) => (
-              <button
-                key={user.id}
-                onClick={() => handleSelectUser(user)}
-                className={cn(
-                  "flex flex-col items-start gap-1 border-b p-3 text-left text-sm transition-all hover:bg-accent",
-                  selectedUser?.id === user.id && "bg-muted"
-                )}
-              >
-                <span className="font-semibold">{user.nome}</span>
-                <p className="text-xs font-medium text-muted-foreground capitalize">{user.cargo}</p>
-              </button>
-            ))}
+            {filteredUsers.map((user) => {
+              const unreadCount = unreadCounts[user.id] || 0;
+              return (
+                <button
+                  key={user.id}
+                  onClick={() => handleSelectUser(user)}
+                  className={cn("flex flex-col items-start gap-1 border-b p-3 text-left text-sm transition-all hover:bg-accent", selectedUser?.id === user.id && "bg-muted")}
+                >
+                  <div className="flex justify-between items-center w-full">
+                    <span className="font-semibold">{user.nome}</span>
+                    {unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
+                        {unreadCount > 99 ? '+99' : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-medium text-muted-foreground capitalize">{user.cargo}</p>
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
-
-      {/* Coluna do Chat Ativo */}
-      <Card className="md:col-span-2 flex flex-col">
+      <Card className="md:col-span-2 flex flex-col overflow-hidden">
         {selectedUser ? (
           <>
             <CardHeader className="flex flex-row items-center gap-4 border-b">
               <Avatar className="h-10 w-10">
-                <AvatarFallback>{selectedUser.nome.charAt(0)}</AvatarFallback>
+                <AvatarFallback>{selectedUser.nome.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <CardTitle>{selectedUser.nome}</CardTitle>
                 <p className="text-sm text-muted-foreground capitalize">{selectedUser.cargo}</p>
               </div>
             </CardHeader>
-
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={cn("flex items-end gap-2", msg.remetente_id === meuUserId ? "justify-end" : "justify-start")}>
                   <div className={cn("max-w-xs rounded-lg px-3 py-2 md:max-w-md", msg.remetente_id === meuUserId ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <p className="text-sm">{msg.conteudo}</p>
+                    <p className="text-sm break-words">{msg.conteudo}</p>
                     <p className="text-right text-xs text-muted-foreground mt-1">{new Date(msg.data_envio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
               ))}
                <div ref={messageEndRef} />
             </CardContent>
-
             <CardFooter className="p-4 border-t">
               <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
                 <Textarea
@@ -192,6 +212,12 @@ export function ChatComponent({ user, token }) {
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   className="min-h-[40px] resize-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
                 />
                 <Button type="submit" size="icon" disabled={!replyText.trim()}>
                   <Send className="h-4 w-4" />

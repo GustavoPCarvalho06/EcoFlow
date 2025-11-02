@@ -1,19 +1,19 @@
 "use client"
 
 import * as React from "react"
+import { useState, useEffect } from "react"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from "next/image"
-import { 
-    IconDashboard, 
-    IconUsers, 
-    IconPlus, 
-    IconBell, 
-    IconMail, 
+import {
+    IconDashboard,
+    IconUsers,
+    IconBell,
+    IconMail,
     IconBroadcast,
-    IconMapPin 
-} from "@tabler/icons-react" 
-import { NavUser } from "@/components/dashboard/nav-user"
+    IconMapPin
+} from "@tabler/icons-react"
+import { NavUser } from "@/components/dashboard/nav-user-adiministrador"
 import { Button } from "@/components/ui/button"
 import {
     Sidebar,
@@ -24,6 +24,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useUnreadCount } from "@/context/UnreadCountContext"
 
 const navItems = [
     {
@@ -56,8 +57,12 @@ const coletorNavItems = [
     }
 ]
 
-export function AppSidebar( usuario, ...props ) {
+export function AppSidebar({ usuario, ...props }) {
     const pathname = usePathname();
+
+    // A contagem vem do contexto, que agora é provido pelo layout.
+    // Adicionamos um valor padrão para evitar erros caso o contexto não seja encontrado.
+    const { totalUnreadCount } = useUnreadCount() || { totalUnreadCount: 0 };
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>
@@ -86,13 +91,11 @@ export function AppSidebar( usuario, ...props ) {
             <SidebarContent className="p-4">
                 <div className="mb-4 flex items-center gap-2">
                     <Button size="icon" variant="ghost" aria-label="Notifications">
-                        {/* MUDANÇA 1: Aumentamos o ícone de sino para consistência */}
-                        <IconBell className="h-6 w-6" /> 
+                        <IconBell className="h-6 w-6" />
                     </Button>
                 </div>
-                
-                {/* MUDANÇA 2: Aumentamos o espaçamento entre os links */}
-                <nav className="flex flex-col gap-2"> 
+
+                <nav className="flex flex-col gap-2">
                     {navItems.map((item, index) => (
                         <Link
                             key={index}
@@ -101,25 +104,28 @@ export function AppSidebar( usuario, ...props ) {
                                 flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
                                 transition-colors
                                 ${pathname === item.href
-                                    ? 'bg-muted text-foreground' 
+                                    ? 'bg-muted text-foreground'
                                     : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                                 }
                             `}
                         >
-                            {/* MUDANÇA 3: Aumentamos o tamanho dos ícones e o padding vertical (py-3) */}
-                            <item.icon className="h-6 w-6" /> 
+                            <item.icon className="h-6 w-6" />
                             <span>{item.title}</span>
+                            {item.title === "Mensagem" && totalUnreadCount > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
+                                    {totalUnreadCount > 99 ? '+99' : totalUnreadCount}
+                                </span>
+                            )}
                         </Link>
                     ))}
                 </nav>
 
-                <div className="mt-8"> {/* MUDANÇA 4: Aumentamos o espaço acima da seção "Coletor" */}
+                <div className="mt-8">
                     <div className="px-3 pb-2">
                         <span className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase">Coletor</span>
                     </div>
                     <div className="border-t mx-3 mb-2"></div>
-                    {/* MUDANÇA 2 (Repetida): Aumentamos o espaçamento entre os links */}
-                    <nav className="flex flex-col gap-2"> 
+                    <nav className="flex flex-col gap-2">
                         {coletorNavItems.map((item, index) => (
                             <Link
                                 key={index}
@@ -128,23 +134,24 @@ export function AppSidebar( usuario, ...props ) {
                                     flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
                                     transition-colors
                                     ${pathname === item.href
-                                        ? 'bg-muted text-foreground' 
+                                        ? 'bg-muted text-foreground'
                                         : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                                     }
                                 `}
                             >
-                                {/* MUDANÇA 3 (Repetida): Aumentamos o tamanho dos ícones e o padding vertical (py-3) */}
                                 <item.icon className="h-6 w-6" />
                                 <span>{item.title}</span>
                             </Link>
                         ))}
                     </nav>
                 </div>
-                
+
             </SidebarContent>
 
             <SidebarFooter className="border-t">
-                <NavUser usuario={usuario}/>
+                {/* [AQUI ESTÁ A CORREÇÃO FINAL] */}
+                {/* Passamos a prop para NavUser no formato que ele espera: { usuario: { ...dados... } } */}
+                <NavUser usuario={{ usuario: usuario }} />
             </SidebarFooter>
         </Sidebar>
     )

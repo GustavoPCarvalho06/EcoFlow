@@ -35,7 +35,8 @@ const io = new Server(server, {
 // Seus middlewares (continua igual)
 app.use(cors({
   origin: 'http://localhost:3000', 
-  credentials: true,             
+  credentials: true,            
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'], 
 }));
 
 

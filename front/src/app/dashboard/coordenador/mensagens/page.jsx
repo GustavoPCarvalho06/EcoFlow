@@ -1,6 +1,6 @@
 // src/app/dashboard/administrador/mensagens/page.jsx (VERSÃO CORRIGIDA)
 
-import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { AppSidebarCoordenador } from "@/components/dashboard/app-sidebar-coordenador";
 import { SiteHeader } from "@/components/dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 // 1. CORREÇÃO DA IMPORTAÇÃO
@@ -33,7 +33,7 @@ export default async function MensagensPage() {
         "--header-height": "calc(var(--spacing) * 12)"
       }}
     >
-      <AppSidebar usuario={user} />
+      <AppSidebarCoordenador usuario={user} />
       <SidebarInset usuario={user}>
         <SiteHeader usuario={user} />
         <main className="flex flex-1 flex-col p-4 md:p-6">

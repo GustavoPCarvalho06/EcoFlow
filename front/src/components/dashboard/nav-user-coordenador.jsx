@@ -8,6 +8,8 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react"
 
+import Link from "next/link"
+
 import {
   Avatar,
   AvatarFallback,
@@ -28,6 +30,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+
+import { AppSidebarCoordenador } from "@/components/dashboard/app-sidebar-coordenador";
 import { logout } from "@/hooks/logout"
 export function NavUser({
   usuario,
@@ -46,11 +50,11 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarFallback className="rounded-lg">
-                  {usuario.usuario.name ? usuario.usuario.name.charAt(0).toUpperCase() : ""}
+                  {usuario.usuario.nome ? usuario.usuario.nome.charAt(0).toUpperCase() : ""}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{usuario.usuario.name}</span>
+                <span className="truncate font-medium">{usuario.usuario.nome}</span>
                 <span className="text-muted-foreground truncate text-xs">
                   {usuario.cpf}
                 </span>
@@ -68,11 +72,11 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarFallback className="rounded-lg">
-                    {usuario.usuario.name ? usuario.usuario.name.charAt(0).toUpperCase() : ""}
+                    {usuario.usuario.nome ? usuario.usuario.nome.charAt(0).toUpperCase() : ""}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{usuario.usuario.name}</span>
+                  <span className="truncate font-medium">{usuario.usuario.nome}</span>
                   <span className="text-muted-foreground truncate text-xs">
                     {usuario.usuario.cpf}
                   </span>
@@ -81,12 +85,12 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <a href="/Perfil">
+                <Link href="/dashboard/coordenador/Perfil">
               <DropdownMenuItem>
                 <IconUserCircle />
                   Account
               </DropdownMenuItem>
-                  </a>
+                  </Link>
               {/* <DropdownMenuItem>
                 <IconNotification />
                 Notifications

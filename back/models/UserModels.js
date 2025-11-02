@@ -114,6 +114,7 @@ const updateUser = async (data, cpf) => {
     if (data.nome) conteudo.nome = data.nome;
     if (data.cpf) conteudo.cpf = data.cpf;
     if (data.cargo) conteudo.cargo = data.cargo;
+    if (data.email) conteudo.email = data.email;
     if (data.statusConta) conteudo.statusConta = data.statusConta;
 
     // A lógica da senha permanece a mesma
@@ -178,7 +179,7 @@ const findUsersPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy =
     const offset = (page - 1) * limit;
 
     const dataQuery = `
-      SELECT id, nome, cpf, cargo, statusConta 
+      SELECT id, nome, cpf, cargo, statusConta ,email
       FROM usuarios 
       ${whereString} 
       ORDER BY ${sortBy} ${sortOrder} 

@@ -38,10 +38,6 @@ export function UserManagementTable() {
   const [error, setError] = useState("");
   const [createCpf, setCreateCpf] = useState("");
 
-  // =======================================================
-  // CORREÇÃO: A função useCallback agora depende de todos os filtros.
-  // Ela será recriada sempre que um filtro mudar.
-  // =======================================================
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -67,12 +63,7 @@ export function UserManagementTable() {
     }
   }, [page, limit, searchQuery, statusFilter, cargoFilter]);
 
-  // =======================================================
-  // CORREÇÃO: Unificamos em um único useEffect com debounce.
-  // =======================================================
   useEffect(() => {
-    // Aplica um debounce apenas na pesquisa para não sobrecarregar
-    // enquanto o usuário digita. Outras mudanças são mais rápidas.
     const debounceTimeout = searchQuery ? 500 : 0; 
     
     const handler = setTimeout(() => {
@@ -80,7 +71,7 @@ export function UserManagementTable() {
     }, debounceTimeout);
 
     return () => clearTimeout(handler);
-  }, [fetchUsers]); // O useEffect agora só depende do fetchUsers, que contém as outras dependências.
+  }, [fetchUsers]);
 
   const forceRefresh = () => fetchUsers();
 
@@ -149,6 +140,7 @@ export function UserManagementTable() {
     const data = {
         nome: formData.get('nome'),
         cpf: selectedUser.cpf,
+        email: formData.get('email'), // <<<--- ADICIONADO AQUI
         cargo: formData.get('cargo'),
         senha: formData.get('senha')
     };
@@ -320,6 +312,13 @@ export function UserManagementTable() {
                 <Label htmlFor="cpf" className="text-right">CPF</Label>
                 <Input id="cpf" name="cpf" required className="col-span-3" value={createCpf} onChange={handleCpfInputChange} maxLength="14" placeholder="000.000.000-00"/>
               </div>
+               {/* ======================================================= */}
+               {/*  NOVO CAMPO DE EMAIL ADICIONADO AQUI                   */}
+               {/* ======================================================= */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">Email</Label>
+                <Input id="email" name="email" type="email" required className="col-span-3" placeholder="exemplo@email.com"/>
+              </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="senha" className="text-right">Senha</Label>
                 <Input id="senha" name="senha" type="password" required className="col-span-3" />
@@ -356,6 +355,13 @@ export function UserManagementTable() {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-nome" className="text-right">Nome</Label>
                 <Input id="edit-nome" name="nome" defaultValue={selectedUser?.nome} className="col-span-3" maxLength="50" />
+              </div>
+              {/* ======================================================= */}
+              {/*  NOVO CAMPO DE EMAIL ADICIONADO AQUI                   */}
+              {/* ======================================================= */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-email" className="text-right">Email</Label>
+                <Input id="edit-email" name="email" type="email" defaultValue={selectedUser?.email} required className="col-span-3" placeholder="exemplo@email.com"/>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-senha" className="text-right">Nova Senha</Label>

@@ -1,3 +1,5 @@
+// back/config/database.js (VERSÃO CORRETA E COMPLETA)
+
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 
@@ -29,14 +31,9 @@ async function readAll(table, where = null) {
     }
 }
 
-// =======================================================
-// FUNÇÃO read ATUALIZADA E CORRIGIDA
-// =======================================================
 async function read(sql, params = []) {
     const connection = await getConnection();
     try {
-        // Agora, a função recebe a query SQL completa e um array de parâmetros.
-        // O método 'execute' do mysql2 substitui os '?' pelos valores em 'params' de forma segura.
         const [rows] = await connection.execute(sql, params);
         return rows;
     } catch(err) {
@@ -46,7 +43,6 @@ async function read(sql, params = []) {
         connection.release();
     }
 }
-// =======================================================
 
 async function create(table, data) {
     const connection = await getConnection();
@@ -116,5 +112,5 @@ const createLixoDB = async (table, data) => {
   }
 };
 
-// Certifique-se de que a nova 'read' está sendo exportada
-export { create, readAll, read, update, deleteRecord, compare, createLixoDB };
+// [AQUI ESTÁ A CORREÇÃO] Garantimos que 'pool' está sendo exportado.
+export { create, readAll, read, update, deleteRecord, compare, createLixoDB, pool };
