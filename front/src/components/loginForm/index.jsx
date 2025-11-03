@@ -15,11 +15,18 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+// 1. Importe o hook que criamos para pegar a URL da API
+import { useApiUrl } from "@/context/ApiContext"; // <-- AJUSTE O CAMINHO SE NECESSÁRIO
 
 export function LoginForm({ className, ...props }) {
+    // 2. Obtenha a URL da API (seja a do IP ou a de localhost) do nosso contexto
+    const apiUrl = useApiUrl();
+    
     const [cpf, setCpf] = useState("");
     const [senha, setSenha] = useState("");
     const [error, setError] = useState("");
+    // 3. Adicione um estado para o carregamento (melhora a experiência do usuário)
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const handleCpfChange = (e) => {
@@ -34,13 +41,25 @@ export function LoginForm({ className, ...props }) {
         setCpf(value);
     };
 
+    // 4. Modifique a função handleLogin para usar a apiUrl
     const handleLogin = async (e) => {
         e.preventDefault();
+        
+        // Verifica se a URL da API já foi definida pelo contexto
+        if (!apiUrl) {
+            setError("Conectando ao servidor... Por favor, tente novamente em um instante.");
+            return;
+        }
+
         setError("");
+        setIsLoading(true); // Inicia o carregamento
         const rawCpf = cpf.replace(/\D/g, "");
 
         try {
-            const response = await fetch("http://localhost:3001/login", {
+            console.log(`Tentando login em: ${apiUrl}/login`); // Log para depuração
+
+            // Usa a apiUrl dinâmica em vez da URL fixa
+            const response = await fetch(`${apiUrl}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ cpf: rawCpf, senha }),
@@ -50,14 +69,19 @@ export function LoginForm({ className, ...props }) {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.erro || "Erro desconhecido ao fazer login.");
+                // Usa a mensagem de erro do backend ou uma mensagem padrão
+                setError(data.erro || data.mensagem || "Erro desconhecido ao fazer login.");
                 return;
             }
 
             const userRole = data.user.cargo;
             router.push(`/dashboard/${userRole}`);
-        } catch {
+
+        } catch (err) {
+            console.error("Falha na requisição de login:", err);
             setError("Não foi possível conectar ao servidor. Verifique sua conexão.");
+        } finally {
+            setIsLoading(false); // Finaliza o carregamento, independente do resultado
         }
     };
 
@@ -142,9 +166,10 @@ export function LoginForm({ className, ...props }) {
                         {/* Botão */}
                         <Button
                             type="submit"
-                            className="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md cursor-pointer"
+                            disabled={isLoading} // Desabilita o botão enquanto carrega
+                            className="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
                         >
-                            Entrar
+                            {isLoading ? "Entrando..." : "Entrar"}
                         </Button>
                     </form>
                 </CardContent>
