@@ -93,7 +93,7 @@ export function AppSidebar(usuario, ...props) {
 
         const socket = io('http://localhost:3001');
         socket.on('comunicados_atualizados', checkNewComunicados);
-        
+
         if (pathname.includes('/comunicados')) {
             setNewComunicadoCount(0);
         }
@@ -111,14 +111,14 @@ export function AppSidebar(usuario, ...props) {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
-                            className="data-[slot=sidebar-menu-button]:!p-1.5"
+                            className="data-[slot=sidebar-menu-button]:!p-1.5 h-15"
                         >
                             <Link href="/dashboard/administrador">
                                 <Image
                                     src="/imagen/Logo.png"
                                     alt="EcoFlow logo"
-                                    width={40}
-                                    height={40}
+                                    width={80}
+                                    height={80}
                                     className="rounded-sm"
                                 />
                                 <span className="text-lg font-semibold">EcoFlow.</span>

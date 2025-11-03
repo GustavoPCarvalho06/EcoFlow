@@ -6,7 +6,7 @@ import { JWT_SECRET } from "../config/jwt.js";
 
 // Controller de login
 const login = async (req, res) => {
-  console.log("✅ O ARQUIVO DE ROTAS DE LOGIN FOI CARREGADO!");
+  
   try {
     const { cpf, senha } = req.body;
 

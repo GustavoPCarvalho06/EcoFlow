@@ -6,12 +6,12 @@ const configureChat = (io) => {
   const onlineUsers = new Map();
 
   io.on('connection', (socket) => {
-    console.log(`✅ Cliente conectado: ${socket.id}`);
+
 
     // Evento para o cliente se identificar após a conexão
     socket.on('join', (userId) => {
       if (userId) {
-        console.log(`Usuário ID: ${userId} se juntou com o socket ID: ${socket.id}`);
+ 
         // Associa o ID do usuário ao ID do socket
         onlineUsers.set(userId.toString(), socket.id);
         // Coloca o socket em uma sala com seu próprio ID de usuário
@@ -52,7 +52,7 @@ const configureChat = (io) => {
           break;
         }
       }
-      console.log(`❌ Cliente desconectado: ${socket.id}`);
+ 
     });
   });
 };
