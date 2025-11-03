@@ -1,10 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { useState, useEffect } from "react"
+// [MODIFICADO] Adicionamos 'useCallback'
+import { useState, useEffect, useCallback } from "react"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from "next/image"
+// [NOVO] Importamos o 'io' para a conexão em tempo real
+import io from "socket.io-client";
 import {
     IconDashboard,
     IconUsers,
@@ -57,12 +60,49 @@ const coletorNavItems = [
     }
 ]
 
-export function AppSidebar({ usuario, ...props }) {
+// [CORREÇÃO] A assinatura da função foi revertida para o seu original
+export function AppSidebar(usuario, ...props) {
     const pathname = usePathname();
-
-    // A contagem vem do contexto, que agora é provido pelo layout.
-    // Adicionamos um valor padrão para evitar erros caso o contexto não seja encontrado.
     const { totalUnreadCount } = useUnreadCount() || { totalUnreadCount: 0 };
+
+    // [NOVO] Estado para a contagem de novos comunicados
+    const [newComunicadoCount, setNewComunicadoCount] = useState(0);
+
+    // [NOVO] Função para buscar e contar novos comunicados
+    const checkNewComunicados = useCallback(async () => {
+        // [CORREÇÃO] Acessamos o objeto de usuário da maneira que sua prop é estruturada
+        const userData = usuario.usuario;
+        if (!userData?.id) return;
+
+        try {
+            const response = await fetch('http://localhost:3001/comunicados/unseen-count', {
+                headers: { 'x-user-id': userData.id.toString() }
+            });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            setNewComunicadoCount(data.count);
+        } catch (error) {
+            console.error("Erro ao verificar novos comunicados:", error);
+        }
+    }, [usuario]);
+
+    // [NOVO] Efeito para gerenciar a notificação
+    useEffect(() => {
+        checkNewComunicados();
+
+        const socket = io('http://localhost:3001');
+        socket.on('comunicados_atualizados', checkNewComunicados);
+        
+        if (pathname.includes('/comunicados')) {
+            setNewComunicadoCount(0);
+        }
+
+        return () => {
+            socket.off('comunicados_atualizados', checkNewComunicados);
+            socket.disconnect();
+        };
+    }, [pathname, checkNewComunicados]);
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>
@@ -89,10 +129,18 @@ export function AppSidebar({ usuario, ...props }) {
             </SidebarHeader>
 
             <SidebarContent className="p-4">
+                {/* [MODIFICADO] Envolvemos o botão com o Link e adicionamos a lógica do contador */}
                 <div className="mb-4 flex items-center gap-2">
-                    <Button size="icon" variant="ghost" aria-label="Notifications">
-                        <IconBell className="h-6 w-6" />
-                    </Button>
+                    <Link href="/dashboard/administrador/comunicados" passHref>
+                        <Button size="icon" variant="ghost" aria-label="Notifications" className="relative">
+                            <IconBell className="h-6 w-6" />
+                            {newComunicadoCount > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                    {newComunicadoCount > 99 ? `+99` : newComunicadoCount}
+                                </span>
+                            )}
+                        </Button>
+                    </Link>
                 </div>
 
                 <nav className="flex flex-col gap-2">
@@ -149,9 +197,8 @@ export function AppSidebar({ usuario, ...props }) {
             </SidebarContent>
 
             <SidebarFooter className="border-t">
-                {/* [AQUI ESTÁ A CORREÇÃO FINAL] */}
-                {/* Passamos a prop para NavUser no formato que ele espera: { usuario: { ...dados... } } */}
-                <NavUser usuario={{ usuario: usuario }} />
+                {/* [CORREÇÃO] A prop 'usuario' é passada sem alterações, exatamente como no seu código original */}
+                <NavUser usuario={usuario} />
             </SidebarFooter>
         </Sidebar>
     )

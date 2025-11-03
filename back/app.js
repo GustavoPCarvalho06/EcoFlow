@@ -8,6 +8,7 @@ import user from "./routes/userRotas.js"
 import login from "./routes/loginRotas.js"
 import lixo from "./routes/lixoRotas.js"
 import msg from "./routes/msgRotas.js"
+import comunicados from "./routes/comunicadoRotas.js"
 
 import sensor from "./routes/statusSensorRotas.js"
 import userStatus from "./routes/statusUserRotas.js"
@@ -43,12 +44,19 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser()); 
 
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 //Rotas
 
 app.use('/lixo', lixo)
 app.use('/user', user)
 app.use('/login', login)
 app.use('/msg', msg)
+app.use('/comunicados',comunicados)
 
 //View
 app.use('/statusSensor', sensor)

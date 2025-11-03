@@ -1,8 +1,10 @@
-// src/context/UnreadCountContext.jsx
+// src/context/UnreadCountContext.jsx (VERSÃO FINAL COM ATUALIZAÇÃO EM TEMPO REAL)
 
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+// [NOVO] Importamos a biblioteca do socket.io-client
+import io from 'socket.io-client';
 
 // 1. Criamos o Contexto
 const UnreadCountContext = createContext();
@@ -32,10 +34,39 @@ export function UnreadCountProvider({ children, user }) {
     }
   }, [meuUserId]);
 
-  // Busca a contagem inicial quando o provedor é montado ou o usuário muda
+  // [MODIFICADO] Este efeito agora gerencia tanto a busca inicial quanto a conexão do socket
   useEffect(() => {
+    // 1. Busca a contagem inicial ao carregar
     fetchTotalUnreadCount();
-  }, [fetchTotalUnreadCount]);
+
+    // 2. Se houver um usuário logado, estabelece a conexão em tempo real
+    if (meuUserId) {
+      const socket = io('http://localhost:3001');
+
+      // Identifica o usuário no servidor de socket
+      socket.on('connect', () => {
+        socket.emit('join', meuUserId);
+      });
+
+      // Define o que fazer quando uma nova mensagem chegar
+      const handleNewMessage = (novaMensagem) => {
+        // Se a mensagem for destinada a mim (e não enviada por mim para mim mesmo),
+        // atualiza a contagem total.
+        if (novaMensagem.destinatario_id === meuUserId) {
+          fetchTotalUnreadCount();
+        }
+      };
+      
+      // "Ouve" pelo evento 'new_message'
+      socket.on('new_message', handleNewMessage);
+
+      // 3. Função de limpeza: É crucial para evitar bugs ao deslogar/trocar de página
+      return () => {
+        socket.off('new_message', handleNewMessage); // Remove o listener
+        socket.disconnect(); // Desconecta o socket
+      };
+    }
+  }, [meuUserId, fetchTotalUnreadCount]); // O array de dependências garante que a lógica rode novamente se o usuário mudar
 
   // O valor que será compartilhado com os componentes filhos
   const value = { totalUnreadCount, fetchTotalUnreadCount };

@@ -1,7 +1,7 @@
-import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { AppSidebarCoordenador } from "@/components/dashboard/app-sidebar-coordenador";
 import { SiteHeader } from "@/components/dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { ComunicadosComponenteAdministrador } from "@/components/dashboard/ComunicadosComponenteAdministrador";
+import { ComunicadosComponenteCoordenador } from "@/components/dashboard/ComunicadosComponenteCoordenador";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 
@@ -26,7 +26,7 @@ export default async function ComunicadosPage() {
         "--header-height": "calc(var(--spacing) * 12)"
       }}
     >
-      <AppSidebar usuario={user} />
+      <AppSidebarCoordenador usuario={user} />
       <SidebarInset usuario={user}>
         <SiteHeader usuario={user} />
         <main className="flex flex-1 flex-col p-4 md:p-6">
@@ -34,7 +34,7 @@ export default async function ComunicadosPage() {
             <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados</h1>
           </div>
           {/* O componente principal dos comunicados será renderizado aqui */}
-          <ComunicadosComponenteAdministrador user={user} />
+          <ComunicadosComponenteCoordenador user={user} />
         </main>
       </SidebarInset>
     </SidebarProvider>

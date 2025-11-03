@@ -54,6 +54,34 @@ CREATE TABLE historico_sensores (
 );
 
 
+-- =============================================================================================
+-- [NOVO] Tabela para o Mural de Comunicados
+-- =============================================================================================
+CREATE TABLE comunicados (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    conteudo TEXT NOT NULL,
+    autor_id INT NOT NULL,
+    data_publicacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- [NOVO] Coluna para armazenar a data da última edição.
+    -- É NULL por padrão, pois um comunicado não é editado ao ser criado.
+    data_edicao TIMESTAMP NULL DEFAULT NULL,
+
+    FOREIGN KEY (autor_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE comunicados_vistos (
+    usuario_id INT NOT NULL,
+    comunicado_id INT NOT NULL,
+    data_visualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (usuario_id, comunicado_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (comunicado_id) REFERENCES comunicados(id) ON DELETE CASCADE
+);
+
+
+
 #--- VIEWS -----------------------------------------------------------------------------------------------------------------
 # Relatorio das Rotas
 CREATE VIEW RotasRelatorio AS
@@ -99,8 +127,8 @@ END$$
 DELIMITER ;
 
 
-SELECT * FROM usuarios;
-SELECT * FROM RotasRelatorio;
+#SELECT * FROM usuarios;
+#SELECT * FROM RotasRelatorio;
 
 
 #--- INSERTS PARA TEST -----------------------------------------------------------------------------------------------------------------
@@ -126,7 +154,7 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 
 INSERT INTO usuarios (nome, email, cpf, senha, cargo, statusConta) VALUES
 ('miguel', 'miguel@example.com', '00000000000', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'administrador', 'ativo'),
-('lalau', 'lalau@example.com', '10000000001', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'coletor', 'ativo'),
+('lalau', 'lalau@example.com', '10000000001', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'coordenador', 'ativo'),
 ('gustavo', 'gustavo@example.com', '10000000002', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'coordenador', 'ativo'),
 ('Carla Dias', 'carla.dias@example.com', '10000000003', 'senha123', 'coletor', 'desligado'),
 ('Daniel Farias', 'daniel.farias@example.com', '10000000004', 'senha123', 'coletor', 'ativo'),
@@ -227,6 +255,38 @@ INSERT INTO usuarios (nome, email, cpf, senha, cargo, statusConta) VALUES
 ('Matheus Noronha', 'matheus.noronha@example.com', '10000000099', 'senha123', 'coletor', 'ativo'),
 ('Vinícius Peixoto', 'vinicius.peixoto@example.com', '10000000100', 'senha123', 'coletor', 'ativo');
 
+
+INSERT INTO comunicados (titulo, conteudo, autor_id) VALUES
+-- Comunicado 1: Curto e Direto
+('Lembrete de Segurança: Uso Obrigatório de EPIs', 'Apenas um lembrete rápido a todos: o uso de luvas e botas de segurança é obrigatório em todas as áreas de coleta e triagem. Sem exceções. A segurança de todos é nossa prioridade número um.', 1),
+
+-- Comunicado 2: Médio com Quebra de Linha
+('Atualização do Ponto de Encontro Matinal', 'Atenção, equipe.\n\nA partir de amanhã, o ponto de encontro para o início do turno será no Pátio B, ao lado do almoxarifado, e não mais no Pátio A. Isso visa facilitar a logística de saída dos veículos.\n\nSejam pontuais.', 2),
+
+-- Comunicado 3: Longo
+('Procedimento Detalhado para Coleta Seletiva em Condomínios Residenciais de Grande Porte', 'Para otimizar a coleta em condomínios com mais de 100 unidades, um novo procedimento foi estabelecido. Primeiramente, o motorista deve contatar o síndico ou zelador via rádio para anunciar a chegada. A equipe de coletores deve se dividir: dois coletores iniciarão a coleta pelos blocos pares, enquanto um coletor, auxiliado por um funcionário do condomínio, se dirigirá à área de descarte de volumosos. É crucial que todo o material reciclável seja inspecionado visualmente por contaminação antes de ser depositado no compartimento do caminhão. Qualquer não conformidade, como lixo orgânico misturado com recicláveis, deve ser registrada fotograficamente e comunicada imediatamente à coordenação para que o condomínio seja notificado. A eficiência neste processo é vital para mantermos nossas metas de reciclagem.', 3),
+
+-- Comunicado 4: Médio
+('Vagas de Estacionamento: Nova Organização', 'Para evitar congestionamentos, as vagas de estacionamento foram reorganizadas. Os caminhões de coleta agora devem estacionar exclusivamente na fileira norte (à esquerda da entrada). As vagas centrais são designadas para veículos de manutenção e supervisão. Carros particulares devem utilizar o estacionamento anexo. Placas de sinalização serão instaladas até o final da semana.', 1),
+
+-- Comunicado 5: Muito Longo e Detalhado (Ótimo para testar o scroll do pop-up)
+('Protocolo de Ação em Caso de Acidentes ou Incidentes Mecânicos Durante a Rota', 'Este comunicado estabelece o protocolo oficial a ser seguido em caso de qualquer incidente durante a operação de coleta. \n\n1. **Segurança em Primeiro Lugar:** Em caso de acidente, a primeira ação é garantir a segurança de todos os envolvidos. Sinalize a área imediatamente com os cones de segurança do veículo e acione o pisca-alerta. Preste os primeiros socorros se necessário e se tiver treinamento para tal. \n\n2. **Comunicação Imediata:** O motorista ou o chefe da equipe deve, sem demora, contatar a central de coordenação pelo rádio no canal de emergência (Canal 1), informando a localização exata, a natureza do incidente (colisão, pane mecânica, pneu furado, etc.) e se há feridos. \n\n3. **Registro do Incidente:** É mandatório o preenchimento do Relatório de Ocorrência de Rota (ROR) que se encontra no porta-luvas de todos os veículos. Detalhe o ocorrido, incluindo data, hora, local, veículos e pessoas envolvidas, e, se possível, colete o contato de testemunhas. Fotografe a cena de múltiplos ângulos, incluindo danos aos veículos e a sinalização utilizada. \n\n4. **Pane Mecânica:** Em caso de falha mecânica que imobilize o veículo, após comunicar a central, a equipe deve aguardar no local a chegada do time de suporte mecânico. Não tente realizar reparos complexos por conta própria, a menos que seja algo simples e que você tenha autorização e treinamento para fazer (ex: troca de uma lâmpada de farol). \n\n5. **Continuidade da Coleta:** A central de coordenação avaliará a situação e decidirá se um veículo reserva será enviado para que a equipe possa concluir a rota ou se a rota será suspensa e reprogramada. A equipe deve seguir estritamente as instruções recebidas da central. \n\nO cumprimento rigoroso deste protocolo é essencial para garantir a segurança e a eficiência operacional.', 2),
+
+-- Comunicado 6: Curto
+('Confraternização de Fim de Ano', 'Save the date! Nossa confraternização anual acontecerá no dia 19 de Dezembro, no salão de eventos principal. Mais detalhes sobre horários e atrações em breve. Contamos com a presença de todos!', 3),
+
+-- Comunicado 7: Médio
+('Feedback sobre o Novo App de Rotas', 'Agradecemos a todos que participaram da fase de testes do novo aplicativo de otimização de rotas. Recebemos muitos feedbacks valiosos e a equipe de TI já está trabalhando nas melhorias. A versão final será lançada no próximo mês para todos os veículos.', 1),
+
+-- Comunicado 8: Longo
+('Guia de Identificação e Separação de Materiais Perigosos Encontrados no Lixo Comum', 'Ocasionalmente, materiais perigosos como baterias de lítio, lâmpadas fluorescentes, latas de tinta e produtos químicos são descartados incorretamente no lixo comum ou reciclável. É de extrema importância que a equipe saiba identificar e manusear esses itens com segurança. Baterias de lítio, por exemplo, podem causar incêndios nos compartimentos dos caminhões se perfuradas ou esmagadas. Ao identificar um desses itens, utilize as luvas de proteção reforçadas, separe o material em um dos contêineres vermelhos de segurança localizados na parte externa do caminhão e notifique a coordenação ao final do turno. Nunca misture diferentes tipos de materiais perigosos no mesmo contêiner. Este procedimento protege não apenas a equipe, mas também toda a operação da usina de triagem.', 2),
+
+-- Comunicado 9: Médio com Lista
+('Checklist Obrigatório de Verificação do Veículo - Início do Turno', 'Lembrete: antes de iniciar a rota, todo motorista deve preencher o checklist de verificação do veículo. Itens a serem checados obrigatoriamente:\n- Nível do óleo e da água\n- Calibragem dos pneus\n- Funcionamento de faróis, setas e luz de ré\n- Condição dos freios (teste de freio em baixa velocidade no pátio)\n- Funcionamento do rádio de comunicação\n- Disponibilidade de EPIs e kit de primeiros socorros\nO formulário preenchido deve ser entregue ao supervisor do pátio antes da saída.', 3),
+
+-- Comunicado 10: Curto
+('Campanha de Vacinação contra a Gripe', 'A campanha de vacinação contra a gripe acontecerá na próxima quarta-feira, das 9h às 16h, na enfermaria da empresa. A vacinação é gratuita e recomendada a todos os colaboradores.', 1);
+
 # Mensagens de suporte
 INSERT INTO mensagens_suporte (nome, mensagem, status_mensagem) VALUES
 ('Lucas Ribeiro', 'O sensor da praça central não está respondendo.', 0),
@@ -243,7 +303,7 @@ INSERT INTO historico_sensores (id_sensor, statusLixo, data_registro) VALUES
 (5, 'Cheia', NOW());
 
 #--- CONSULTAS DE TESTE -----------------------------------------------------------------------------------------------------------------
-SELECT * FROM UsuariosTrampo;
-SELECT * FROM RotasRelatorio;
-SELECT * FROM MensagensPendentes;
-SELECT * FROM StatusPorDia;
+#SELECT * FROM UsuariosTrampo;
+#SELECT * FROM RotasRelatorio;
+#SELECT * FROM MensagensPendentes;
+#SELECT * FROM StatusPorDia;
