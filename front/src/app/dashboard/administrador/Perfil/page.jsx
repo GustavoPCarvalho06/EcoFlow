@@ -66,8 +66,20 @@ export default async function Perfil() {
               <div> {user.cpf}</div>
             </div>
             <div className="flex">
+              <div className="font-black px-2">sexo: </div>
+              <div>{user.sexo}</div>
+            </div>
+            <div className="flex">
               <div className="font-black px-2">cargo: </div>
               <div>{user.cargo}</div>
+            </div>
+            <div className="flex">
+              <div className="font-black px-2">CEP: </div>
+              <div>{user.CEP}</div>
+            </div>
+            <div className="flex">
+              <div className="font-black px-2">estado civil: </div>
+              <div>{user.estadoCivil}</div>
             </div>
           </div>
 

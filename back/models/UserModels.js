@@ -86,13 +86,18 @@ const createUser = async (data) => {
     }
 
     const senhaHash = await bcrypt.hash(data.senha, 10);
+    const emailHash = await bcrypt.hash(data.email, 10);
+    const CEPhash = await bcrypt.hash(data.CEP, 10);
 
     const dataUsuario = {
       nome: data.nome,
       cpf: cleanCPF, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
       senha: senhaHash,
       cargo: data.cargo,
-      email: data.email,
+      email: emailHash,
+      sexo: data.sexo,
+      estadoCivil: data.estadoCivil,
+      CEP: CEPhash,
       statusConta: 'ativo'
     };
 

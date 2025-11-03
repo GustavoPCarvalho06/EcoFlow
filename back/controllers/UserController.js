@@ -6,7 +6,7 @@ const createUserController = async (req, res) => {
   try {
     const userData = req.body;
 
-    if (!userData || !userData.cpf || !userData.senha || !userData.nome|| !userData.email) {
+    if (!userData || !userData.cpf || !userData.senha || !userData.nome || !userData.email || !userData.estadoCivil || !userData.CEP) {
       return res.status(400).json({ mensagem: "Dados insuficientes para criar o usuário." });
     }
 

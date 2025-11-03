@@ -1,17 +1,19 @@
-
 DROP DATABASE EcoFlowBD;
 CREATE DATABASE EcoFlowBD;
 USE EcoFlowBD;
 
 #--- Administrador -----------------------------------------------------------------------------------------------------------------
 CREATE TABLE usuarios (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100),	
-	cpf VARCHAR(14) NOT NULL UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    sexo ENUM('masculino', 'feminino', 'outro') DEFAULT 'outro',
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    estadoCivil ENUM('solteiro(a)', 'namorando', 'casado(a)') NOT NULL DEFAULT 'solteiro(a)' ,
     senha VARCHAR(255) NOT NULL,
-    email varchar (255) unique,
-    cargo ENUM ("administrador","coordenador","coletor") default "coletor",
-    statusConta ENUM ("ativo","desligado") default "ativo"
+    CEP VARCHAR(8) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE ,
+    cargo ENUM('administrador', 'coordenador', 'coletor') DEFAULT 'coletor',
+    statusConta ENUM('ativo', 'desligado') DEFAULT 'ativo'
 );
 #--- Sensor IOT -----------------------------------------------------------------------------------------------------------------
 CREATE TABLE SistemaSensor(
@@ -154,7 +156,7 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 
 INSERT INTO usuarios (nome, email, cpf, senha, cargo, statusConta) VALUES
 ('miguel', 'miguel@example.com', '00000000000', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'administrador', 'ativo'),
-('lalau', 'lalau@example.com', '10000000001', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'coordenador', 'ativo'),
+('lalau', 'lalau@example.com', '49256740810', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'coordenador', 'ativo'),
 ('gustavo', 'gustavo@example.com', '10000000002', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', 'coordenador', 'ativo'),
 ('Carla Dias', 'carla.dias@example.com', '10000000003', 'senha123', 'coletor', 'desligado'),
 ('Daniel Farias', 'daniel.farias@example.com', '10000000004', 'senha123', 'coletor', 'ativo'),
@@ -216,45 +218,8 @@ INSERT INTO usuarios (nome, email, cpf, senha, cargo, statusConta) VALUES
 ('Davi Uchoa', 'davi.uchoa@example.com', '10000000060', 'senha123', 'coletor', 'desligado'),
 ('Emanuelly Valente', 'emanuelly.valente@example.com', '10000000061', 'senha123', 'coletor', 'ativo'),
 ('Francisco Wallner', 'francisco.wallner@example.com', '10000000062', 'senha123', 'coordenador', 'ativo'),
-('Gael Yates', 'gael.yates@example.com', '10000000063', 'senha123', 'coletor', 'ativo'),
-('Heloísa Zago', 'heloisa.zago@example.com', '10000000064', 'senha123', 'coletor', 'ativo'),
-('Augusto Abrantes', 'augusto.abrantes@example.com', '10000000065', 'senha123', 'coordenador', 'desligado'),
-('Bárbara Boaventura', 'barbara.boaventura@example.com', '10000000066', 'senha123', 'coletor', 'ativo'),
-('Cecília Cordeiro', 'cecilia.cordeiro@example.com', '10000000067', 'senha123', 'coletor', 'ativo'),
-('Eduardo Dutra', 'eduardo.dutra@example.com', '10000000068', 'senha123', 'coordenador', 'ativo'),
-('Fernanda Evangelista', 'fernanda.evangelista@example.com', '10000000069', 'senha123', 'coletor', 'desligado'),
-('Gustavo Fagundes', 'gustavo.fagundes@example.com', '10000000070', 'senha123', 'coletor', 'ativo'),
-('Isaac Galvão', 'isaac.galvao@example.com', '10000000071', 'senha123', 'coordenador', 'ativo'),
-('Joaquim Henriques', 'joaquim.henriques@example.com', '10000000072', 'senha123', 'coletor', 'ativo'),
-('Luiza Inácio', 'luiza.inacio@example.com', '10000000073', 'senha123', 'coletor', 'ativo'),
-('Mathias Jaques', 'mathias.jaques@example.com', '10000000074', 'senha123', 'coordenador', 'desligado'),
-('Nathan Lacerda', 'nathan.lacerda@example.com', '10000000075', 'senha123', 'coletor', 'ativo'),
-('Pérola Magalhães', 'perola.magalhaes@example.com', '10000000076', 'senha123', 'coletor', 'ativo'),
-('Ryan Nascimento', 'ryan.nascimento@example.com', '10000000077', 'senha123', 'coordenador', 'ativo'),
-('Thiago Oliva', 'thiago.oliva@example.com', '10000000078', 'senha123', 'coletor', 'desligado'),
-('Vicente Pacheco', 'vicente.pacheco@example.com', '10000000079', 'senha123', 'coletor', 'ativo'),
-('Alexia Quadros', 'alexia.quadros@example.com', '10000000080', 'senha123', 'coordenador', 'ativo'),
-('Benjamin Rezende', 'benjamin.rezende@example.com', '10000000081', 'senha123', 'coletor', 'ativo'),
-('Clarice Sampaio', 'clarice.sampaio@example.com', '10000000082', 'senha123', 'coletor', 'ativo'),
-('Erick Toledo', 'erick.toledo@example.com', '10000000083', 'senha123', 'coordenador', 'desligado'),
-('Isabel Veiga', 'isabel.veiga@example.com', '10000000084', 'senha123', 'coletor', 'ativo'),
-('Levi Werner', 'levi.werner@example.com', '10000000085', 'senha123', 'coletor', 'ativo'),
-('Marina Young', 'marina.young@example.com', '10000000086', 'senha123', 'coordenador', 'ativo'),
-('Nicolas Zimer', 'nicolas.zimer@example.com', '10000000087', 'senha123', 'coletor', 'desligado'),
-('Otávio Alencar', 'otavio.alencar@example.com', '10000000088', 'senha123', 'coletor', 'ativo'),
-('Rebeca Belmonte', 'rebeca.belmonte@example.com', '10000000089', 'senha123', 'coordenador', 'ativo'),
-('Theo Castanheira', 'theo.castanheira@example.com', '10000000090', 'senha123', 'coletor', 'ativo'),
-('Valentim Dorneles', 'valentim.dorneles@example.com', '10000000091', 'senha123', 'coletor', 'ativo'),
-('Yuri Espinoza', 'yuri.espinoza@example.com', '10000000092', 'senha123', 'coordenador', 'desligado'),
-('Antônio Fogaça', 'antonio.fogaca@example.com', '10000000093', 'senha123', 'coletor', 'ativo'),
-('Bento Gadelha', 'bento.gadelha@example.com', '10000000094', 'senha123', 'coletor', 'ativo'),
-('Cauã Hilário', 'caua.hilario@example.com', '10000000095', 'senha123', 'coordenador', 'ativo'),
-('Enzo Ipanema', 'enzo.ipanema@example.com', '10000000096', 'senha123', 'coletor', 'desligado'),
-('Gael Junqueira', 'gael.junqueira@example.com', '10000000097', 'senha123', 'coletor', 'ativo'),
-('Lucas Medeiros', 'lucas.medeiros@example.com', '10000000098', 'senha123', 'coordenador', 'ativo'),
-('Matheus Noronha', 'matheus.noronha@example.com', '10000000099', 'senha123', 'coletor', 'ativo'),
 ('Vinícius Peixoto', 'vinicius.peixoto@example.com', '10000000100', 'senha123', 'coletor', 'ativo');
-
+select *from usuarios;
 
 INSERT INTO comunicados (titulo, conteudo, autor_id) VALUES
 -- Comunicado 1: Curto e Direto

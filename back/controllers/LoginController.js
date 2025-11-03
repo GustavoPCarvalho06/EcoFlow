@@ -11,6 +11,7 @@ const login = async (req, res) => {
     const { cpf, senha } = req.body;
 
     const user = await findUserByCpf(cpf);
+
     if (!user) {
       return res.status(404).json({ erro: "Usuário não encontrado" });
     }
@@ -20,12 +21,15 @@ const login = async (req, res) => {
     }
 
     const senhaValida = await bcrypt.compare(senha, user.senha);
+    const emailValido = await bcrypt.compare(user.email);
+
+
     if (!senhaValida) {
       return res.status(401).json({ erro: "Senha inválida" });
     }
 
     const token = jwt.sign(
-      { id: user.id, cpf: user.cpf, cargo: user.cargo, nome: user.nome, email:user.email},
+      { id: user.id, cpf: user.cpf, cargo: user.cargo, nome: user.nome, email:emailValido, sexo: user.sexo,estadoCivil: user.estadoCivil, CEP: user.CEP,},
       JWT_SECRET,
       { expiresIn: "1h" }
     );
