@@ -1,7 +1,8 @@
 import {read, readAll, deleteRecord, create, update} from "../config/database.js"
 import { findUserByCpf } from "./loginModel.js";
-import { cpf as cpfValidator } from 'cpf-cnpj-validator'; 
+import { cpf, cpf as cpfValidator } from 'cpf-cnpj-validator'; 
 import bcrypt from "bcryptjs"; 
+import { encrypt } from "../utils/cryptoUtils.js";
 
 
 const deleteUser = async (id) => {
@@ -86,18 +87,20 @@ const createUser = async (data) => {
     }
 
     const senhaHash = await bcrypt.hash(data.senha, 10);
-    const emailHash = await bcrypt.hash(data.email, 10);
-    const CEPhash = await bcrypt.hash(data.CEP, 10);
+    const emailEncrypted = encrypt(data.email);
+    const cepEncrypted = encrypt(data.CEP);
+    const cpfEncrypted = encrypt(cleanCPF);
+    const cargoEncrypted = encrypt(data.cargo);
 
     const dataUsuario = {
       nome: data.nome,
-      cpf: cleanCPF, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
+      cpf: cpfEncrypted, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
       senha: senhaHash,
-      cargo: data.cargo,
-      email: emailHash,
+      cargo: cargoEncrypted,
+      email: emailEncrypted,
       sexo: data.sexo,
       estadoCivil: data.estadoCivil,
-      CEP: CEPhash,
+      CEP: cepEncrypted,
       statusConta: 'ativo'
     };
 
