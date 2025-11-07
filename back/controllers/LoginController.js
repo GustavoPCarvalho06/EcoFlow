@@ -10,8 +10,26 @@ const login = async (req, res) => {
   
   try {
     const { cpf, senha } = req.body;
+    const cpfValido = Buffer.from(cpf, "utf8").toString("base64");
+    console.log(cpfValido);
+    
+    const criptoUser = await findUserByCpf(cpfValido);
+    console.log("usuario logado", criptoUser);
 
-    const user = await findUserByCpf(cpf);
+    const user = Object.fromEntries(
+      Object.entries(criptoUser).map(([key, value]) => {
+        // só tenta decodificar se for string e não for hash da senha
+        if (typeof value === "string" && value !== criptoUser.senha && value !== criptoUser.statusConta) {
+          try {
+            return [key, Buffer.from(value, "base64").toString("utf8")];
+          } catch {
+            return [key, value]; // se não for base64 válido, mantém original
+          }
+        }
+        return [key, value];
+      })
+    );
+    console.log ("usuario logado 2: ", user);
 
     if (!user) {
       return res.status(404).json({ erro: "Usuário não encontrado" });
@@ -22,10 +40,6 @@ const login = async (req, res) => {
     }
 
     const senhaValida = await bcrypt.compare(senha, user.senha);
-    // const email = decrypt(user.email);
-    // const cep = decrypt(user.CEP);
-    
-
       
     if (!senhaValida) {
       return res.status(401).json({ erro: "Senha inválida" });

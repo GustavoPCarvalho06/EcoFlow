@@ -86,23 +86,27 @@ const createUser = async (data) => {
     }
 
     const senhaHash = await bcrypt.hash(data.senha, 10);
-    // const emailEncrypted = encrypt(data.email);
-    // const cepEncrypted = encrypt(data.CEP);
-    // const cpfEncrypted = encrypt(cleanCPF);
-    // const cargoEncrypted = encrypt(data.cargo);
-
+    const emailHash = Buffer.from(data.email, "utf8").toString("base64");
+    const cepHash = Buffer.from(data.CEP, "utf8").toString("base64");
+    const cpfHash = Buffer.from(cleanCPF, "utf8").toString("base64");
+    const cargoHash = Buffer.from(data.cargo, "utf8").toString("base64");
+    const sexo = Buffer.from(data.sexo, "utf8").toString("base64");
+    const estadoCivil = Buffer.from(data.estadoCivil, "utf8").toString("base64");
+    const nome = Buffer.from(data.nome, "utf8").toString("base64");
+    
     const dataUsuario = {
-      nome: data.nome,
-      cpf: cleanCPF, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
+      nome: nome,
+      cpf: cpfHash, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
       senha: senhaHash,
-      cargo: data.cargo,
-      email: data.email,
-      sexo: data.sexo,
-      estadoCivil: data.estadoCivil,
-      CEP: data.CEP,
+      cargo: cargoHash,
+      email: emailHash,
+      sexo: sexo,
+      estadoCivil: estadoCivil,
+      CEP: cepHash,
       statusConta: 'ativo'
     };
-
+    console.log(dataUsuario)
+    
     await create("usuarios", dataUsuario);
     return;
 
