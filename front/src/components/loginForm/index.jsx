@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 // 1. Importe o hook que criamos para pegar a URL da API
-import { useApiUrl } from "@/context/ApiContext"; // <-- AJUSTE O CAMINHO SE NECESSÁRIO
+import { useApiUrl } from "@/app/context/ApiContext";
 
 export function LoginForm({ className, ...props }) {
     // 2. Obtenha a URL da API (seja a do IP ou a de localhost) do nosso contexto

@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { findUserByCpf } from "../models/loginModel.js";
 import { JWT_SECRET } from "../config/jwt.js";
 
+
 // Controller de login
 const login = async (req, res) => {
   
@@ -21,15 +22,17 @@ const login = async (req, res) => {
     }
 
     const senhaValida = await bcrypt.compare(senha, user.senha);
-    const emailValido = await bcrypt.compare(user.email);
+    // const email = decrypt(user.email);
+    // const cep = decrypt(user.CEP);
+    
 
-
+      
     if (!senhaValida) {
       return res.status(401).json({ erro: "Senha inválida" });
     }
 
     const token = jwt.sign(
-      { id: user.id, cpf: user.cpf, cargo: user.cargo, nome: user.nome, email:emailValido, sexo: user.sexo,estadoCivil: user.estadoCivil, CEP: user.CEP,},
+      { id: user.id, cpf: user.cpf, cargo: user.cargo, nome: user.nome, email:user.email, sexo: user.sexo, estadoCivil: user.estadoCivil, CEP: user.CEP,},
       JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -42,16 +45,7 @@ const login = async (req, res) => {
       sameSite: 'Lax', // Ou 'Strict' para mais segurança
       maxAge: 3600000 // 1 hora
     });
-
-    // >>> ADICIONE ESTA LINHA PARA CRIAR O COOKIE DE PERFIL <<<
-    res.cookie('perfil', user.cargo, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
-      maxAge: 3600000 // 1 hora
-    });
-    // ---------------
-
+  
     return res.status(200).json({
       message: "Login realizado com sucesso!",
       user: {

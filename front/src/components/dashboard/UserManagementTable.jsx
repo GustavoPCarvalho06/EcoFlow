@@ -12,6 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Pencil, Search, PowerOff, Power, ChevronLeft, ChevronRight } from "lucide-react";
 
+// --- ADIÇÃO 1: Importar o hook da nossa API ---
+import { useApiUrl } from "@/app/context/ApiContext";
+
+// Função auxiliar (sem alterações)
 const formatCPF = (cpf) => {
   if (!cpf) return "";
   const cleanCpf = cpf.replace(/\D/g, '');
@@ -20,6 +24,9 @@ const formatCPF = (cpf) => {
 };
 
 export function UserManagementTable() {
+  // --- ADIÇÃO 2: Obter a URL da API do nosso contexto ---
+  const apiUrl = useApiUrl();
+
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -38,7 +45,14 @@ export function UserManagementTable() {
   const [error, setError] = useState("");
   const [createCpf, setCreateCpf] = useState("");
 
+  // --- ALTERAÇÃO 1: Atualizar a função de busca de usuários ---
   const fetchUsers = useCallback(async () => {
+    // Adiciona a verificação da apiUrl antes de fazer a chamada
+    if (!apiUrl) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
@@ -48,7 +62,8 @@ export function UserManagementTable() {
         statusConta: statusFilter,
         cargo: cargoFilter,
       });
-      const response = await fetch(`http://localhost:3001/user/paginated?${params.toString()}`);
+      // Usa a apiUrl dinâmica em vez da URL fixa
+      const response = await fetch(`${apiUrl}/user/paginated?${params.toString()}`);
       if (!response.ok) throw new Error('Falha ao buscar dados dos usuários');
       
       const data = await response.json();
@@ -57,11 +72,12 @@ export function UserManagementTable() {
       setTotalUsers(data.total);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
+      setError("Não foi possível carregar os usuários.");
       setUsers([]);
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, searchQuery, statusFilter, cargoFilter]);
+  }, [page, limit, searchQuery, statusFilter, cargoFilter, apiUrl]); // Adiciona apiUrl às dependências
 
   useEffect(() => {
     const debounceTimeout = searchQuery ? 500 : 0; 
@@ -71,7 +87,7 @@ export function UserManagementTable() {
     }, debounceTimeout);
 
     return () => clearTimeout(handler);
-  }, [fetchUsers]);
+  }, [fetchUsers]); // fetchUsers já depende da apiUrl, então está correto
 
   const forceRefresh = () => fetchUsers();
 
@@ -104,10 +120,18 @@ export function UserManagementTable() {
     setCreateCpf(formattedValue.slice(0, 14));
   };
   
+  // --- ALTERAÇÃO 2: Atualizar a função auxiliar de chamadas API ---
   const handleApiCall = async (endpoint, method, body, successCallback) => {
+    // Adiciona a verificação da apiUrl antes de fazer qualquer chamada
+    if (!apiUrl) {
+      setError("Conexão com o servidor não estabelecida. Tente novamente.");
+      return;
+    }
+
     try {
       setError("");
-      const response = await fetch(`http://localhost:3001/user/${endpoint}`, {
+      // Usa a apiUrl dinâmica em vez da URL fixa
+      const response = await fetch(`${apiUrl}/user/${endpoint}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -122,6 +146,10 @@ export function UserManagementTable() {
     }
   };
 
+  // As funções abaixo (handleCreateUser, handleUpdateUser, etc.)
+  // já usam `handleApiCall`, então elas são corrigidas automaticamente.
+  // Nenhuma mudança é necessária nelas.
+  
   const handleCreateUser = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -140,13 +168,11 @@ export function UserManagementTable() {
     const data = {
         nome: formData.get('nome'),
         cpf: selectedUser.cpf,
-        email: formData.get('email'), // <<<--- ADICIONADO AQUI
+        email: formData.get('email'),
         cargo: formData.get('cargo'),
         senha: formData.get('senha')
     };
-    if (!data.senha) {
-        delete data.senha;
-    }
+    if (!data.senha) delete data.senha;
     await handleApiCall('put', 'PUT', data, () => {
       setIsEditModalOpen(false);
       forceRefresh();
@@ -169,6 +195,18 @@ export function UserManagementTable() {
     await updateUserStatus(selectedUser, 'ativo');
     setIsReactivateAlertOpen(false);
   };
+  
+  // --- ADIÇÃO 3: Renderização condicional para o estado inicial da API ---
+  if (!apiUrl) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Conectando ao servidor...</CardTitle>
+          <CardDescription>Aguarde enquanto a conexão é estabelecida.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <>

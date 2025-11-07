@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_STYLES } from "./mapStyles.js";
 
+import { useApiUrl } from "@/app/context/ApiContext.js";
+
 export default function MapboxMap() {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
@@ -13,6 +15,8 @@ export default function MapboxMap() {
   const [mounted, setMounted] = useState(false);
   const [rotaInfo, setRotaInfo] = useState(null);
 
+  const apiUrl = useApiUrl();
+
   const usuario = { x: -46.559689, y: -23.64434 };
 
   useEffect(() => setMounted(true), []);
@@ -21,7 +25,7 @@ export default function MapboxMap() {
     if (!mounted) return;
     (async () => {
       try {
-        const response = await fetch("http://localhost:3001/statusSensor");
+        const response = await fetch(`${apiUrl}/statusSensor`);
         const data = await response.json();
         setPontos(data);
       } catch (err) {
@@ -51,6 +55,12 @@ export default function MapboxMap() {
 
         mapRef.current = map;
         map.addControl(new mapboxgl.NavigationControl());
+
+
+        if (!apiUrl) {
+          setError("Conectando ao servidor... Por favor, tente novamente em um instante.");
+          return;
+        }
 
         // marcador do usuário
         const UsuarioMarker = document.createElement("div");
@@ -161,8 +171,8 @@ export default function MapboxMap() {
         ponto.Stats === "Vazia"
           ? "green"
           : ponto.Stats === "Quase Cheia"
-          ? "orange"
-          : "red";
+            ? "orange"
+            : "red";
 
       const el = document.createElement("div");
       Object.assign(el.style, {

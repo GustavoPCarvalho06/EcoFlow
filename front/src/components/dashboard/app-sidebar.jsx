@@ -1,12 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-// [MODIFICADO] Adicionamos 'useCallback'
-import { useState, useEffect, useCallback } from "react"
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
-import Image from "next/image"
-// [NOVO] Importamos o 'io' para a conexão em tempo real
+import * as React from "react";
+import { useState, useEffect, useCallback } from "react";
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Image from "next/image";
 import io from "socket.io-client";
 import {
     IconDashboard,
@@ -15,9 +13,9 @@ import {
     IconMail,
     IconBroadcast,
     IconMapPin
-} from "@tabler/icons-react"
-import { NavUser } from "@/components/dashboard/nav-user-adiministrador"
-import { Button } from "@/components/ui/button"
+} from "@tabler/icons-react";
+import { NavUser } from "@/components/dashboard/nav-user-adiministrador";
+import { Button } from "@/components/ui/button";
 import {
     Sidebar,
     SidebarContent,
@@ -26,56 +24,44 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { useUnreadCount } from "@/context/UnreadCountContext"
+} from "@/components/ui/sidebar";
+import { useUnreadCount } from "@/app/context/UnreadCountContext";
 
+// Importa o hook customizado para obter a URL da API dinamicamente.
+import { useApiUrl } from "@/app/context/ApiContext";
+
+// Definição dos itens de navegação (sem alterações).
 const navItems = [
-    {
-        title: "Dashboard",
-        href: "/dashboard/administrador",
-        icon: IconDashboard,
-    },
-    {
-        title: "Usuários",
-        href: "/dashboard/administrador/usuarios",
-        icon: IconUsers,
-    },
-    {
-        title: "Mensagem",
-        href: "/dashboard/administrador/mensagens",
-        icon: IconMail,
-    },
-    {
-        title: "Comunicados",
-        href: "/dashboard/administrador/comunicados",
-        icon: IconBroadcast,
-    },
-]
+    { title: "Dashboard", href: "/dashboard/administrador", icon: IconDashboard },
+    { title: "Usuários", href: "/dashboard/administrador/usuarios", icon: IconUsers },
+    { title: "Mensagem", href: "/dashboard/administrador/mensagens", icon: IconMail },
+    { title: "Comunicados", href: "/dashboard/administrador/comunicados", icon: IconBroadcast },
+];
 
 const coletorNavItems = [
-    {
-        title: "Mapa",
-        href: "/dashboard/administrador/mapa",
-        icon: IconMapPin,
-    }
-]
+    { title: "Mapa", href: "/dashboard/administrador/mapa", icon: IconMapPin }
+];
 
-// [CORREÇÃO] A assinatura da função foi revertida para o seu original
 export function AppSidebar(usuario, ...props) {
+    // Obtém a URL da API (seja localhost ou IP) do nosso contexto.
+    const apiUrl = useApiUrl();
     const pathname = usePathname();
+    
+    // Obtém a contagem de mensagens não lidas do outro contexto.
     const { totalUnreadCount } = useUnreadCount() || { totalUnreadCount: 0 };
-
-    // [NOVO] Estado para a contagem de novos comunicados
+    
+    // Estado para a contagem de novos comunicados.
     const [newComunicadoCount, setNewComunicadoCount] = useState(0);
 
-    // [NOVO] Função para buscar e contar novos comunicados
+    // Função para buscar e contar novos comunicados.
     const checkNewComunicados = useCallback(async () => {
-        // [CORREÇÃO] Acessamos o objeto de usuário da maneira que sua prop é estruturada
         const userData = usuario.usuario;
-        if (!userData?.id) return;
+        // A função agora depende da apiUrl para ser executada.
+        if (!userData?.id || !apiUrl) return;
 
         try {
-            const response = await fetch('http://localhost:3001/comunicados/unseen-count', {
+            // Usa a apiUrl dinâmica em vez da URL fixa.
+            const response = await fetch(`${apiUrl}/comunicados/unseen-count`, {
                 headers: { 'x-user-id': userData.id.toString() }
             });
             if (!response.ok) return;
@@ -85,25 +71,35 @@ export function AppSidebar(usuario, ...props) {
         } catch (error) {
             console.error("Erro ao verificar novos comunicados:", error);
         }
-    }, [usuario]);
+    }, [usuario, apiUrl]); // Adiciona apiUrl às dependências.
 
-    // [NOVO] Efeito para gerenciar a notificação
+    // Efeito para gerenciar a busca inicial e a conexão em tempo real.
     useEffect(() => {
+        // Só executa a lógica se a apiUrl estiver disponível.
+        if (!apiUrl) return;
+        
+        // Busca a contagem inicial.
         checkNewComunicados();
 
-        const socket = io('http://localhost:3001');
+        // Usa a apiUrl dinâmica para a conexão do socket.
+        const socket = io(apiUrl);
+        // Ouve por atualizações de comunicados.
         socket.on('comunicados_atualizados', checkNewComunicados);
 
+        // Zera a contagem se o usuário navegar para a página de comunicados.
         if (pathname.includes('/comunicados')) {
             setNewComunicadoCount(0);
         }
 
+        // Função de limpeza para desconectar o socket quando o componente for desmontado.
         return () => {
             socket.off('comunicados_atualizados', checkNewComunicados);
             socket.disconnect();
         };
-    }, [pathname, checkNewComunicados]);
+    }, [pathname, checkNewComunicados, apiUrl]); // Adiciona apiUrl às dependências.
 
+    // O componente é renderizado normalmente. As funções acima garantem que as chamadas
+    // para a API usem a URL correta assim que ela estiver disponível.
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader className="border-b">
@@ -129,7 +125,6 @@ export function AppSidebar(usuario, ...props) {
             </SidebarHeader>
 
             <SidebarContent className="p-4">
-                {/* [MODIFICADO] Envolvemos o botão com o Link e adicionamos a lógica do contador */}
                 <div className="mb-4 flex items-center gap-2">
                     <Link href="/dashboard/administrador/comunicados" passHref>
                         <Button size="icon" variant="ghost" aria-label="Notifications" className="relative">
@@ -193,13 +188,11 @@ export function AppSidebar(usuario, ...props) {
                         ))}
                     </nav>
                 </div>
-
             </SidebarContent>
 
             <SidebarFooter className="border-t">
-                {/* [CORREÇÃO] A prop 'usuario' é passada sem alterações, exatamente como no seu código original */}
                 <NavUser usuario={usuario} />
             </SidebarFooter>
         </Sidebar>
-    )
+    );
 }

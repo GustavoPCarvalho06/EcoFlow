@@ -1,24 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState, useEffect, useCallback } from "react"
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
-import Image from "next/image"
-import io from "socket.io-client"
-import { IconDashboard, IconMapPin, IconBroadcast, IconMail, IconBell } from "@tabler/icons-react" 
-import { NavUser } from "@/components/dashboard/nav-user-coordenador"
-import { Button } from "@/components/ui/button"
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { useUnreadCount } from "@/context/UnreadCountContext";
+import { useEffect } from "react";
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Image from "next/image";
+import { IconDashboard, IconMapPin, IconBroadcast, IconMail, IconBell } from "@tabler/icons-react"; 
+import { NavUser } from "@/components/dashboard/nav-user-coordenador"; // VERIFIQUE este caminho
+import { Button } from "@/components/ui/button";
+import { 
+    Sidebar, 
+    SidebarContent, 
+    SidebarFooter, 
+    SidebarHeader, 
+    SidebarMenu, 
+    SidebarMenuButton, 
+    SidebarMenuItem 
+} from "@/components/ui/sidebar";
+
+// Importa o hook que agora centraliza TODA a lógica de notificações.
+// VERIFIQUE se este caminho está correto para a sua estrutura de pastas.
+import { useUnreadCount } from "../../app/context/UnreadCountContext.jsx"; 
 
 const navItemsCoordenador = [
     { title: "Dashboard", href: "/dashboard/coordenador", icon: IconDashboard },
@@ -27,58 +28,28 @@ const navItemsCoordenador = [
     { title: "Gerenciar Comunicados", href: "/dashboard/coordenador/comunicados", icon: IconBroadcast },
 ];
 
-export function AppSidebarCoordenador( usuario, ...props ) {
+export function AppSidebarCoordenador(usuario, ...props) {
     const pathname = usePathname();
-    const { totalUnreadCount } = useUnreadCount() || { totalUnreadCount: 0 };
     
-    // Extrai o objeto de usuário da prop, que vem em um formato aninhado
-    const userData = usuario.usuario;
+    // Consome os valores e funções diretamente do nosso contexto centralizado.
+    // Isso substitui toda a lógica de useState, useCallback, useEffect e socket.io
+    // que existia anteriormente neste componente.
+    const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount() || {};
 
-    // Estado para a contagem de novos comunicados
-    const [newComunicadoCount, setNewComunicadoCount] = useState(0);
-
-    // Função para buscar a contagem de comunicados não vistos
-    const checkNewComunicados = useCallback(async () => {
-        if (!userData?.id) return;
-        try {
-            const response = await fetch('http://localhost:3001/comunicados/unseen-count', {
-                headers: { 'x-user-id': userData.id.toString() }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setNewComunicadoCount(data.count);
-            }
-        } catch (error) {
-            console.error("Erro ao verificar novos comunicados:", error);
-        }
-    }, [userData]);
-
-    // Efeito para buscar a contagem ao carregar e ouvir por atualizações
+    // Efeito simplificado que apenas zera a contagem de comunicados na UI
+    // quando o usuário navega para a página de comunicados.
     useEffect(() => {
-        checkNewComunicados();
-        const socket = io('http://localhost:3001');
-        
-        // Ouve pelo evento do backend para re-verificar a contagem
-        socket.on('comunicados_atualizados', checkNewComunicados);
-        
-        // Zera o contador na UI se o usuário navegar para a página de comunicados
-        if (pathname.includes('/comunicados')) {
-            setNewComunicadoCount(0);
+        if (pathname.includes('/comunicados') && clearComunicadoCount) {
+            clearComunicadoCount();
         }
-
-        // Limpeza: desconecta o socket ao sair
-        return () => {
-            socket.off('comunicados_atualizados', checkNewComunicados);
-            socket.disconnect();
-        };
-    }, [pathname, checkNewComunicados]);
+    }, [pathname, clearComunicadoCount]);
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader className="border-b">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+                        <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5 h-auto">
                             <a href="/dashboard/coordenador">
                                 <Image
                                     src="/imagen/Logo.png"
@@ -94,14 +65,14 @@ export function AppSidebarCoordenador( usuario, ...props ) {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent className="p-4">
-                {/* Ícone de sino com notificação */}
                  <div className="mb-4 flex items-center gap-2">
                     <Link href="/dashboard/coordenador/comunicados" passHref>
                         <Button size="icon" variant="ghost" aria-label="Notifications" className="relative">
                             <IconBell className="h-6 w-6" />
-                            {newComunicadoCount > 0 && (
+                            {/* Usa o estado 'totalComunicadoUnread' vindo do contexto */}
+                            {(totalComunicadoUnread > 0) && (
                                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                    {newComunicadoCount > 9 ? '9+' : newComunicadoCount}
+                                    {totalComunicadoUnread > 9 ? '9+' : totalComunicadoUnread}
                                 </span>
                             )}
                         </Button>
@@ -125,10 +96,10 @@ export function AppSidebarCoordenador( usuario, ...props ) {
                             <item.icon className="h-6 w-6" />
                             <span>{item.title}</span>
 
-                            {/* Contador de mensagens não lidas */}
-                            {item.title === "Mensagem" && totalUnreadCount > 0 && (
+                            {/* Usa o estado 'totalMsgUnread' vindo do contexto */}
+                            {item.title === "Mensagem" && (totalMsgUnread > 0) && (
                                 <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
-                                    {totalUnreadCount > 99 ? '+99' : totalUnreadCount}
+                                    {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
                                 </span>
                             )}
                         </Link>
@@ -139,5 +110,5 @@ export function AppSidebarCoordenador( usuario, ...props ) {
                 <NavUser usuario={usuario}/>
             </SidebarFooter>
         </Sidebar>
-    )
+    );
 }

@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
-import { UnreadCountProvider } from "@/context/UnreadCountContext";
+import { UnreadCountProvider} from "@/app/context/UnreadCountContext";
 
 export default function AdministradorLayout({ children }) {
   
@@ -21,8 +21,8 @@ export default function AdministradorLayout({ children }) {
   // O layout simplesmente renderiza o Provedor, que por sua vez renderiza a página atual ({children}).
   // Agora, TODAS as páginas de administrador (e seus componentes) estarão dentro do contexto.
   return (
-    <UnreadCountProvider user={user}>
-      {children}
-    </UnreadCountProvider>
+<UnreadCountProvider user={user}>
+  {children}
+</UnreadCountProvider>
   );
 }
