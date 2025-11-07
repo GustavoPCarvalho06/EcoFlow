@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config({ path: './.env' })
+
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -16,7 +19,6 @@ import sensor from "./routes/statusSensorRotas.js"
 import userStatus from "./routes/statusUserRotas.js"
 import msgStatus from "./routes/statusMsgRotas.js"
 import diaStatus from "./routes/statusDiaRotas.js"
-
 import configureChat from './socket/chat.js';
 
 const app = express();

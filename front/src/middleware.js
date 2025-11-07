@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from 'jsonwebtoken';
 
 // Defina os prefixos das rotas que você quer proteger.
 const protectedPrefixes = ["/dashboard/coordenador", "/dashboard/administrador"];
@@ -6,20 +8,31 @@ const protectedPrefixes = ["/dashboard/coordenador", "/dashboard/administrador"]
 export function middleware(request) {
   const { pathname } = request.nextUrl;
   
-  // Obtém o token e o perfil (cargo do usuário) dos cookies.
-  const token = request.cookies.get("token")?.value;
-  const perfil = request.cookies.get("perfil")?.value;
+  // Obtém o token e o token (cargo do usuário) dos cookies.
+  const cookieStore = cookies();
+  const tokenCookie = cookieStore.get('token');
+
+  let user = null;
+  if (tokenCookie && tokenCookie.value) {
+    try {
+      const decodedToken = jwt.decode(tokenCookie.value);
+      user = decodedToken;
+    } catch (error) {
+      console.error("Erro ao decodificar o token:", error);
+    }
+  }
+
 
   console.log("Acessando a rota:", pathname);
-  console.log("Perfil do usuário (cookie):", perfil);
+  console.log("token do usuário (cookie):", user);
 
   const isProtected = protectedPrefixes.some((prefix) =>
     pathname.startsWith(prefix)
   );
 
   if (isProtected) {
-    // 1. Se não houver token ou perfil, redireciona para a página de login.
-    if (!token || !perfil) {
+    // 1. Se não houver token ou token, redireciona para a página de login.
+    if (!user) {
       const loginUrl = new URL(`/`, request.url);
       // Opcional: informa para qual página o usuário tentava ir.
       loginUrl.searchParams.set("callbackUrl", pathname);
@@ -27,14 +40,14 @@ export function middleware(request) {
     }
 
     // 2. Regra para a rota de Coordenador
-    if (pathname.startsWith("/dashboard/coordenador") && perfil !== "coordenador") {
+    if (pathname.startsWith("/dashboard/coordenador") && user.cargo !== "coordenador") {
       // Se o usuário não for um coordenador, redireciona para "não autorizado".
       const unauthorizedUrl = new URL("/", request.url);
       return NextResponse.redirect(unauthorizedUrl);
     }
 
     // 3. Regra para a rota de Administrador
-    if (pathname.startsWith("/dashboard/administrador") && perfil !== "administrador") {
+    if (pathname.startsWith("/dashboard/administrador") && user.cargo !== "administrador") {
       // Se o usuário não for um administrador, redireciona para "não autorizado".
       const unauthorizedUrl = new URL("/", request.url);
       return NextResponse.redirect(unauthorizedUrl);
