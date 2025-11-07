@@ -1,4 +1,5 @@
-// src/components/dashboard/ComunicadosComponenteCoordenador.jsx (VERSÃO FINAL)
+// src/components/dashboard/ComunicadosComponenteCoordenador.jsx
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,24 +14,53 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { IconPlus, IconPencil, IconTrash } from "@tabler/icons-react";
 
+// Importa o hook customizado para obter a URL da API dinamicamente.
+// VERIFIQUE se este caminho está correto para a sua estrutura de pastas.
+import { useApiUrl } from "../../app/context/ApiContext"; 
+
+// Componente para exibir um comunicado completo em um Dialog (sem alterações).
 function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   if (!comunicado) return null;
   const isEdited = !!comunicado.data_edicao;
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}><DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{comunicado.titulo}</DialogTitle><CardDescription>{isEdited ? 'Editado' : 'Postado'} por {comunicado.autor_nome} • {new Date(isEdited ? comunicado.data_edicao : comunicado.data_publicacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</CardDescription></DialogHeader><div className="mt-4 max-h-[60vh] overflow-y-auto pr-4"><p className="text-sm text-muted-foreground whitespace-pre-line break-words">{comunicado.conteudo}</p></div></DialogContent></Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{comunicado.titulo}</DialogTitle>
+          <CardDescription>
+            {isEdited ? 'Editado' : 'Postado'} por {comunicado.autor_nome} • {new Date(isEdited ? comunicado.data_edicao : comunicado.data_publicacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+          </CardDescription>
+        </DialogHeader>
+        <div className="mt-4 max-h-[60vh] overflow-y-auto pr-4">
+          <p className="text-sm text-muted-foreground whitespace-pre-line break-words">{comunicado.conteudo}</p>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
+// Componente de formulário para criar/editar um comunicado (sem alterações).
 function ComunicadoForm({ onSubmit, initialData = null, onClose }) {
     const [titulo, setTitulo] = useState(initialData?.titulo || "");
     const [conteudo, setConteudo] = useState(initialData?.conteudo || "");
     const handleSubmit = (e) => { e.preventDefault(); onSubmit({ titulo, conteudo }); };
-    return (<form onSubmit={handleSubmit} className="grid gap-4 py-4"><div className="grid gap-2"><Label htmlFor="titulo">Título</Label><Input id="titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} required /></div><div className="grid gap-2"><Label htmlFor="conteudo">Conteúdo</Label><Textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} required rows={8} /></div><DialogFooter><DialogClose asChild><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button></DialogClose><Button type="submit">Salvar Comunicado</Button></DialogFooter></form>);
+    return (
+      <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+        <div className="grid gap-2"><Label htmlFor="titulo">Título</Label><Input id="titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} required /></div>
+        <div className="grid gap-2"><Label htmlFor="conteudo">Conteúdo</Label><Textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} required rows={8} /></div>
+        <DialogFooter><DialogClose asChild><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button></DialogClose><Button type="submit">Salvar Comunicado</Button></DialogFooter>
+      </form>
+    );
 }
 
 export function ComunicadosComponenteCoordenador({ user }) {
+    // Obtém a URL da API (seja localhost ou IP) do nosso contexto.
+    const apiUrl = useApiUrl();
+    
+    // Estados do componente
     const [todosComunicados, setTodosComunicados] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [editingComunicado, setEditingComunicado] = useState(null);
@@ -41,12 +71,16 @@ export function ComunicadosComponenteCoordenador({ user }) {
 
     const canManage = user?.cargo === 'coordenador' || user?.cargo === 'administrador';
 
+    // Função para buscar todos os dados, agora usando a apiUrl dinâmica.
     const fetchData = useCallback(async () => {
-        if (!user?.id) { setLoading(false); return; }
+        if (!user?.id || !apiUrl) { 
+            setLoading(false); 
+            return; 
+        }
         try {
             const [comunicadosRes, unseenIdsRes] = await Promise.all([
-                fetch('http://localhost:3001/comunicados'),
-                fetch('http://localhost:3001/comunicados/unseen-ids-detailed', { headers: { 'x-user-id': user.id.toString() } })
+                fetch(`${apiUrl}/comunicados`),
+                fetch(`${apiUrl}/comunicados/unseen-ids-detailed`, { headers: { 'x-user-id': user.id.toString() } })
             ]);
             if (comunicadosRes.ok) setTodosComunicados(await comunicadosRes.json());
             if (unseenIdsRes.ok) {
@@ -54,37 +88,46 @@ export function ComunicadosComponenteCoordenador({ user }) {
                 setUnseenIds(new Set(data.new_ids));
                 setEditedUnseenIds(new Set(data.edited_ids));
             }
-        } catch (error) { console.error("Erro ao buscar dados:", error); } 
+        } catch (err) { 
+            console.error("Erro ao buscar dados:", err); 
+            setError("Não foi possível carregar os comunicados.");
+        } 
         finally { setLoading(false); }
-    }, [user]);
+    }, [user, apiUrl]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
+    // Efeito para o Socket.IO, agora usando a apiUrl dinâmica.
     useEffect(() => {
-        const socket = io('http://localhost:3001');
+        if (!apiUrl) return;
+        const socket = io(apiUrl);
         socket.on('comunicados_atualizados', fetchData);
         return () => { socket.off('comunicados_atualizados', fetchData); socket.disconnect(); };
-    }, [fetchData]);
+    }, [fetchData, apiUrl]);
 
     const handleOpenForm = (comunicado = null) => { setEditingComunicado(comunicado); setIsFormOpen(true); };
     const handleCloseForm = () => { setIsFormOpen(false); setEditingComunicado(null); };
 
+    // Função para marcar um comunicado como visto, agora com apiUrl dinâmica.
     const handleExibirCompleto = async (comunicado) => {
+        if (!apiUrl) return;
         setViewingComunicado(comunicado);
         setIsViewOpen(true);
         const isUnseen = unseenIds.has(comunicado.id) || editedUnseenIds.has(comunicado.id);
         if (isUnseen && user?.id) {
             try {
-                await fetch(`http://localhost:3001/comunicados/mark-one-seen/${comunicado.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-user-id': user.id.toString() } });
+                await fetch(`${apiUrl}/comunicados/mark-one-seen/${comunicado.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-user-id': user.id.toString() } });
                 setUnseenIds(prev => { const next = new Set(prev); next.delete(comunicado.id); return next; });
                 setEditedUnseenIds(prev => { const next = new Set(prev); next.delete(comunicado.id); return next; });
             } catch (error) { console.error("Erro ao marcar como visto:", error); }
         }
     };
 
+    // Função de CRUD para criar/editar, agora com apiUrl dinâmica.
     const handleSubmit = async (formData) => {
+        if (!apiUrl) return;
         const isEditing = !!editingComunicado;
-        const url = isEditing ? `http://localhost:3001/comunicados/${editingComunicado.id}` : 'http://localhost:3001/comunicados';
+        const url = isEditing ? `${apiUrl}/comunicados/${editingComunicado.id}` : `${apiUrl}/comunicados`;
         const method = isEditing ? 'PUT' : 'POST';
         const body = { ...formData, ...(!isEditing && { autor_id: user.id }) };
         try {
@@ -94,28 +137,32 @@ export function ComunicadosComponenteCoordenador({ user }) {
         } catch (error) { console.error("Erro ao salvar:", error); }
     };
 
+    // Função para deletar, agora com apiUrl dinâmica.
     const handleDelete = async (id) => {
-        try { await fetch(`http://localhost:3001/comunicados/${id}`, { method: 'DELETE' }); }
+        if (!apiUrl) return;
+        try { 
+            await fetch(`${apiUrl}/comunicados/${id}`, { method: 'DELETE' }); 
+        }
         catch (error) { console.error("Erro ao deletar:", error); }
     };
 
     const truncarTexto = (texto, limite) => (texto.length > limite ? { texto: texto.substring(0, limite) + "...", truncado: true } : { texto, truncado: false });
-
     const comunicadosVisiveis = todosComunicados.slice(0, limiteExibicao);
     const mostrarBotaoExibirMais = todosComunicados.length > limiteExibicao;
 
-    // [NOVO] Lógica para calcular quantos comunicados não vistos estão "escondidos"
     let unseenHiddenCount = 0;
     if (mostrarBotaoExibirMais) {
-        const hiddenComunicados = todosComunicados.slice(limiteExibicao);
-        hiddenComunicados.forEach(comunicado => {
+        todosComunicados.slice(limiteExibicao).forEach(comunicado => {
             if (unseenIds.has(comunicado.id) || editedUnseenIds.has(comunicado.id)) {
                 unseenHiddenCount++;
             }
         });
     }
 
+    // Renderização condicional para os estados de conexão e carregamento.
+    if (!apiUrl) return <p className="text-center text-muted-foreground">Conectando ao servidor...</p>;
     if (loading) return <p className="text-center text-muted-foreground">Carregando...</p>;
+    if (error) return <p className="text-center text-red-500">{error}</p>;
 
     return (
         <div className="space-y-4">
@@ -165,10 +212,8 @@ export function ComunicadosComponenteCoordenador({ user }) {
                     
                     {mostrarBotaoExibirMais && (
                       <div className="flex justify-center py-4">
-                        {/* [MODIFICADO] O botão agora é relativo para posicionar a notificação */}
                         <Button variant="outline" onClick={() => setLimiteExibicao(todosComunicados.length)} className="relative">
                           Exibir Todos os Comunicados
-                          {/* [NOVO] Notificação que só aparece se houver comunicados não vistos escondidos */}
                           {unseenHiddenCount > 0 && (
                             <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                               {unseenHiddenCount}

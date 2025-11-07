@@ -1,11 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useCallback } from "react";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from "next/image";
-import io from "socket.io-client";
 import {
     IconDashboard,
     IconUsers,
@@ -27,10 +25,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useUnreadCount } from "@/app/context/UnreadCountContext";
 
-// Importa o hook customizado para obter a URL da API dinamicamente.
-import { useApiUrl } from "@/app/context/ApiContext";
-
-// Definição dos itens de navegação (sem alterações).
 const navItems = [
     { title: "Dashboard", href: "/dashboard/administrador", icon: IconDashboard },
     { title: "Usuários", href: "/dashboard/administrador/usuarios", icon: IconUsers },
@@ -42,64 +36,18 @@ const coletorNavItems = [
     { title: "Mapa", href: "/dashboard/administrador/mapa", icon: IconMapPin }
 ];
 
-export function AppSidebar(usuario, ...props) {
-    // Obtém a URL da API (seja localhost ou IP) do nosso contexto.
-    const apiUrl = useApiUrl();
+export function AppSidebar({ usuario, ...props }) {
     const pathname = usePathname();
     
-    // Obtém a contagem de mensagens não lidas do outro contexto.
-    const { totalUnreadCount } = useUnreadCount() || { totalUnreadCount: 0 };
-    
-    // Estado para a contagem de novos comunicados.
-    const [newComunicadoCount, setNewComunicadoCount] = useState(0);
+    // Consumindo do contexto - TUDO vem do contexto agora
+    const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount, isConnected } = useUnreadCount();
 
-    // Função para buscar e contar novos comunicados.
-    const checkNewComunicados = useCallback(async () => {
-        const userData = usuario.usuario;
-        // A função agora depende da apiUrl para ser executada.
-        if (!userData?.id || !apiUrl) return;
+    console.log('🔔 Estado da sidebar:', { 
+        totalMsgUnread, 
+        totalComunicadoUnread, 
+        isConnected 
+    });
 
-        try {
-            // Usa a apiUrl dinâmica em vez da URL fixa.
-            const response = await fetch(`${apiUrl}/comunicados/unseen-count`, {
-                headers: { 'x-user-id': userData.id.toString() }
-            });
-            if (!response.ok) return;
-
-            const data = await response.json();
-            setNewComunicadoCount(data.count);
-        } catch (error) {
-            console.error("Erro ao verificar novos comunicados:", error);
-        }
-    }, [usuario, apiUrl]); // Adiciona apiUrl às dependências.
-
-    // Efeito para gerenciar a busca inicial e a conexão em tempo real.
-    useEffect(() => {
-        // Só executa a lógica se a apiUrl estiver disponível.
-        if (!apiUrl) return;
-        
-        // Busca a contagem inicial.
-        checkNewComunicados();
-
-        // Usa a apiUrl dinâmica para a conexão do socket.
-        const socket = io(apiUrl);
-        // Ouve por atualizações de comunicados.
-        socket.on('comunicados_atualizados', checkNewComunicados);
-
-        // Zera a contagem se o usuário navegar para a página de comunicados.
-        if (pathname.includes('/comunicados')) {
-            setNewComunicadoCount(0);
-        }
-
-        // Função de limpeza para desconectar o socket quando o componente for desmontado.
-        return () => {
-            socket.off('comunicados_atualizados', checkNewComunicados);
-            socket.disconnect();
-        };
-    }, [pathname, checkNewComunicados, apiUrl]); // Adiciona apiUrl às dependências.
-
-    // O componente é renderizado normalmente. As funções acima garantem que as chamadas
-    // para a API usem a URL correta assim que ela estiver disponível.
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader className="border-b">
@@ -118,6 +66,9 @@ export function AppSidebar(usuario, ...props) {
                                     className="rounded-sm"
                                 />
                                 <span className="text-lg font-semibold">EcoFlow.</span>
+                                {!isConnected && (
+                                    <span className="ml-2 text-xs text-yellow-500">🔌 Conectando...</span>
+                                )}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -127,11 +78,17 @@ export function AppSidebar(usuario, ...props) {
             <SidebarContent className="p-4">
                 <div className="mb-4 flex items-center gap-2">
                     <Link href="/dashboard/administrador/comunicados" passHref>
-                        <Button size="icon" variant="ghost" aria-label="Notifications" className="relative">
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            aria-label="Notifications" 
+                            className="relative"
+                            onClick={clearComunicadoCount}
+                        >
                             <IconBell className="h-6 w-6" />
-                            {newComunicadoCount > 0 && (
+                            {totalComunicadoUnread > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                    {newComunicadoCount > 99 ? `+99` : newComunicadoCount}
+                                    {totalComunicadoUnread > 99 ? `+99` : totalComunicadoUnread}
                                 </span>
                             )}
                         </Button>
@@ -154,9 +111,9 @@ export function AppSidebar(usuario, ...props) {
                         >
                             <item.icon className="h-6 w-6" />
                             <span>{item.title}</span>
-                            {item.title === "Mensagem" && totalUnreadCount > 0 && (
+                            {item.title === "Mensagem" && totalMsgUnread > 0 && (
                                 <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
-                                    {totalUnreadCount > 99 ? '+99' : totalUnreadCount}
+                                    {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
                                 </span>
                             )}
                         </Link>

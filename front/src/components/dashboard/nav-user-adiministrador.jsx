@@ -31,11 +31,27 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { logout } from "@/hooks/logout"
+
 export function NavUser({
   usuario,
 }) {
   const { isMobile } = useSidebar()
 
+  // CORREÇÃO: Função segura para acessar as propriedades do usuário
+  const getUserName = () => {
+    // Tenta acessar usuario.usuario.nome primeiro, depois usuario.nome
+    return usuario?.usuario?.nome || usuario?.nome || "Usuário"
+  }
+
+  const getUserCpf = () => {
+    // Tenta acessar usuario.usuario.cpf primeiro, depois usuario.cpf
+    return usuario?.usuario?.cpf || usuario?.cpf || ""
+  }
+
+  const getInitial = () => {
+    const name = getUserName()
+    return name ? name.charAt(0).toUpperCase() : "U"
+  }
 
   return (
     <SidebarMenu>
@@ -48,13 +64,13 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarFallback className="rounded-lg">
-                  {usuario.usuario.nome ? usuario.usuario.nome.charAt(0).toUpperCase() : ""}
+                  {getInitial()}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{usuario.usuario.nome}</span>
+                <span className="truncate font-medium">{getUserName()}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {usuario.cpf}
+                  {getUserCpf()}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -70,34 +86,30 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarFallback className="rounded-lg">
-                    {usuario.usuario.nome ? usuario.usuario.nome.charAt(0).toUpperCase() : ""}
+                    {getInitial()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{usuario.usuario.nome}</span>
+                  <span className="truncate font-medium">{getUserName()}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {usuario.usuario.cpf}
+                    {getUserCpf()}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <Link href="/dashboard/administrador/Perfil">
-              <DropdownMenuItem>
-                <IconUserCircle />
+              <Link href="/dashboard/administrador/Perfil">
+                <DropdownMenuItem>
+                  <IconUserCircle />
                   Account
-              </DropdownMenuItem>
-                  </Link>
-              {/* <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem> */}
+                </DropdownMenuItem>
+              </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}> 
               <IconLogout />
-                Log out
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

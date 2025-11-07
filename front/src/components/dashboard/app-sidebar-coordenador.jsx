@@ -36,13 +36,7 @@ export function AppSidebarCoordenador(usuario, ...props) {
     // que existia anteriormente neste componente.
     const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount() || {};
 
-    // Efeito simplificado que apenas zera a contagem de comunicados na UI
-    // quando o usuário navega para a página de comunicados.
-    useEffect(() => {
-        if (pathname.includes('/comunicados') && clearComunicadoCount) {
-            clearComunicadoCount();
-        }
-    }, [pathname, clearComunicadoCount]);
+
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>
@@ -97,10 +91,11 @@ export function AppSidebarCoordenador(usuario, ...props) {
                             <span>{item.title}</span>
 
                             {/* Usa o estado 'totalMsgUnread' vindo do contexto */}
-                            {item.title === "Mensagem" && (totalMsgUnread > 0) && (
+                            {item.title === "Mensagem" && totalMsgUnread > 0 && (
                                 <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
                                     {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
                                 </span>
+                            
                             )}
                         </Link>
                     ))}

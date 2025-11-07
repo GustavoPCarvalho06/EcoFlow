@@ -1,8 +1,7 @@
-// src/context/UnreadCountContext.jsx (VERSÃO FINAL COM CORREÇÃO DE REATIVIDADE)
-
+// app/context/UnreadCountContext.jsx
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import io from 'socket.io-client';
 import { useApiUrl } from './ApiContext';
 
@@ -14,8 +13,10 @@ export function UnreadCountProvider({ children, user }) {
 
   const [totalMsgUnread, setTotalMsgUnread] = useState(0);
   const [totalComunicadoUnread, setTotalComunicadoUnread] = useState(0);
+  const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  // As funções de busca continuam as mesmas, com useCallback para otimização.
+  // Função para buscar contagem de mensagens
   const fetchTotalMsgUnread = useCallback(async () => {
     if (!meuUserId || !apiUrl) {
       setTotalMsgUnread(0);
@@ -29,11 +30,13 @@ export function UnreadCountProvider({ children, user }) {
       const countsBySender = await response.json();
       const total = Object.values(countsBySender).reduce((sum, current) => sum + current, 0);
       setTotalMsgUnread(total);
+      console.log('📊 Contagem de mensagens atualizada:', total);
     } catch (error) {
       console.error("Erro ao buscar contagem de mensagens:", error);
     }
   }, [meuUserId, apiUrl]);
 
+  // Função para buscar contagem de comunicados
   const fetchTotalComunicadoUnread = useCallback(async () => {
     if (!meuUserId || !apiUrl) {
       setTotalComunicadoUnread(0);
@@ -46,6 +49,7 @@ export function UnreadCountProvider({ children, user }) {
       if (!response.ok) throw new Error("Falha na busca de comunicados");
       const data = await response.json();
       setTotalComunicadoUnread(data.count);
+      console.log('📢 Contagem de comunicados atualizada:', data.count);
     } catch (error) {
       console.error("Erro ao buscar contagem de comunicados:", error);
     }
@@ -55,52 +59,79 @@ export function UnreadCountProvider({ children, user }) {
     setTotalComunicadoUnread(0);
   };
 
-  // --- INÍCIO DA CORREÇÃO DE REATIVIDADE ---
-
-  // 1. Criamos "refs" para guardar as versões mais recentes das nossas funções de callback.
-  const fetchMsgRef = useRef(fetchTotalMsgUnread);
-  const fetchComunicadoRef = useRef(fetchTotalComunicadoUnread);
-
-  // 2. Usamos um useEffect simples para garantir que os refs SEMPRE tenham a versão
-  //    mais atualizada das funções a cada renderização.
+  // Efeito principal para gerenciar o socket
   useEffect(() => {
-    fetchMsgRef.current = fetchTotalMsgUnread;
-    fetchComunicadoRef.current = fetchTotalComunicadoUnread;
-  }); // Sem array de dependências, roda a cada render.
+    if (!meuUserId || !apiUrl) return;
 
-  // 3. O useEffect do socket agora só depende do usuário e da URL.
-  //    Ele não precisa mais saber sobre as funções de fetch, evitando o "stale closure".
-  useEffect(() => {
-    if (meuUserId && apiUrl) {
-      // Busca inicial continua a mesma
+    console.log('🔌 Iniciando conexão socket para usuário:', meuUserId);
+    
+    // Cria nova instância do socket
+    const newSocket = io(apiUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+
+    setSocket(newSocket);
+
+    // Configura listeners do socket
+    newSocket.on('connect', () => {
+      console.log('✅ Socket conectado, fazendo join:', meuUserId);
+      setIsConnected(true);
+      newSocket.emit('join', meuUserId);
+      
+      // Busca contagens iniciais após conectar
       fetchTotalMsgUnread();
       fetchTotalComunicadoUnread();
+    });
 
-      const socket = io(apiUrl);
-      socket.on('connect', () => socket.emit('join', meuUserId));
+    newSocket.on('disconnect', () => {
+      console.log('❌ Socket desconectado');
+      setIsConnected(false);
+    });
 
-      // 4. Os listeners agora chamam as funções através dos refs,
-      //    garantindo que estão sempre executando a versão mais recente.
-      const handleNewMessage = () => fetchMsgRef.current();
-      const handleComunicados = () => fetchComunicadoRef.current();
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Erro de conexão socket:', error);
+      setIsConnected(false);
+    });
 
-      socket.on('new_message', handleNewMessage);
-      socket.on('comunicados_atualizados', handleComunicados);
+    // Listener para novas mensagens - ATUALIZA EM TEMPO REAL
+    newSocket.on('new_message', (mensagem) => {
+      console.log('📨 Nova mensagem recebida via socket:', mensagem);
+      
+      // Se a mensagem é para mim, atualiza a contagem
+      if (mensagem.destinatario_id === meuUserId) {
+        fetchTotalMsgUnread(); // Atualiza contagem automaticamente
+      }
+    });
 
-      return () => {
-        socket.off('new_message', handleNewMessage);
-        socket.off('comunicados_atualizados', handleComunicados);
-        socket.disconnect();
-      };
-    }
-  }, [meuUserId, apiUrl, fetchTotalMsgUnread, fetchTotalComunicadoUnread]); // Mantemos as dependências originais aqui para robustez
+    // Listener para comunicados - ATUALIZA EM TEMPO REAL
+    newSocket.on('comunicados_atualizados', () => {
+      console.log('📢 Comunicados atualizados via socket');
+      fetchTotalComunicadoUnread(); // Atualiza contagem automaticamente
+    });
 
-  // --- FIM DA CORREÇÃO ---
+    // Cleanup
+    return () => {
+      console.log('🧹 Limpando conexão socket');
+      newSocket.off('connect');
+      newSocket.off('disconnect');
+      newSocket.off('connect_error');
+      newSocket.off('new_message');
+      newSocket.off('comunicados_atualizados');
+      newSocket.disconnect();
+      setSocket(null);
+      setIsConnected(false);
+    };
+  }, [meuUserId, apiUrl, fetchTotalMsgUnread, fetchTotalComunicadoUnread]);
 
   const value = { 
+    socket,
+    isConnected,
     totalMsgUnread, 
     totalComunicadoUnread, 
-    fetchTotalUnreadCount: fetchTotalMsgUnread,
+    fetchTotalMsgUnread,
     clearComunicadoCount,
   };
 
@@ -112,5 +143,9 @@ export function UnreadCountProvider({ children, user }) {
 }
 
 export const useUnreadCount = () => {
-  return useContext(UnreadCountContext);
+  const context = useContext(UnreadCountContext);
+  if (!context) {
+    throw new Error('useUnreadCount deve ser usado dentro de UnreadCountProvider');
+  }
+  return context;
 };
