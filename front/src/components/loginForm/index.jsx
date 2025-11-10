@@ -75,6 +75,7 @@ export function LoginForm({ className, ...props }) {
             }
 
             const userRole = data.user.cargo;
+            console.log(useRouter)
             router.push(`/dashboard/${userRole}`);
 
         } catch (err) {

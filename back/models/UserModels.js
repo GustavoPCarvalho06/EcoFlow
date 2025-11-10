@@ -94,15 +94,17 @@ const createUser = async (data) => {
     const estadoCivil = Buffer.from(data.estadoCivil, "utf8").toString("base64");
     const nome = Buffer.from(data.nome, "utf8").toString("base64");
     
+
+
     const dataUsuario = {
-      nome: nome,
-      cpf: cpfHash, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
+      nome: data.nome,
+      cpf: cleanCPF, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
       senha: senhaHash,
-      cargo: cargoHash,
-      email: emailHash,
-      sexo: sexo,
-      estadoCivil: estadoCivil,
-      CEP: cepHash,
+      cargo: data.cargo,
+      email: data.email,
+      sexo: data.sexo,
+      estadoCivil: data.estadoCivil,
+      CEP: data.CEP,
       statusConta: 'ativo'
     };
     console.log(dataUsuario)

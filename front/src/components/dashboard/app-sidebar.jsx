@@ -66,9 +66,7 @@ export function AppSidebar({ usuario, ...props }) {
                                     className="rounded-sm"
                                 />
                                 <span className="text-lg font-semibold">EcoFlow.</span>
-                                {!isConnected && (
-                                    <span className="ml-2 text-xs text-yellow-500">🔌 Conectando...</span>
-                                )}
+                                
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

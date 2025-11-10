@@ -25,12 +25,15 @@ export function middleware(request) {
 
   console.log("Acessando a rota:", pathname);
   console.log("token do usuário (cookie):", user);
+console.log("Decoded token cargo:", user?.cargo);
+
 
   const isProtected = protectedPrefixes.some((prefix) =>
     pathname.startsWith(prefix)
   );
 
   if (isProtected) {
+    
     // 1. Se não houver token ou token, redireciona para a página de login.
     if (!user) {
       const loginUrl = new URL(`/`, request.url);
