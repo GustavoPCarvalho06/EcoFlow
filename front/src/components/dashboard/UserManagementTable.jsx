@@ -11,20 +11,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Pencil, Search, PowerOff, Power, ChevronLeft, ChevronRight } from "lucide-react";
-
-// --- ADIÇÃO 1: Importar o hook da nossa API ---
 import { useApiUrl } from "@/app/context/ApiContext";
 
-// Função auxiliar (sem alterações)
+// Funções auxiliares
 const formatCPF = (cpf) => {
   if (!cpf) return "";
-  const cleanCpf = cpf.replace(/\D/g, '');
-  if (cleanCpf.length !== 11) return cpf;
-  return cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  const cleanCpf = cpf.replace(/\D/g, '').slice(0, 11);
+  if (cleanCpf.length > 9) {
+    return cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  } else if (cleanCpf.length > 6) {
+    return cleanCpf.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+  } else if (cleanCpf.length > 3) {
+    return cleanCpf.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+  }
+  return cleanCpf;
 };
 
+const formatCEP = (cep) => {
+    if (!cep) return "";
+    // Garante que apenas números sejam processados e formata
+    const cleanCep = cep.replace(/\D/g, '').slice(0, 8);
+    if (cleanCep.length > 5) {
+        return cleanCep.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+    }
+    return cleanCep;
+};
+
+
 export function UserManagementTable() {
-  // --- ADIÇÃO 2: Obter a URL da API do nosso contexto ---
   const apiUrl = useApiUrl();
 
   const [users, setUsers] = useState([]);
@@ -43,11 +57,15 @@ export function UserManagementTable() {
   const [isReactivateAlertOpen, setIsReactivateAlertOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState("");
+  
   const [createCpf, setCreateCpf] = useState("");
+  const [createCep, setCreateCep] = useState("");
+  
+  // Estado para o CEP do modal de edição, para garantir a formatação
+  const [editCep, setEditCep] = useState("");
 
-  // --- ALTERAÇÃO 1: Atualizar a função de busca de usuários ---
+
   const fetchUsers = useCallback(async () => {
-    // Adiciona a verificação da apiUrl antes de fazer a chamada
     if (!apiUrl) {
       setIsLoading(false);
       return;
@@ -62,7 +80,6 @@ export function UserManagementTable() {
         statusConta: statusFilter,
         cargo: cargoFilter,
       });
-      // Usa a apiUrl dinâmica em vez da URL fixa
       const response = await fetch(`${apiUrl}/user/paginated?${params.toString()}`);
       if (!response.ok) throw new Error('Falha ao buscar dados dos usuários');
       
@@ -77,22 +94,22 @@ export function UserManagementTable() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, searchQuery, statusFilter, cargoFilter, apiUrl]); // Adiciona apiUrl às dependências
+  }, [page, limit, searchQuery, statusFilter, cargoFilter, apiUrl]);
 
   useEffect(() => {
     const debounceTimeout = searchQuery ? 500 : 0; 
-    
     const handler = setTimeout(() => {
       fetchUsers();
     }, debounceTimeout);
-
     return () => clearTimeout(handler);
-  }, [fetchUsers]); // fetchUsers já depende da apiUrl, então está correto
+  }, [fetchUsers]);
 
   const forceRefresh = () => fetchUsers();
 
   const handleOpenEditModal = (user) => {
     setSelectedUser(user);
+    // Pré-formata o CEP ao abrir o modal de edição
+    setEditCep(formatCEP(user.CEP)); 
     setError("");
     setIsEditModalOpen(true);
   };
@@ -108,21 +125,20 @@ export function UserManagementTable() {
   };
 
   const handleCpfInputChange = (e) => {
-    const rawValue = e.target.value.replace(/\D/g, '');
-    let formattedValue = rawValue;
-    if (rawValue.length > 9) {
-      formattedValue = rawValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    } else if (rawValue.length > 6) {
-      formattedValue = rawValue.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
-    } else if (rawValue.length > 3) {
-      formattedValue = rawValue.replace(/(\d{3})(\d{1,3})/, '$1.$2');
-    }
-    setCreateCpf(formattedValue.slice(0, 14));
+    setCreateCpf(formatCPF(e.target.value));
   };
   
-  // --- ALTERAÇÃO 2: Atualizar a função auxiliar de chamadas API ---
+  const handleCepInputChange = (e) => {
+    setCreateCep(formatCEP(e.target.value));
+  };
+  
+  // Handler separado para o CEP do modal de edição
+  const handleEditCepInputChange = (e) => {
+    setEditCep(formatCEP(e.target.value));
+  };
+
+
   const handleApiCall = async (endpoint, method, body, successCallback) => {
-    // Adiciona a verificação da apiUrl antes de fazer qualquer chamada
     if (!apiUrl) {
       setError("Conexão com o servidor não estabelecida. Tente novamente.");
       return;
@@ -130,7 +146,6 @@ export function UserManagementTable() {
 
     try {
       setError("");
-      // Usa a apiUrl dinâmica em vez da URL fixa
       const response = await fetch(`${apiUrl}/user/${endpoint}`, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -146,18 +161,18 @@ export function UserManagementTable() {
     }
   };
 
-  // As funções abaixo (handleCreateUser, handleUpdateUser, etc.)
-  // já usam `handleApiCall`, então elas são corrigidas automaticamente.
-  // Nenhuma mudança é necessária nelas.
-  
   const handleCreateUser = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    data.cpf = data.cpf.replace(/\D/g, ''); 
+    
+    data.cpf = data.cpf.replace(/\D/g, '');
+    data.CEP = data.CEP.replace(/\D/g, '');
+
     await handleApiCall('post', 'POST', data, () => {
       setIsCreateModalOpen(false);
       setCreateCpf("");
+      setCreateCep("");
       forceRefresh();
     });
   };
@@ -165,14 +180,22 @@ export function UserManagementTable() {
   const handleUpdateUser = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    
     const data = {
-        nome: formData.get('nome'),
         cpf: selectedUser.cpf,
+        nome: formData.get('nome'),
         email: formData.get('email'),
         cargo: formData.get('cargo'),
-        senha: formData.get('senha')
+        senha: formData.get('senha'),
+        sexo: formData.get('sexo'), 
+        estadoCivil: formData.get('estadoCivil'), 
+        CEP: formData.get('CEP').replace(/\D/g, ''), 
     };
-    if (!data.senha) delete data.senha;
+
+    if (!data.senha) {
+        delete data.senha;
+    }
+
     await handleApiCall('put', 'PUT', data, () => {
       setIsEditModalOpen(false);
       forceRefresh();
@@ -196,13 +219,12 @@ export function UserManagementTable() {
     setIsReactivateAlertOpen(false);
   };
   
-  // --- ADIÇÃO 3: Renderização condicional para o estado inicial da API ---
   if (!apiUrl) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Conectando ao servidor...</CardTitle>
-          <CardDescription>Aguarde enquanto a conexão é estabelecida.</CardDescription>
+            <CardTitle>Conectando ao servidor...</CardTitle>
+            <CardDescription>Aguarde enquanto a conexão é estabelecida.</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -211,15 +233,14 @@ export function UserManagementTable() {
   return (
     <>
       <Card>
+        {/* CABEÇALHO E FILTROS - SEM ALTERAÇÕES */}
         <CardHeader>
           <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <CardTitle>Gerenciamento de Usuários</CardTitle>
-              <CardDescription>
-                Visualize, filtre, crie e gerencie todos os usuários do sistema.
-              </CardDescription>
+              <CardDescription>Visualize, filtre, crie e gerencie todos os usuários do sistema.</CardDescription>
             </div>
-            <Button size="sm" className="gap-1 cursor-pointer" onClick={() => { setError(""); setCreateCpf(""); setIsCreateModalOpen(true); }}>
+            <Button size="sm" className="gap-1 cursor-pointer" onClick={() => { setError(""); setCreateCpf(""); setCreateCep(""); setIsCreateModalOpen(true); }}>
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Criar Novo Usuário</span>
             </Button>
@@ -227,16 +248,7 @@ export function UserManagementTable() {
           <div className="flex items-center gap-4 mt-4">
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Pesquisar por nome ou CPF..."
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-              />
+              <Input type="search" placeholder="Pesquisar por nome ou CPF..." className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}/>
             </div>
             <Select value={cargoFilter} onValueChange={(value) => { setCargoFilter(value); setPage(1); }}>
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Filtrar por Cargo" /></SelectTrigger>
@@ -257,6 +269,7 @@ export function UserManagementTable() {
             </Select>
           </div>
         </CardHeader>
+        {/* TABELA - SEM ALTERAÇÕES */}
         <CardContent>
           <Table>
             <TableHeader>
@@ -269,10 +282,8 @@ export function UserManagementTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center h-24">Carregando...</TableCell></TableRow>
-              ) : users.length > 0 ? (
-                users.map((user) => (
+              {isLoading ? ( <TableRow><TableCell colSpan={5} className="text-center h-24">Carregando...</TableCell></TableRow> ) 
+              : users.length > 0 ? ( users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.nome}</TableCell>
                     <TableCell className="hidden md:table-cell">{formatCPF(user.cpf)}</TableCell>
@@ -283,178 +294,99 @@ export function UserManagementTable() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => handleOpenEditModal(user)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => handleOpenEditModal(user)}><Pencil className="h-4 w-4" /></Button>
                       {user.statusConta === 'ativo' ? (
-                        <Button variant="ghost" size="icon" className="text-red-500 cursor-pointer" onClick={() => handleOpenDeleteAlert(user)}>
-                          <PowerOff className="h-4 w-4" />
-                        </Button>
+                        <Button variant="ghost" size="icon" className="text-red-500 cursor-pointer" onClick={() => handleOpenDeleteAlert(user)}><PowerOff className="h-4 w-4" /></Button>
                       ) : (
-                        <Button variant="ghost" size="icon" className="text-blue-500 cursor-pointer" onClick={() => handleOpenReactivateAlert(user)}>
-                          <Power className="h-4 w-4" />
-                        </Button>
+                        <Button variant="ghost" size="icon" className="text-blue-500 cursor-pointer" onClick={() => handleOpenReactivateAlert(user)}><Power className="h-4 w-4" /></Button>
                       )}
                     </TableCell>
                   </TableRow>
                 ))
-              ) : (
-                <TableRow><TableCell colSpan={5} className="text-center h-24">Nenhum usuário encontrado.</TableCell></TableRow>
-              )}
+              ) : ( <TableRow><TableCell colSpan={5} className="text-center h-24">Nenhum usuário encontrado.</TableCell></TableRow> )}
             </TableBody>
           </Table>
         </CardContent>
+        {/* FOOTER - SEM ALTERAÇÕES */}
         <CardFooter className="flex items-center justify-between border-t p-4">
-          <div className="text-sm text-muted-foreground">
-            Total de <span className="font-semibold">{totalUsers}</span> usuário(s).
-          </div>
+          <div className="text-sm text-muted-foreground">Total de <span className="font-semibold">{totalUsers}</span> usuário(s).</div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Label htmlFor="rows-per-page">Linhas por página:</Label>
               <Select value={limit.toString()} onValueChange={(value) => { setLimit(Number(value)); setPage(1); }}>
                 <SelectTrigger id="rows-per-page" className="w-[70px]"><SelectValue/></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="5">5</SelectItem><SelectItem value="10">10</SelectItem><SelectItem value="20">20</SelectItem></SelectContent>
               </Select>
             </div>
             <div className="text-sm font-medium">Página {page} de {totalPages}</div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1 || isLoading}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || isLoading}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1 || isLoading}><ChevronLeft className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || isLoading}><ChevronRight className="h-4 w-4" /></Button>
             </div>
           </div>
         </CardFooter>
       </Card>
 
-      {/* --- MODAIS E ALERTAS --- */}
+      {/* --- MODAL DE CRIAÇÃO --- */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle>Criar Novo Usuário</DialogTitle>
             <DialogDescription>Preencha os dados abaixo para criar uma nova conta.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateUser}>
             <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="nome" className="text-right">Nome</Label><Input id="nome" name="nome" required className="col-span-3" maxLength="100" /></div>
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="cpf" className="text-right">CPF</Label><Input id="cpf" name="cpf" required className="col-span-3" value={createCpf} onChange={handleCpfInputChange} maxLength="14" placeholder="000.000.000-00" inputMode="numeric" pattern="[0-9.-]*"/></div>
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="email" className="text-right">Email</Label><Input id="email" name="email" type="email" required className="col-span-3" placeholder="exemplo@email.com"/></div>
+              {/* ALTERAÇÃO AQUI */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="nome" className="text-right">Nome</Label>
-                <Input id="nome" name="nome" required className="col-span-3" maxLength="50" />
+                <Label htmlFor="CEP" className="text-right">CEP</Label>
+                <Input id="CEP" name="CEP" required className="col-span-3" value={createCep} onChange={handleCepInputChange} maxLength="9" placeholder="00000-000" inputMode="numeric" pattern="[0-9-]*" />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="cpf" className="text-right">CPF</Label>
-                <Input id="cpf" name="cpf" required className="col-span-3" value={createCpf} onChange={handleCpfInputChange} maxLength="14" placeholder="000.000.000-00"/>
-              </div>
-               {/* ======================================================= */}
-               {/*  NOVO CAMPO DE EMAIL ADICIONADO AQUI                   */}
-               {/* ======================================================= */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">Email</Label>
-                <Input id="email" name="email" type="email" required className="col-span-3" placeholder="exemplo@email.com"/>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="senha" className="text-right">Senha</Label>
-                <Input id="senha" name="senha" type="password" required className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="cargo" className="text-right">Cargo</Label>
-                <Select name="cargo" required>
-                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione um cargo" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="administrador">Administrador</SelectItem>
-                    <SelectItem value="coordenador">Coordenador</SelectItem>
-                    <SelectItem value="coletor">Coletor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="sexo" className="text-right">Sexo</Label><Select name="sexo" required><SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione o sexo" /></SelectTrigger><SelectContent><SelectItem value="masculino">Masculino</SelectItem><SelectItem value="feminino">Feminino</SelectItem><SelectItem value="outros">Outro</SelectItem></SelectContent></Select></div>
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="estadoCivil" className="text-right">Estado Civil</Label><Select name="estadoCivil" required><SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione o estado civil" /></SelectTrigger><SelectContent><SelectItem value="solteiro(a)">Solteiro(a)</SelectItem><SelectItem value="casado(a)">Casado(a)</SelectItem><SelectItem value="viuvo(a)">Viúvo(a)</SelectItem><SelectItem value="divorciado(a)">Divorciado(a)</SelectItem></SelectContent></Select></div>
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="senha" className="text-right">Senha</Label><Input id="senha" name="senha" type="password" required className="col-span-3" /></div>
+              <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="cargo" className="text-right">Cargo</Label><Select name="cargo" required><SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione um cargo" /></SelectTrigger><SelectContent><SelectItem value="administrador">Administrador</SelectItem><SelectItem value="coordenador">Coordenador</SelectItem><SelectItem value="coletor">Coletor</SelectItem></SelectContent></Select></div>
             </div>
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancelar</Button>
-              <Button type="submit">Salvar</Button>
-            </DialogFooter>
+            <DialogFooter><Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancelar</Button><Button type="submit">Salvar</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
       
+      {/* --- MODAL DE EDIÇÃO --- */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle>Editar Usuário</DialogTitle>
             <DialogDescription>Altere os dados do usuário. Deixe a senha em branco para não alterá-la.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleUpdateUser}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-nome" className="text-right">Nome</Label>
-                <Input id="edit-nome" name="nome" defaultValue={selectedUser?.nome} className="col-span-3" maxLength="50" />
+          {selectedUser && (
+            <form onSubmit={handleUpdateUser}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-nome" className="text-right">Nome</Label><Input id="edit-nome" name="nome" defaultValue={selectedUser.nome} className="col-span-3" maxLength="100" /></div>
+                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-email" className="text-right">Email</Label><Input id="edit-email" name="email" type="email" defaultValue={selectedUser.email} required className="col-span-3" placeholder="exemplo@email.com"/></div>
+                {/* ALTERAÇÃO AQUI */}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-CEP" className="text-right">CEP</Label>
+                  <Input id="edit-CEP" name="CEP" value={editCep} onChange={handleEditCepInputChange} required className="col-span-3" maxLength="9" placeholder="00000-000" inputMode="numeric" pattern="[0-9-]*"/>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-sexo" className="text-right">Sexo</Label><Select name="sexo" defaultValue={selectedUser.sexo}><SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione o sexo" /></SelectTrigger><SelectContent><SelectItem value="masculino">Masculino</SelectItem><SelectItem value="feminino">Feminino</SelectItem><SelectItem value="outros">Outro</SelectItem></SelectContent></Select></div>
+                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-estadoCivil" className="text-right">Estado Civil</Label><Select name="estadoCivil" defaultValue={selectedUser.estadoCivil}><SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione o estado civil" /></SelectTrigger><SelectContent><SelectItem value="solteiro(a)">Solteiro(a)</SelectItem><SelectItem value="casado(a)">Casado(a)</SelectItem><SelectItem value="viuvo(a)">Viúvo(a)</SelectItem><SelectItem value="divorciado(a)">Divorciado(a)</SelectItem></SelectContent></Select></div>
+                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-senha" className="text-right">Nova Senha</Label><Input id="edit-senha" name="senha" type="password" placeholder="********" className="col-span-3" /></div>
+                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-cargo" className="text-right">Cargo</Label><Select name="cargo" defaultValue={selectedUser.cargo}><SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione um cargo" /></SelectTrigger><SelectContent><SelectItem value="administrador">Administrador</SelectItem><SelectItem value="coordenador">Coordenador</SelectItem><SelectItem value="coletor">Coletor</SelectItem></SelectContent></Select></div>
               </div>
-              {/* ======================================================= */}
-              {/*  NOVO CAMPO DE EMAIL ADICIONADO AQUI                   */}
-              {/* ======================================================= */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-email" className="text-right">Email</Label>
-                <Input id="edit-email" name="email" type="email" defaultValue={selectedUser?.email} required className="col-span-3" placeholder="exemplo@email.com"/>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-senha" className="text-right">Nova Senha</Label>
-                <Input id="edit-senha" name="senha" type="password" placeholder="********" className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-cargo" className="text-right">Cargo</Label>
-                <Select name="cargo" defaultValue={selectedUser?.cargo}>
-                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione um cargo" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="administrador">Administrador</SelectItem>
-                    <SelectItem value="coordenador">Coordenador</SelectItem>
-                    <SelectItem value="coletor">Coletor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancelar</Button>
-              <Button type="submit">Salvar Alterações</Button>
-            </DialogFooter>
-          </form>
+              {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+              <DialogFooter><Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancelar</Button><Button type="submit">Salvar Alterações</Button></DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação irá desativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>. 
-              O usuário não poderá mais acessar o sistema.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDeactivate} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isReactivateAlertOpen} onOpenChange={setIsReactivateAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Confirmar Reativação</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja reativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>? 
-              O usuário voltará a ter acesso ao sistema.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmReactivate} className="bg-blue-600 hover:bg-blue-700">Sim, reativar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* --- ALERTAS --- */}
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Esta ação irá desativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>. O usuário não poderá mais acessar o sistema.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleConfirmDeactivate} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+      <AlertDialog open={isReactivateAlertOpen} onOpenChange={setIsReactivateAlertOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Confirmar Reativação</AlertDialogTitle><AlertDialogDescription>Tem certeza que deseja reativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>? O usuário voltará a ter acesso ao sistema.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleConfirmReactivate} className="bg-blue-600 hover:bg-blue-700">Sim, reativar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
     </>
   );
 }

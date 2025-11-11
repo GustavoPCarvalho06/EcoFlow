@@ -15,7 +15,14 @@ const createUserController = async (req, res) => {
     return res.status(201).json({ mensagem: "Usuário criado com sucesso" });
 
   } catch (err) {
-    // CAPTURA DO ERRO DE CPF INVÁLIDO (formato)
+    // =======================================================
+    // NOVA CAPTURA DE ERRO DE CEP ADICIONADA AQUI
+    // =======================================================
+    if (err.statusCode === 404) {
+      return res.status(404).json({ mensagem: err.message });
+    }
+
+    // CAPTURA DO ERRO DE CPF/CEP INVÁLIDO (formato)
     if (err.statusCode === 400) {
       return res.status(400).json({ mensagem: err.message });
     }
@@ -31,8 +38,8 @@ const createUserController = async (req, res) => {
   }
 };
 
-
-const readPaginatedController = async (req, res) => {
+// Renomeei para ficar consistente com a rota
+const findUsersPaginatedController = async (req, res) => {
   try {
     const { 
       page = 1, 
@@ -40,12 +47,11 @@ const readPaginatedController = async (req, res) => {
       search = '', 
       cargo = '', 
       statusConta = '',
-      sortBy = 'statusConta', // Ordena por status por padrão
-      sortOrder = 'ASC'      // 'ativo' vem primeiro
+      sortBy = 'id',
+      sortOrder = 'ASC'
     } = req.query;
 
     const filters = { search, cargo, statusConta };
-    // Remove filtros vazios
     Object.keys(filters).forEach(key => (filters[key] === '' || filters[key] === 'todos') && delete filters[key]);
     
     const result = await findUsersPaginated({ 
@@ -63,25 +69,37 @@ const readPaginatedController = async (req, res) => {
   }
 };
 
-
-
 const updateUserController = async (req, res) => {
     try {
       const { cpf } = req.body; 
       const userData = req.body; 
   
       if (!cpf) {
-        return res.status(400).json({ mensagem: "CPF do usuário não fornecido" });
+        return res.status(400).json({ mensagem: "CPF do usuário não fornecido para atualização" });
       }
   
       await updateUser(userData, cpf);
       return res.status(200).json({ mensagem: "Usuário atualizado com sucesso" });
   
     } catch (err) {
-      console.error("Erro ao atualizar usuário: ", err);
+      // =======================================================
+      // LÓGICA DE TRATAMENTO DE ERRO COMPLETA ADICIONADA AQUI
+      // =======================================================
+      // CAPTURA DO ERRO DE CEP NÃO ENCONTRADO
+      if (err.statusCode === 404) {
+        return res.status(404).json({ mensagem: err.message });
+      }
+
+      // CAPTURA DO ERRO DE FORMATO INVÁLIDO (ex: CEP com menos de 8 dígitos)
+      if (err.statusCode === 400) {
+        return res.status(400).json({ mensagem: err.message });
+      }
+      
+      // CAPTURA DE OUTROS ERROS
+      console.error("Erro no controller ao atualizar usuário: ", err);
       return res.status(500).json({ mensagem: "Erro interno ao atualizar o usuário" });
     }
-  };
+};
   
 
 const changeFuncaoUserController = async (req, res) => {
@@ -146,4 +164,4 @@ const readAllUserController = async (req,res) =>{
     }
 };
 
-export default{changeStatusUserController, readFilterUserController, readAllUserController, updateUserController, changeFuncaoUserController,createUserController,readPaginatedController}
+export default{changeStatusUserController, readFilterUserController, readAllUserController, updateUserController, changeFuncaoUserController,createUserController,readPaginatedController: findUsersPaginatedController}
