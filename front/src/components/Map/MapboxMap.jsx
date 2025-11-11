@@ -6,9 +6,10 @@ import { MAPBOX_STYLES } from "./mapStyles.js";
 
 import { useApiUrl } from "@/app/context/ApiContext.js";
 
-export default function MapboxMap() {
+export default function MapboxMap({ onMapClick }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
+  const markerRef = useRef(null);
   const mapboxRef = useRef(null);
   const [filtro, setFiltro] = useState("-");
   const [pontos, setPontos] = useState([]);
@@ -53,8 +54,31 @@ export default function MapboxMap() {
           antialias: true,
         });
 
+        /* marcador pro modal */
+        if (onMapClick) {
+          map.on("click", (e) => {
+            const { lng, lat } = e.lngLat;
+
+            onMapClick({ lat, lng })
+            if (markerRef.current) {
+              markerRef.current.setLngLat([lng, lat]);
+            } else {
+              markerRef.current = new mapboxgl.Marker({ color: "#FF2020" })
+                .setLngLat([lng, lat])
+                .addTo(map);
+            }
+          });
+        }
         mapRef.current = map;
         map.addControl(new mapboxgl.NavigationControl());
+        map.on("click", (e) => {
+          if (onMapClick) {
+            onMapClick({
+              lat: e.lngLat.lat,
+              lng: e.lngLat.lng,
+            });
+          }
+        });
 
 
         if (!apiUrl) {
@@ -62,7 +86,7 @@ export default function MapboxMap() {
           return;
         }
 
-        // marcador do usuário
+        // marcador do usuario
         const UsuarioMarker = document.createElement("div");
         UsuarioMarker.className = "marker";
         UsuarioMarker.style.backgroundImage = "url('https://i.imgur.com/MK4NUzI.png')";
@@ -114,16 +138,6 @@ export default function MapboxMap() {
             },
             labelLayerId
           );
-        });
-
-        // 3d inclinaçao
-        map.on("zoom", () => {
-          const zoom = map.getZoom();
-          if (zoom >= 16.5 && map.getPitch() < 50) {
-            map.easeTo({ pitch: 60, bearing: -17.6, duration: 1200 });
-          } else if (zoom < 16.3 && map.getPitch() > 0) {
-            map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
-          }
         });
       }
     })();
@@ -353,7 +367,7 @@ export default function MapboxMap() {
         ref={mapContainer}
         style={{
           width: "100%",
-          height: "800px",
+          height: "100%",
           borderRadius: "12px",
           overflow: "hidden",
         }}
