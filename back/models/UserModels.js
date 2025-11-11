@@ -242,4 +242,60 @@ const changeFuncao = async (data, id) => {
     }
 }
 
-export {readAllUser, readUser, readUserEmail,   createUser, updateUser, changeStatus, changeFuncao,deleteUser,findUsersPaginated}
+
+
+
+
+
+const findUserByCpfWithEmail = async (cpf) => {
+    try {
+        const sql = "SELECT email FROM usuarios WHERE cpf = ?";
+        const [user] = await read(sql, [cpf]);
+        return user;
+    } catch (err) {
+        console.error("Erro ao buscar usuário por CPF e email:", err);
+        throw err;
+    }
+};
+
+const saveRecoveryCode = async (cpf, codigo, expiracao) => {
+    try {
+        const data = {
+            codigo_recuperacao: codigo,
+            expiracao_codigo: expiracao
+        };
+        await update("usuarios", data, `cpf = '${cpf}'`);
+    } catch (err) {
+        console.error("Erro ao salvar código de recuperação:", err);
+        throw err;
+    }
+};
+
+const findUserByCpfAndCode = async (cpf, codigo) => {
+    try {
+        const sql = "SELECT id FROM usuarios WHERE cpf = ? AND codigo_recuperacao = ? AND expiracao_codigo > NOW()";
+        const [user] = await read(sql, [cpf, codigo]);
+        return user;
+    } catch (err) {
+        console.error("Erro ao verificar código:", err);
+        throw err;
+    }
+};
+
+const updatePasswordByCpf = async (cpf, newPassword) => {
+    try {
+        const senhaHash = await bcrypt.hash(newPassword, 10);
+        const data = {
+            senha: senhaHash,
+            codigo_recuperacao: null, // Limpa o código após o uso
+            expiracao_codigo: null
+        };
+        await update("usuarios", data, `cpf = '${cpf}'`);
+    } catch (err) {
+        console.error("Erro ao atualizar senha:", err);
+        throw err;
+    }
+};
+
+export {readAllUser, readUser, readUserEmail,   createUser, updateUser, changeStatus, changeFuncao,deleteUser,findUsersPaginated,
+  findUserByCpfWithEmail,saveRecoveryCode,findUserByCpfAndCode,updatePasswordByCpf}

@@ -16,7 +16,9 @@ CREATE TABLE usuarios (
     CEP VARCHAR(8) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE ,
     cargo ENUM('administrador', 'coordenador', 'coletor') DEFAULT 'coletor',
-    statusConta ENUM('ativo', 'desligado') DEFAULT 'ativo'
+    statusConta ENUM('ativo', 'desligado') DEFAULT 'ativo',
+    codigo_recuperacao VARCHAR(6) NULL,   
+    expiracao_codigo TIMESTAMP NULL
 );
 #--- Sensor IOT -----------------------------------------------------------------------------------------------------------------
 CREATE TABLE SistemaSensor(
