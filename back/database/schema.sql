@@ -18,7 +18,9 @@ CREATE TABLE usuarios (
     cargo ENUM('administrador', 'coordenador', 'coletor') DEFAULT 'coletor',
     statusConta ENUM('ativo', 'desligado') DEFAULT 'ativo',
     codigo_recuperacao VARCHAR(6) NULL,   
-    expiracao_codigo TIMESTAMP NULL
+    expiracao_codigo TIMESTAMP NULL,
+    token_verificacao VARCHAR(255) NULL,
+    expiracao_token_verificacao TIMESTAMP NULL
 );
 #--- Sensor IOT -----------------------------------------------------------------------------------------------------------------
 CREATE TABLE SistemaSensor(

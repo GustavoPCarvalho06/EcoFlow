@@ -1,5 +1,5 @@
 import {readAllUser, readUser, createUser, updateUser, changeStatus, changeFuncao,findUsersPaginated} from "../models/UserModels.js"
-
+import { sendVerificationEmail } from '../config/mailer.js'; 
 
 
 const createUserController = async (req, res) => {
@@ -10,29 +10,30 @@ const createUserController = async (req, res) => {
       return res.status(400).json({ mensagem: "Dados insuficientes para criar o usuário." });
     }
 
-    await createUser(userData);
+    // 1. Chama a função UMA ÚNICA VEZ
+    const { email, token } = await createUser(userData);
 
-    return res.status(201).json({ mensagem: "Usuário criado com sucesso" });
+    // 2. Envia o e-mail
+    await sendVerificationEmail(email, token);
+
+    // 3. Retorna a resposta de sucesso
+    return res.status(201).json({ mensagem: "Usuário criado com sucesso. Um e-mail de verificação foi enviado." });
 
   } catch (err) {
-    // =======================================================
-    // NOVA CAPTURA DE ERRO DE CEP ADICIONADA AQUI
-    // =======================================================
     if (err.statusCode === 404) {
       return res.status(404).json({ mensagem: err.message });
     }
-
-    // CAPTURA DO ERRO DE CPF/CEP INVÁLIDO (formato)
     if (err.statusCode === 400) {
       return res.status(400).json({ mensagem: err.message });
     }
-    
-    // CAPTURA DO ERRO DE CPF DUPLICADO
     if (err.statusCode === 409) {
       return res.status(409).json({ mensagem: err.message });
     }
+    if (err.message === "Não foi possível enviar o e-mail de verificação.") {
+        // Este erro pode acontecer se o usuário for criado mas o email falhar.
+        return res.status(500).json({ mensagem: "Usuário criado, mas houve uma falha ao enviar o e-mail de verificação. Contate o suporte." });
+    }
     
-    // CAPTURA DE OUTROS ERROS
     console.error("Erro no controller ao criar usuário: ", err);
     return res.status(500).json({ mensagem: "Erro interno ao tentar criar o usuário." });
   }

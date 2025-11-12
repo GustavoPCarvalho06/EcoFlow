@@ -12,6 +12,7 @@ import lixo from "./routes/lixoRotas.js"
 import msg from "./routes/msgRotas.js"
 import comunicados from "./routes/comunicadoRotas.js"
 import recuperacao from "./routes/recuperacaoRotas.js";
+import authRoutes from "./routes/authRotas.js";
 
 import sensor from "./routes/statusSensorRotas.js"
 import userStatus from "./routes/statusUserRotas.js"
@@ -90,6 +91,7 @@ app.use('/login', login);
 app.use('/msg', msg);
 app.use('/comunicados', comunicados);
 app.use('/recuperacao', recuperacao);
+app.use('/auth', authRoutes); 
 
 // Suas Views (Rotas de Status)
 app.use('/statusSensor', sensor);

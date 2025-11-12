@@ -60,9 +60,10 @@ export function UserManagementTable() {
   
   const [createCpf, setCreateCpf] = useState("");
   const [createCep, setCreateCep] = useState("");
-  
-  // Estado para o CEP do modal de edição, para garantir a formatação
   const [editCep, setEditCep] = useState("");
+
+  // ADIÇÃO 1: Estado para controlar o modal de sucesso
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
 
   const fetchUsers = useCallback(async () => {
@@ -108,7 +109,6 @@ export function UserManagementTable() {
 
   const handleOpenEditModal = (user) => {
     setSelectedUser(user);
-    // Pré-formata o CEP ao abrir o modal de edição
     setEditCep(formatCEP(user.CEP)); 
     setError("");
     setIsEditModalOpen(true);
@@ -132,7 +132,6 @@ export function UserManagementTable() {
     setCreateCep(formatCEP(e.target.value));
   };
   
-  // Handler separado para o CEP do modal de edição
   const handleEditCepInputChange = (e) => {
     setEditCep(formatCEP(e.target.value));
   };
@@ -161,6 +160,7 @@ export function UserManagementTable() {
     }
   };
 
+  // ADIÇÃO 2: Lógica do handleCreateUser modificada
   const handleCreateUser = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -169,12 +169,30 @@ export function UserManagementTable() {
     data.cpf = data.cpf.replace(/\D/g, '');
     data.CEP = data.CEP.replace(/\D/g, '');
 
-    await handleApiCall('post', 'POST', data, () => {
-      setIsCreateModalOpen(false);
-      setCreateCpf("");
+    try {
+      setError(""); // Limpa erros de tentativas anteriores
+      const response = await fetch(`${apiUrl}/user/post`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      const responseData = await response.json(); // Sempre leia a resposta
+
+      if (!response.ok) {
+        throw new Error(responseData.mensagem || 'Ocorreu um erro');
+      }
+
+      // SUCESSO!
+      setIsCreateModalOpen(false); // Fecha o modal de criação
+      setCreateCpf("");            // Limpa os campos
       setCreateCep("");
-      forceRefresh();
-    });
+      setIsSuccessModalOpen(true); // Abre o modal de sucesso
+      forceRefresh();              // Atualiza a tabela
+
+    } catch (err) {
+      setError(err.message);
+    }
   };
   
   const handleUpdateUser = async (event) => {
@@ -233,7 +251,6 @@ export function UserManagementTable() {
   return (
     <>
       <Card>
-        {/* CABEÇALHO E FILTROS - SEM ALTERAÇÕES */}
         <CardHeader>
           <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -269,7 +286,6 @@ export function UserManagementTable() {
             </Select>
           </div>
         </CardHeader>
-        {/* TABELA - SEM ALTERAÇÕES */}
         <CardContent>
           <Table>
             <TableHeader>
@@ -307,7 +323,6 @@ export function UserManagementTable() {
             </TableBody>
           </Table>
         </CardContent>
-        {/* FOOTER - SEM ALTERAÇÕES */}
         <CardFooter className="flex items-center justify-between border-t p-4">
           <div className="text-sm text-muted-foreground">Total de <span className="font-semibold">{totalUsers}</span> usuário(s).</div>
           <div className="flex items-center gap-4">
@@ -327,7 +342,6 @@ export function UserManagementTable() {
         </CardFooter>
       </Card>
 
-      {/* --- MODAL DE CRIAÇÃO --- */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
@@ -339,7 +353,6 @@ export function UserManagementTable() {
               <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="nome" className="text-right">Nome</Label><Input id="nome" name="nome" required className="col-span-3" maxLength="100" /></div>
               <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="cpf" className="text-right">CPF</Label><Input id="cpf" name="cpf" required className="col-span-3" value={createCpf} onChange={handleCpfInputChange} maxLength="14" placeholder="000.000.000-00" inputMode="numeric" pattern="[0-9.-]*"/></div>
               <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="email" className="text-right">Email</Label><Input id="email" name="email" type="email" required className="col-span-3" placeholder="exemplo@email.com"/></div>
-              {/* ALTERAÇÃO AQUI */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="CEP" className="text-right">CEP</Label>
                 <Input id="CEP" name="CEP" required className="col-span-3" value={createCep} onChange={handleCepInputChange} maxLength="9" placeholder="00000-000" inputMode="numeric" pattern="[0-9-]*" />
@@ -355,7 +368,6 @@ export function UserManagementTable() {
         </DialogContent>
       </Dialog>
       
-      {/* --- MODAL DE EDIÇÃO --- */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
@@ -367,7 +379,6 @@ export function UserManagementTable() {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-nome" className="text-right">Nome</Label><Input id="edit-nome" name="nome" defaultValue={selectedUser.nome} className="col-span-3" maxLength="100" /></div>
                 <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="edit-email" className="text-right">Email</Label><Input id="edit-email" name="email" type="email" defaultValue={selectedUser.email} required className="col-span-3" placeholder="exemplo@email.com"/></div>
-                {/* ALTERAÇÃO AQUI */}
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-CEP" className="text-right">CEP</Label>
                   <Input id="edit-CEP" name="CEP" value={editCep} onChange={handleEditCepInputChange} required className="col-span-3" maxLength="9" placeholder="00000-000" inputMode="numeric" pattern="[0-9-]*"/>
@@ -384,9 +395,26 @@ export function UserManagementTable() {
         </DialogContent>
       </Dialog>
 
-      {/* --- ALERTAS --- */}
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Esta ação irá desativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>. O usuário não poderá mais acessar o sistema.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleConfirmDeactivate} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
       <AlertDialog open={isReactivateAlertOpen} onOpenChange={setIsReactivateAlertOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Confirmar Reativação</AlertDialogTitle><AlertDialogDescription>Tem certeza que deseja reativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>? O usuário voltará a ter acesso ao sistema.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleConfirmReactivate} className="bg-blue-600 hover:bg-blue-700">Sim, reativar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+    
+      {/* ADIÇÃO 3: O JSX DO MODAL DE SUCESSO */}
+      <AlertDialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Usuário Criado com Sucesso!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Um e-mail de verificação foi enviado para a conta do novo usuário. 
+              Ele precisará clicar no link enviado para ativar a conta e poder fazer login.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsSuccessModalOpen(false)}>
+              Entendido
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

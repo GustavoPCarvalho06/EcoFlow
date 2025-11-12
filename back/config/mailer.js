@@ -37,3 +37,32 @@ export const sendRecoveryEmail = async (to, code) => {
         throw new Error("Não foi possível enviar o e-mail de recuperação.");
     }
 };
+
+
+export const sendVerificationEmail = async (to, token) => {
+    try {
+        // IMPORTANTE: Troque 'localhost:3000' pelo domínio do seu site em produção
+        const verificationLink = `http://localhost:3000/verificar-conta?token=${token}`;
+
+        await transporter.sendMail({
+            from: '"EcoFlow Suporte" <ecoflowsuport@gmail.com>', // Use seu e-mail de suporte
+            to: to,
+            subject: "Ative sua Conta EcoFlow",
+            html: `
+                <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+                    <h2>Bem-vindo(a) ao EcoFlow!</h2>
+                    <p>Seu cadastro foi realizado com sucesso.</p>
+                    <p>Por favor, clique no botão abaixo para ativar sua conta. O link é válido por 24 horas.</p>
+                    <a href="${verificationLink}" style="background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; font-weight: bold;">
+                        Ativar Minha Conta
+                    </a>
+                </div>
+            `,
+        });
+        console.log(`E-mail de verificação enviado para ${to}`);
+        return true;
+    } catch (error) {
+        console.error("Erro ao enviar e-mail de verificação:", error);
+        throw new Error("Não foi possível enviar o e-mail de verificação.");
+    }
+}

@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 // PASSO 1: Importe a nova biblioteca
 // =======================================================
 import cep from 'cep-promise';
+import crypto from 'crypto';
 
 
 const deleteUser = async (id) => {
@@ -97,6 +98,9 @@ const createUser = async (data) => {
       throw error;
     }
 
+     const token = crypto.randomBytes(32).toString('hex'); // <-- 2. GERE UM TOKEN SEGURO
+    const expiracao = new Date(Date.now() + 24 * 60 * 60 * 1000); // <-- 3. VALIDADE DE 24 HORAS
+
     const senhaHash = await bcrypt.hash(data.senha, 10);
     
     const dataUsuario = {
@@ -108,11 +112,14 @@ const createUser = async (data) => {
       sexo: data.sexo,
       estadoCivil: data.estadoCivil,
       CEP: cleanCEP,
-      statusConta: 'ativo'
+      statusConta: 'desligado', // <-- 4. SEMPRE CRIAR COMO 'desligado'
+      token_verificacao: token, // <-- 5. SALVE O TOKEN
+      expiracao_token_verificacao: expiracao // <-- 6. SALVE A EXPIRAÇÃO
     };
-    
+
+
     await create("usuarios", dataUsuario);
-    return;
+    return { email: data.email, token: token };
 
   } catch (err) {
     // Repassa o erro (seja de CEP, CPF ou outro) para o controller tratar.
@@ -297,5 +304,35 @@ const updatePasswordByCpf = async (cpf, newPassword) => {
     }
 };
 
+const verifyUserByToken = async (token) => {
+    try {
+        // 1. Encontra o usuário pelo token
+        const sqlFind = "SELECT id, expiracao_token_verificacao FROM usuarios WHERE token_verificacao = ?";
+        const [user] = await read(sqlFind, [token]);
+
+        if (!user) {
+            throw new Error("Token de verificação inválido.");
+        }
+
+        // 2. Verifica se o token expirou
+        if (new Date(user.expiracao_token_verificacao) < new Date()) {
+            throw new Error("Seu link de verificação expirou.");
+        }
+
+        // 3. Ativa o usuário e limpa o token
+        const dataUpdate = {
+            statusConta: 'ativo',
+            token_verificacao: null,
+            expiracao_token_verificacao: null
+        };
+        await update("usuarios", dataUpdate, `id = '${user.id}'`);
+
+        return true;
+    } catch (err) {
+        console.error("Erro no model ao verificar token:", err);
+        throw err; // Repassa o erro para o controller
+    }
+};
+
 export {readAllUser, readUser, readUserEmail,   createUser, updateUser, changeStatus, changeFuncao,deleteUser,findUsersPaginated,
-  findUserByCpfWithEmail,saveRecoveryCode,findUserByCpfAndCode,updatePasswordByCpf}
+  findUserByCpfWithEmail,saveRecoveryCode,findUserByCpfAndCode,updatePasswordByCpf,verifyUserByToken}
