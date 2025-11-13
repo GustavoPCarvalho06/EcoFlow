@@ -72,9 +72,8 @@ export function LoginForm({ className, ...props }) {
                 setError(data.erro || data.mensagem || "Erro desconhecido ao fazer login.");
                 return;
             }
-
-            const userRole = data.user.cargo;
-            router.push(`/dashboard/${userRole}`);
+            
+            router.push(`/dashboard`);
 
         } catch (err) {
             console.error("Falha na requisição de login:", err);

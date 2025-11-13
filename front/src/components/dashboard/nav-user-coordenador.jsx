@@ -31,7 +31,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-import { AppSidebarCoordenador } from "@/components/dashboard/app-sidebar-coordenador";
+import { AppSidebarCoordenador } from "@/components/dashboard/Sidebar/SidebarCoordenador";
 import { logout } from "@/hooks/logout"
 export function NavUser({
   usuario,
@@ -85,7 +85,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <Link href="/dashboard/coordenador/Perfil">
+                <Link href="/Perfil">
               <DropdownMenuItem>
                 <IconUserCircle />
                   Account

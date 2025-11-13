@@ -99,7 +99,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Link href="/dashboard/administrador/Perfil">
+              <Link href="/Perfil">
                 <DropdownMenuItem>
                   <IconUserCircle />
                   Account
