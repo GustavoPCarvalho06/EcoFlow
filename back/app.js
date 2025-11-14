@@ -20,10 +20,14 @@ import msgStatus from "./routes/statusMsgRotas.js"
 import diaStatus from "./routes/statusDiaRotas.js"
 import configureChat from './socket/chat.js';
 
+
+//vcs tem tudo inveja da minha maneriser chora mais hahahahah
+
+
 const app = express();
 const server = http.createServer(app);
 
-// --- INÍCIO DA CONFIGURAÇÃO DE REDE E CORS ---
+// --- INÍCIO DA CONFIGURAÇÃO DE REDE E CORS --- oi
 
 // 1. Função para encontrar o endereço de IP local na rede
 const getLocalIpAddress = () => {

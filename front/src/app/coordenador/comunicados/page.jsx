@@ -1,4 +1,4 @@
-import { AppSidebarCoordenador } from "@/components/dashboard/Sidebar/SidebarCoordenador";
+import { AppSidebarCoordenador, CoordenadorSidebar } from "@/components/dashboard/Sidebar/SidebarCoordenador";
 import { SiteHeader } from "@/components/dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ComunicadosComponenteCoordenador } from "@/components/dashboard/ComunicadosComponenteCoordenador";
@@ -26,7 +26,7 @@ export default async function ComunicadosPage() {
         "--header-height": "calc(var(--spacing) * 12)"
       }}
     >
-      <AppSidebarCoordenador usuario={user} />
+      <CoordenadorSidebar usuario={user} />
       <SidebarInset usuario={user}>
         <SiteHeader usuario={user} />
         <main className="flex flex-1 flex-col p-4 md:p-6">
