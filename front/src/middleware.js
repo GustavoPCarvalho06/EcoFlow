@@ -43,14 +43,14 @@ export function middleware(request) {
     }
 
     // 2. Regra para a rota de Coordenador
-    if (pathname.startsWith("/dashboard/") && user.cargo !== "coordenador") {
+    if (pathname.startsWith("/dashboard") && user.cargo !== "coordenador") {
       // Se o usuário não for um coordenador, redireciona para "não autorizado".
       const unauthorizedUrl = new URL("/", request.url);
       return NextResponse.redirect(unauthorizedUrl);
     }
 
     // 3. Regra para a rota de Administrador
-    if (pathname.startsWith("/usuarios/") && user.cargo !== "administrador") {
+    if (pathname.startsWith("/usuarios") && user.cargo !== "administrador") {
       // Se o usuário não for um administrador, redireciona para "não autorizado".
       const unauthorizedUrl = new URL("/", request.url);
       return NextResponse.redirect(unauthorizedUrl);

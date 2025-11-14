@@ -27,9 +27,9 @@ import { useUnreadCount } from "@/app/context/UnreadCountContext";
 
 const navItems = [
     { title: "Dashboard", href: "/dashboard/", icon: IconDashboard },
-    { title: "Usuários", href: "/administrador/usuarios", icon: IconUsers },
+    { title: "Usuários", href: "/usuarios", icon: IconUsers },
     { title: "Mensagem", href: "/mensagens", icon: IconMail },
-    { title: "Comunicados", href: "/administrador/comunicados", icon: IconBroadcast },
+    { title: "Comunicados", href: "/comunicados", icon: IconBroadcast },
 ];
 
 const coletorNavItems = [
