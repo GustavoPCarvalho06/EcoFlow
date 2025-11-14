@@ -1,6 +1,3 @@
-import {  CoordenadorSidebar } from "@/components/dashboard/Sidebar/SidebarCoordenador";
-import { SiteHeader } from "@/components/dashboard/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 

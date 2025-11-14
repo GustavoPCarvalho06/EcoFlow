@@ -1,6 +1,3 @@
-import { AdministradorSidebar, AppSidebar } from "@/components/dashboard/Sidebar/AdministradorSidebar";
-import { SiteHeader } from "@/components/dashboard/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import MapboxMap from "@/components/Map/MapboxMap.jsx";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";

@@ -6,7 +6,6 @@ import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 import { CoordenadorSidebar } from "../Sidebar/SidebarCoordenador";
 import ColetorSidebar from "../Sidebar/ColetorSidebar";
-import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
 
 

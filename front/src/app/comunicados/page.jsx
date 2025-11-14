@@ -1,12 +1,9 @@
-import { AppSidebarCoordenador } from "@/components/dashboard/Sidebar/SidebarCoordenador";
-import { SiteHeader } from "@/components/dashboard/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
 import { ComunicadosComponenteCoordenador } from "@/components/dashboard/ComunicadosComponenteCoordenador";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 import Layout from "@/components/dashboard/layout/Layout";
 import { ComunicadosComponenteAdministrador } from "@/components/dashboard/ComunicadosComponenteAdministrador";
-import { redirect } from "next/navigation";
 
 export default async function ComunicadosPage() {
   const cookieStore = cookies();
