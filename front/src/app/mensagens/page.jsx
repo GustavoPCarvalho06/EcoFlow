@@ -1,12 +1,7 @@
-// src/app/dashboard/administrador/mensagens/page.jsx (VERSÃO CORRIGIDA)
-
-import { AppSidebarCoordenador, CoordenadorSidebar } from "@/components/dashboard/Sidebar/SidebarCoordenador";
-import { SiteHeader } from "@/components/dashboard/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-// 1. CORREÇÃO DA IMPORTAÇÃO
 import { ChatComponent } from "@/components/dashboard/ChatComponent"; 
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
+import Layout from "@/components/dashboard/layout/Layout";
 
 export default async function MensagensPage() {
   const cookieStore = cookies();
@@ -27,25 +22,14 @@ export default async function MensagensPage() {
   }
 
   return (
-    <SidebarProvider
-      style={{
-        "--sidebar-width": "calc(var(--spacing) * 72)",
-        "--header-height": "calc(var(--spacing) * 12)"
-      }}
-    >
-      <CoordenadorSidebar usuario={user} />
-      <SidebarInset usuario={user}>
-        <SiteHeader usuario={user} />
+    <Layout>
         <main className="flex flex-1 flex-col p-4 md:p-6">
           <div className="flex items-center mb-4">
             <h1 className="font-semibold text-lg md:text-xl">Mensagens</h1>
           </div>
-
           {/* 2. CORREÇÃO DO NOME E PASSAGEM DOS DADOS (PROPS) */}
           <ChatComponent user={user} token={tokenCookie?.value} />
-
         </main>
-      </SidebarInset>
-    </SidebarProvider>
+    </Layout>
   );
 }

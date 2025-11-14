@@ -23,9 +23,9 @@ import { useUnreadCount } from "../../../app/context/UnreadCountContext.jsx";
 
 const navItemsCoordenador = [
     { title: "Dashboard", href: "/dashboard", icon: IconDashboard },
-    { title: "Mensagem", href: "/coordenador/mensagens", icon: IconMail },
-    { title: "Mapa de Coleta", href: "/coordenador/rotas", icon: IconMapPin },
-    { title: "Gerenciar Comunicados", href: "/coordenador/comunicados", icon: IconBroadcast },
+    { title: "Mensagem", href: "/mensagens", icon: IconMail },
+    { title: "Mapa de Coleta", href: "/mapa", icon: IconMapPin },
+    { title: "Gerenciar Comunicados", href: "/comunicados", icon: IconBroadcast },
 ];
 
 export function CoordenadorSidebar(usuario, ...props) {
@@ -60,7 +60,7 @@ export function CoordenadorSidebar(usuario, ...props) {
             </SidebarHeader>
             <SidebarContent className="p-4">
                  <div className="mb-4 flex items-center gap-2">
-                    <Link href="/coordenador/comunicados" passHref>
+                    <Link href="/comunicados" passHref>
                         <Button size="icon" variant="ghost" aria-label="Notifications" className="relative">
                             <IconBell className="h-6 w-6" />
                             {/* Usa o estado 'totalComunicadoUnread' vindo do contexto */}
