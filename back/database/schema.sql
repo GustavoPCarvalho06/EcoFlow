@@ -26,7 +26,8 @@ CREATE TABLE usuarios (
 CREATE TABLE SistemaSensor(
 	id_Sensor INT AUTO_INCREMENT PRIMARY KEY,
     statusLixo ENUM ('Cheia','Quase Cheia','Vazia') DEFAULT 'Vazia', # ver dps se deixa "Quase Cheia" ou "Metade" checar na documentaçao
-    localizacao POINT
+    localizacao POINT,
+    Endereco VARCHAR(255)
 );
 
 #--- Mensagens Suporte -----------------------------------------------------------------------------------------------------------------
@@ -94,7 +95,7 @@ CREATE TABLE comunicados_vistos (
 #--- VIEWS -----------------------------------------------------------------------------------------------------------------
 # Relatorio das Rotas
 CREATE VIEW RotasRelatorio AS
-SELECT SistemaSensor.id_Sensor AS ID, SistemaSensor.statusLixo AS Stats, SistemaSensor.localizacao AS Coordenadas
+SELECT SistemaSensor.id_Sensor AS ID, SistemaSensor.statusLixo AS Status,SistemaSensor.Endereco AS Endereço, SistemaSensor.localizacao AS Coordenadas
 FROM SistemaSensor;
 
 # Relatório de Usuários Ativos
