@@ -1,31 +1,29 @@
-import { AppSidebarCoordenador } from "@/components/dashboard/Sidebar/SidebarCoordenador";
-import { SiteHeader } from "@/components/dashboard/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+// Local do arquivo: front\src\app\Perfil\page.jsx
+
+import Perfil from "@/components/Perfil/perfil";
+import Layout from "@/components/dashboard/layout/Layout";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Perfil from "@/components/Perfil/perfil";
-import { AppSidebar } from "@/components/dashboard/Sidebar/AdministradorSidebar";
-import Sidebar from "@/components/dashboard/Sidebar/AdministradorSidebar";
-import Layout from "@/components/dashboard/layout/Layout";
 
-export default async function pagePerfil() {
+// Esta página agora é um Server Component que busca os dados
+export default async function PagePerfil() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
 
   let user = null;
   if (tokenCookie && tokenCookie.value) {
     try {
-      const decodedToken = jwt.decode(tokenCookie.value);
-      user = decodedToken;
+      // Decodificamos o token aqui, no servidor
+      user = jwt.decode(tokenCookie.value);
     } catch (error) {
-      console.error("Erro ao decodificar o token:", error);
+      console.error("Erro ao decodificar o token na página de perfil:", error);
     }
   }
 
-  return(
+  return (
     <Layout>
-        <Perfil/>
+      {/* Passamos o objeto 'user' como propriedade para o componente cliente */}
+      <Perfil initialUser={user} />
     </Layout>
-  )
+  );
 }

@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 import { CoordenadorSidebar } from "../Sidebar/SidebarCoordenador";
 import ColetorSidebar from "../Sidebar/ColetorSidebar";
+import { redirect } from "next/navigation";
 
 
 
@@ -22,6 +23,9 @@ export default async function Layout({ children }) {
             console.error("Erro ao decodificar o token:", error);
         }
     }
+    if (!user){
+        redirect('/');
+    };
 
 
 
@@ -37,9 +41,7 @@ export default async function Layout({ children }) {
                     <AdministradorSidebar variant="inset" usuario={user} />
                     <SidebarInset usuario={user}>
                         <SiteHeader usuario={user} />
-                        <main usuario={user}>
                             {children}
-                        </main>
                     </SidebarInset>
                 </SidebarProvider>
             );
@@ -57,9 +59,8 @@ export default async function Layout({ children }) {
                     <CoordenadorSidebar variant="inset" usuario={user} />
                     <SidebarInset usuario={user}>
                         <SiteHeader usuario={user} />
-                        <main usuario={user}>
+                        
                             {children}
-                        </main>
                     </SidebarInset>
                 </SidebarProvider>
             );

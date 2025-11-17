@@ -27,9 +27,9 @@ import { useUnreadCount } from "@/app/context/UnreadCountContext";
 
 const navItems = [
     { title: "Dashboard", href: "/dashboard/", icon: IconDashboard },
-    { title: "Usuários", href: "/administrador/usuarios", icon: IconUsers },
-    { title: "Mensagem", href: "/administrador/mensagens", icon: IconMail },
-    { title: "Comunicados", href: "/administrador/comunicados", icon: IconBroadcast },
+    { title: "Usuários", href: "/usuarios", icon: IconUsers },
+    { title: "Mensagem", href: "/mensagens", icon: IconMail },
+    { title: "Comunicados", href: "/comunicados", icon: IconBroadcast },
 ];
 
 const coletorNavItems = [
@@ -57,7 +57,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5 h-15"
                         >
-                            <Link href="/dashboard/">
+                            <Link href="/dashboard">
                                 <Image
                                     src="/imagen/Logo.png"
                                     alt="EcoFlow logo"
@@ -75,7 +75,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
 
             <SidebarContent className="p-4">
                 <div className="mb-4 flex items-center gap-2">
-                    <Link href="/administrador/comunicados" passHref>
+                    <Link href="/comunicados" passHref>
                         <Button 
                             size="icon" 
                             variant="ghost" 

@@ -58,7 +58,7 @@ export function UserPreviewTable({ users }) {
       <CardFooter className="flex justify-center border-t p-0 h-7">
         {/* MUDANÇA 3: Classes corrigidas para um botão largo e alto */}
         <Button asChild variant="outline" className="w-full h-13 border-0 border-t" aria-label="Ver todos os usuários">
-          <Link href="/dashboard/administrador/usuarios">
+          <Link href="/usuarios">
             <Menu className="h-8 w-8" />
           </Link>
         </Button>

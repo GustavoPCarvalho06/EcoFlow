@@ -1,9 +1,5 @@
-import { AdministradorSidebar } from "@/components/dashboard/Sidebar/AdministradorSidebar";
-import { SiteHeader } from "@/components/dashboard/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
-import { redirect } from "next/navigation";
 import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
 import { UserPreviewTable } from "@/components/dashboard/UserPreviewTable";
 import Layout from "../dashboard/layout/Layout";
