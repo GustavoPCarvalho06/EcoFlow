@@ -95,7 +95,7 @@ CREATE TABLE comunicados_vistos (
 #--- VIEWS -----------------------------------------------------------------------------------------------------------------
 # Relatorio das Rotas
 CREATE VIEW RotasRelatorio AS
-SELECT SistemaSensor.id_Sensor AS ID, SistemaSensor.statusLixo AS Status,SistemaSensor.Endereco AS Endereço, SistemaSensor.localizacao AS Coordenadas
+SELECT SistemaSensor.id_Sensor AS ID, SistemaSensor.statusLixo AS Stats, SistemaSensor.Endereco AS Endereco, SistemaSensor.localizacao AS Coordenadas
 FROM SistemaSensor;
 
 # Relatório de Usuários Ativos
