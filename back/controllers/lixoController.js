@@ -1,23 +1,27 @@
 import { createLixo, updateLixo, deleteLixo } from "../models/lixeiraModels.js";
 
-// 🔹 Criar
+// Criar
 const createLixoController = async (req, res) => {
   try {
-    const { statusLixo, localizacao } = req.body;
+    const { statusLixo, localizacao, endereco } = req.body;
 
-    if (!statusLixo || !localizacao || !localizacao.x || !localizacao.y) {
-      return res.status(400).json({ mensagem: "statusLixo e localizacao inválidos" });
+    if (!statusLixo || !localizacao || localizacao.x === undefined || localizacao.y === undefined || !endereco) {
+      return res.status(400).json({ mensagem: "statusLixo, localizacao e endereco inválidos" });
     }
 
-    await createLixo({ statusLixo, localizacao });
+    if (!["Cheia", "Quase Cheia", "Vazia"].includes(statusLixo)) {
+      return res.status(400).json({ mensagem: "statusLixo inválido" });
+    }
+
+    await createLixo({ statusLixo, localizacao, endereco });
     return res.status(200).json({ mensagem: "Lixeira criada com sucesso" });
+
   } catch (err) {
-    console.error("Erro no controller ao criar lixeira:", err);
     return res.status(500).json({ mensagem: err.message });
   }
 };
 
-// 🔹 Atualizar
+// Atualizar
 const updateLixoController = async (req, res) => {
   try {
     const { id, statusLixo } = req.body;
@@ -33,7 +37,7 @@ const updateLixoController = async (req, res) => {
   }
 };
 
-// 🔹 Deletar
+// Deletar
 const deleteLixoController = async (req, res) => {
   try {
     const { id } = req.body;

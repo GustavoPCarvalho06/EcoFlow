@@ -204,6 +204,7 @@ export default function MapboxMap({ onMapClick }) {
         .setPopup(
           new mapboxgl.Popup({ offset: 25 }).setHTML(`
             <strong>ID:</strong> ${ponto.ID}<br/>
+            <strong>Endereço:</strong> ${ponto.endereco}<br>
             <strong>Status:</strong> ${ponto.Stats}<br/>
             <strong>Lat:</strong> ${y}<br/>
             <strong>Lng:</strong> ${x}

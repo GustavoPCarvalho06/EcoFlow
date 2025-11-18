@@ -1,6 +1,6 @@
 import { read, readAll, deleteRecord, create, update ,createLixoDB} from "../config/database.js";
 
-// 🗑️ Deletar Lixeira
+// Deletar
 const deleteLixo = async (id) => {
   try {
     const usuario = await deleteRecord("SistemaSensor", `id_Sensor = '${id}'`);
@@ -14,13 +14,13 @@ const deleteLixo = async (id) => {
   }
 };
 
-// 🧱 Criar Lixeira (com POINT)
+// Criar c/point
 const createLixo = async (data) => {
   try {
-    const { statusLixo, localizacao } = data;
+    const { statusLixo, localizacao, endereco } = data;
 
-    if (!statusLixo || !localizacao || !localizacao.x || !localizacao.y) {
-      throw new Error("Campos statusLixo e localizacao são obrigatórios");
+    if (!statusLixo || !localizacao || !localizacao.x || !localizacao.y || !endereco) {
+      throw new Error("Campos statusLixo, localizacao e endereço são obrigatórios");
     }
 
     // Cria o POINT no formato SQL
@@ -30,10 +30,11 @@ const createLixo = async (data) => {
     const dataUsuario = {
       statusLixo,
       localizacao: point,
+      endereco,
     };
 
     // Envia o comando de criação
-    await createLixoDB("SistemaSensor", dataUsuario, true); // ⚠️ Passe true se sua função create() não usa prepared statements
+    await createLixoDB("SistemaSensor", dataUsuario, true);
     return "Lixeira criada com sucesso";
   } catch (err) {
     console.error("Houve um erro ao criar a Lixeira:", err);
@@ -41,7 +42,7 @@ const createLixo = async (data) => {
   }
 };
 
-// ♻️ Atualizar Lixeira
+// Update
 const updateLixo = async (data, id) => {
   try {
     const conteudo = {

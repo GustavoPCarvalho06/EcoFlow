@@ -44,10 +44,12 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    latitude: coords.lat,
-                    longitude: coords.lng,
-                    rua: coords.rua,
-                    status: status,
+                    statusLixo: status,
+                    localizacao: {
+                        x: coords.lng,
+                        y: coords.lat
+                    },
+                    endereco: coords.rua
                 }),
             });
 
@@ -64,6 +66,7 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
             console.error("Erro ao enviar:", err);
         }
     };
+
 
     return (
         <div className="w-[260px] rounded-xl border shadow-sm p-5 flex flex-col items-center gap-4 bg-white">
@@ -89,7 +92,7 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
 
             <div className="w-full">
                 <label className="text-sm font-medium">Status do Lixo</label>
-                <select 
+                <select
                     className="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm"
                     onChange={(e) => setStatus(e.target.value)}
                     value={status}
@@ -100,8 +103,8 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
                 </select>
             </div>
 
-            <Button 
-                size="lg" 
+            <Button
+                size="lg"
                 className="w-full gap-2 cursor-pointer text-md"
                 onClick={handleCreate}
             >
