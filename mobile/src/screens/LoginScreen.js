@@ -1,9 +1,6 @@
-// =================================================================================
-// Arquivo: C:\...\EcoFlow\mobliler\src\screens\LoginScreen.js (VERSÃO FINAL COM REDIRECIONAMENTO PARA DRAWER)
-// =================================================================================
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, Modal } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import novo
 
 // !! IMPORTANTE !! Substitua pelo IP do seu backend.
 const API_URL = 'http://10.84.6.136:3001';
@@ -23,7 +20,6 @@ const formatCPF = (value) => {
   return limitedValue;
 };
 
-
 // --- Componente do Modal de Recuperação de Senha ---
 const ForgotPasswordModal = ({ visible, onClose }) => {
     const [step, setStep] = useState(1);
@@ -35,14 +31,90 @@ const ForgotPasswordModal = ({ visible, onClose }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     
-    const resetModal = () => { setStep(1); setCpf(''); setCodigo(''); setNovaSenha(''); setConfirmarSenha(''); setError(''); setSuccess(''); setIsLoading(false); onClose(); };
-    const handleSendCode = async () => { setIsLoading(true); setError(''); try { const response = await fetch(`${API_URL}/recuperacao/enviar-codigo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, '') }), }); const data = await response.json(); if (!response.ok) throw new Error(data.mensagem); setSuccess('Código enviado para seu e-mail!'); setStep(2); } catch (err) { setError(err.message); } finally { setIsLoading(false); } };
-    const handleVerifyCode = async () => { setIsLoading(true); setError(''); try { const response = await fetch(`${API_URL}/recuperacao/verificar-codigo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo }), }); const data = await response.json(); if (!response.ok) throw new Error(data.mensagem); setSuccess('Código verificado com sucesso!'); setStep(3); } catch (err) { setError(err.message); } finally { setIsLoading(false); } };
-    const handleResetPassword = async () => { if (novaSenha !== confirmarSenha) { setError('As senhas não coincidem.'); return; } setIsLoading(true); setError(''); try { const response = await fetch(`${API_URL}/recuperacao/redefinir-senha`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo, novaSenha }), }); const data = await response.json(); if (!response.ok) throw new Error(data.mensagem); setSuccess('Senha redefinida com sucesso!'); setTimeout(resetModal, 2000); } catch (err) { setError(err.message); } finally { setIsLoading(false); } };
+    const resetModal = () => { 
+        setStep(1); setCpf(''); setCodigo(''); setNovaSenha(''); 
+        setConfirmarSenha(''); setError(''); setSuccess(''); 
+        setIsLoading(false); onClose(); 
+    };
 
-    return ( <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={resetModal}> <View style={styles.modalContainer}> <View style={styles.modalView}> <Text style={styles.modalTitle}>Recuperar Senha</Text> {error && <Text style={styles.errorTextModal}>{error}</Text>} {success && <Text style={styles.successText}>{success}</Text>} {step === 1 && ( <> <Text style={styles.modalDescription}>Digite seu CPF para iniciarmos a recuperação.</Text> <TextInput style={styles.input} placeholder="CPF" value={cpf} onChangeText={(text) => setCpf(formatCPF(text))} keyboardType="numeric" /> <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={isLoading}> <Text style={styles.buttonText}>{isLoading ? 'Enviando...' : 'Enviar Código'}</Text> </TouchableOpacity> </> )} {step === 2 && ( <> <Text style={styles.modalDescription}>Insira o código de 6 dígitos enviado para seu e-mail.</Text> <TextInput style={styles.input} placeholder="Código" value={codigo} onChangeText={setCodigo} keyboardType="numeric" maxLength={6} /> <TouchableOpacity style={styles.button} onPress={handleVerifyCode} disabled={isLoading}> <Text style={styles.buttonText}>{isLoading ? 'Verificando...' : 'Verificar Código'}</Text> </TouchableOpacity> </> )} {step === 3 && ( <> <Text style={styles.modalDescription}>Crie uma nova senha.</Text> <TextInput style={styles.input} placeholder="Nova Senha" value={novaSenha} onChangeText={setNovaSenha} secureTextEntry /> <TextInput style={styles.input} placeholder="Confirmar Nova Senha" value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry /> <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={isLoading}> <Text style={styles.buttonText}>{isLoading ? 'Salvando...' : 'Redefinir Senha'}</Text> </TouchableOpacity> </> )} <TouchableOpacity style={styles.closeButton} onPress={resetModal}> <Text style={styles.closeButtonText}>Fechar</Text> </TouchableOpacity> </View> </View> </Modal> );
+    const handleSendCode = async () => { 
+        setIsLoading(true); setError(''); 
+        try { 
+            const response = await fetch(`${API_URL}/recuperacao/enviar-codigo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, '') }), }); 
+            const data = await response.json(); 
+            if (!response.ok) throw new Error(data.mensagem); 
+            setSuccess('Código enviado para seu e-mail!'); setStep(2); 
+        } catch (err) { setError(err.message); } finally { setIsLoading(false); } 
+    };
+
+    const handleVerifyCode = async () => { 
+        setIsLoading(true); setError(''); 
+        try { 
+            const response = await fetch(`${API_URL}/recuperacao/verificar-codigo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo }), }); 
+            const data = await response.json(); 
+            if (!response.ok) throw new Error(data.mensagem); 
+            setSuccess('Código verificado com sucesso!'); setStep(3); 
+        } catch (err) { setError(err.message); } finally { setIsLoading(false); } 
+    };
+
+    const handleResetPassword = async () => { 
+        if (novaSenha !== confirmarSenha) { setError('As senhas não coincidem.'); return; } 
+        setIsLoading(true); setError(''); 
+        try { 
+            const response = await fetch(`${API_URL}/recuperacao/redefinir-senha`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo, novaSenha }), }); 
+            const data = await response.json(); 
+            if (!response.ok) throw new Error(data.mensagem); 
+            setSuccess('Senha redefinida com sucesso!'); setTimeout(resetModal, 2000); 
+        } catch (err) { setError(err.message); } finally { setIsLoading(false); } 
+    };
+
+    return (
+        <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={resetModal}>
+            <View style={styles.modalContainer}>
+                <View style={styles.modalView}>
+                    <Text style={styles.modalTitle}>Recuperar Senha</Text>
+                    {error ? <Text style={styles.errorTextModal}>{error}</Text> : null}
+                    {success ? <Text style={styles.successText}>{success}</Text> : null}
+                    
+                    {step === 1 && (
+                        <View style={{width: '100%', alignItems: 'center'}}>
+                            <Text style={styles.modalDescription}>Digite seu CPF para iniciarmos a recuperação.</Text>
+                            <TextInput style={styles.input} placeholder="CPF" value={cpf} onChangeText={(text) => setCpf(formatCPF(text))} keyboardType="numeric" />
+                            <TouchableOpacity style={styles.button} onPress={handleSendCode} disabled={isLoading}>
+                                <Text style={styles.buttonText}>{isLoading ? 'Enviando...' : 'Enviar Código'}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {step === 2 && (
+                        <View style={{width: '100%', alignItems: 'center'}}>
+                            <Text style={styles.modalDescription}>Insira o código de 6 dígitos enviado para seu e-mail.</Text>
+                            <TextInput style={styles.input} placeholder="Código" value={codigo} onChangeText={setCodigo} keyboardType="numeric" maxLength={6} />
+                            <TouchableOpacity style={styles.button} onPress={handleVerifyCode} disabled={isLoading}>
+                                <Text style={styles.buttonText}>{isLoading ? 'Verificando...' : 'Verificar Código'}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {step === 3 && (
+                         <View style={{width: '100%', alignItems: 'center'}}>
+                            <Text style={styles.modalDescription}>Crie uma nova senha.</Text>
+                            <TextInput style={styles.input} placeholder="Nova Senha" value={novaSenha} onChangeText={setNovaSenha} secureTextEntry />
+                            <TextInput style={styles.input} placeholder="Confirmar Nova Senha" value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry />
+                            <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={isLoading}>
+                                <Text style={styles.buttonText}>{isLoading ? 'Salvando...' : 'Redefinir Senha'}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    <TouchableOpacity style={styles.closeButton} onPress={resetModal}>
+                        <Text style={styles.closeButtonText}>Fechar</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
 };
-
 
 // --- Componente Principal da Tela de Login ---
 export default function LoginScreen({ navigation }) {
@@ -83,8 +155,10 @@ export default function LoginScreen({ navigation }) {
       }
 
       if (data.user && data.user.cargo === 'coletor') {
-        // AQUI ESTÁ A MUDANÇA PRINCIPAL
-        navigation.replace('AppDrawer', { user: data.user });
+        // AQUI ESTÁ O CORRETO: MainTabs
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+        
+        navigation.replace('MainTabs', { user: data.user });
       } else {
         setCpfError("Acesso negado. App exclusivo para coletores.");
       }
