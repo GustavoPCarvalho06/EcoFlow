@@ -54,7 +54,7 @@ export default function MapboxMap({ onMapClick }) {
           antialias: true,
         });
 
-        /* marcador pro modal */
+        /* marcador pro modal quando clica onde for criar */
         if (onMapClick) {
           map.on("click", (e) => {
             const { lng, lat } = e.lngLat;
@@ -95,7 +95,36 @@ export default function MapboxMap({ onMapClick }) {
 
         new mapboxgl.Marker(UsuarioMarker)
           .setLngLat([usuario.x, usuario.y])
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setText("Você está aqui"))
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(`
+    <div style="
+      font-family: Arial, sans-serif;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+      min-width: 140px;
+      text-align: center;
+    ">
+      <div style="
+        font-size: 16px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 4px;
+      ">
+        📍 Você está aqui
+      </div>
+
+      <div style="
+        font-size: 12px;
+        color: #666;
+      ">
+        Seu ponto atual
+      </div>
+    </div>
+  `)
+          )
+
           .addTo(map);
 
         // 3D
@@ -156,7 +185,7 @@ export default function MapboxMap({ onMapClick }) {
     if (map.markers) map.markers.forEach((m) => m.remove());
     map.markers = [];
 
-    ["rota", "rota-arrows"].forEach((id) => {
+    ["rota"].forEach((id) => {
       if (map.getLayer(id)) map.removeLayer(id);
     });
     if (map.getSource("rota")) map.removeSource("rota");
@@ -203,13 +232,58 @@ export default function MapboxMap({ onMapClick }) {
         .setLngLat([x, y])
         .setPopup(
           new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <strong>ID:</strong> ${ponto.ID}<br/>
-            <strong>Endereço:</strong> ${ponto.endereco}<br>
-            <strong>Status:</strong> ${ponto.Stats}<br/>
-            <strong>Lat:</strong> ${y}<br/>
-            <strong>Lng:</strong> ${x}
-          `)
+    <div style="
+      font-family: Arial, sans-serif;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+      min-width: 180px;
+    ">
+      <div style="
+        font-size: 16px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 6px;
+      ">
+        🗑️ Sensor ${ponto.ID}
+      </div>
+
+      <div style="
+        font-size: 14px;
+        color: #444;
+        margin-bottom: 4px;
+      ">
+        <strong>Endereço:</strong><br/>
+        <span style="color:#666">${ponto.Endereco}</span>
+      </div>
+
+      <div style="
+        font-size: 14px;
+        margin: 6px 0;
+        padding: 6px 10px;
+        background: ${ponto.Stats === "Vazia"
+              ? "#d4f8d4"
+              : ponto.Stats === "Quase Cheia"
+                ? "#ffe9b3"
+                : "#ffcdcd"
+            };
+        border-radius: 6px;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+      ">
+        Status: ${ponto.Stats}
+      </div>
+
+      <div style="font-size: 12px; color:#777;">
+        <strong>Lat:</strong> ${y}<br/>
+        <strong>Lng:</strong> ${x}
+      </div>
+    </div>
+  `)
         )
+
         .addTo(map);
 
       map.markers.push(marker);
@@ -271,23 +345,6 @@ export default function MapboxMap({ onMapClick }) {
               "line-opacity": 0.9,
             },
           });
-
-          map.addLayer({
-            id: "rota-arrows",
-            type: "symbol",
-            source: "rota",
-            layout: {
-              "symbol-placement": "line",
-              "text-field": "→",
-              "text-size": 30,
-              "symbol-spacing": 80,
-              "text-allow-overlap": true,
-              "text-ignore-placement": true,
-              "text-keep-upright": true,
-            },
-            paint: { "text-color": "#ffffff" },
-          });
-
           const bounds = new mapboxgl.LngLatBounds();
           route.coordinates.forEach((coord) => bounds.extend(coord));
           map.fitBounds(bounds, { padding: 50 });
@@ -359,8 +416,6 @@ export default function MapboxMap({ onMapClick }) {
             fontWeight: 600,
           }}
         >
-          🚗 Distância: {rotaInfo.distance} km | ⏱️ Tempo estimado:{" "}
-          {rotaInfo.duration} min
         </div>
       )}
 
