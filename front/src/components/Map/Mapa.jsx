@@ -2,6 +2,7 @@ import MapboxMap from "@/components/Map/MapboxMap.jsx";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import MapBoxCriarWrapper from "@/components/Map/MapBoxCriarWrapper.jsx";
+import MapBoxManejarWrapper from "./MapBoxManejarWrapper.jsx";
 
 import {
   Popover,
@@ -93,7 +94,7 @@ export default async function MapaPage() {
                   </DialogHeader>
 
                   <div className="py-6 text-muted-foreground">
-                    N fiz ainda
+                    <MapBoxManejarWrapper />
                   </div>
                 </DialogContent>
               </Dialog>

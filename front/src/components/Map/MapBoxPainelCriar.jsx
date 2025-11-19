@@ -7,6 +7,10 @@ import { useApiUrl } from "@/app/context/ApiContext";
 export default function MapBoxPainelCriar({ coords, setCoords }) {
     const [loadingRua, setLoadingRua] = useState(false);
     const [status, setStatus] = useState("Vazia");
+
+    // NEW: message handler (tipo: "erro" | "sucesso")
+    const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
+
     const apiUrl = useApiUrl();
 
     useEffect(() => {
@@ -32,8 +36,10 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
     }, [coords.lat, coords.lng, setCoords]);
 
     const handleCreate = async () => {
+        setMensagem({ tipo: "", texto: "" });
+
         if (!coords.lat || !coords.lng) {
-            alert("Clique no mapa primeiro!");
+            setMensagem({ tipo: "erro", texto: "Clique no mapa primeiro!" });
             return;
         }
 
@@ -57,16 +63,17 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
 
             if (!res.ok) {
                 console.error("Erro ao criar:", data);
-                alert("Erro ao criar ponto de coleta");
+                setMensagem({ tipo: "erro", texto: "Erro ao criar ponto de coleta" });
                 return;
             }
 
-            alert("Ponto de coleta criado com sucesso!");
+            setMensagem({ tipo: "sucesso", texto: "Ponto de coleta criado com sucesso!" });
+
         } catch (err) {
             console.error("Erro ao enviar:", err);
+            setMensagem({ tipo: "erro", texto: "Erro ao enviar os dados" });
         }
     };
-
 
     return (
         <div className="w-[260px] rounded-xl border shadow-sm p-5 flex flex-col items-center gap-4 bg-white">
@@ -74,6 +81,16 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
             <h3 className="text-center text-lg font-semibold">
                 Novo Ponto de Coleta
             </h3>
+
+            {/* MESSAGE AREA */}
+            {mensagem.texto && (
+                <div
+                    className={`text-sm font-medium text-center ${mensagem.tipo === "erro" ? "text-red-600" : "text-green-600"
+                        }`}
+                >
+                    {mensagem.texto}
+                </div>
+            )}
 
             <div className="w-full">
                 <label className="text-sm font-medium">Latitude</label>
