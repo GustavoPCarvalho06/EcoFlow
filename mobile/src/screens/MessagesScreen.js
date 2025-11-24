@@ -1,44 +1,76 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// =================================================================================
+// Arquivo: mobile/src/screens/MessagesScreen.js
+// =================================================================================
+
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotification } from '../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 
-const API_URL = 'http://10.84.6.136:3001';
+import API_URL from '../config/api';
 
 export default function MessagesScreen({ navigation }) {
-  const { user, fetchCounts } = useNotification();
+  const { user, fetchCounts, socket } = useNotification();
   
   const [users, setUsers] = useState([]);
   const [unreadPerUser, setUnreadPerUser] = useState({});
+  const [lastActivity, setLastActivity] = useState({});
+  
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  // Atualiza a lista sempre que a tela ganha foco
+  // Atualiza dados ao focar na tela (voltar do chat)
   useFocusEffect(
     useCallback(() => {
         if (user) fetchData();
     }, [user])
   );
 
+  useEffect(() => {
+    if (!socket || !user) return;
+
+    const handleNewMessageList = (msg) => {
+      // Se a mensagem for para mim
+      if (msg.destinatario_id === user.id) {
+        // Atualiza contador
+        setUnreadPerUser((prev) => ({
+          ...prev,
+          [msg.remetente_id]: (prev[msg.remetente_id] || 0) + 1
+        }));
+
+        // Atualiza horário para ordenar
+        setLastActivity((prev) => ({
+            ...prev,
+            [msg.remetente_id]: Date.now()
+        }));
+
+        fetchCounts();
+      }
+    };
+
+    socket.on('new_message', handleNewMessageList);
+
+    return () => {
+      socket.off('new_message', handleNewMessageList);
+    };
+  }, [socket, user]);
+
   const fetchData = async () => {
     try {
-      // 1. Pega todos os usuários (coordenadores/admins)
-      const resUsers = await fetch(`${API_URL}/user/paginated?statusConta=ativo&limit=1000`);
-      const dataUsers = await resUsers.json();
-      
-      // Filtra para não mostrar a mim mesmo
-      const others = dataUsers.users.filter(u => u.id !== user.id);
-      setUsers(others);
-
-      // 2. Pega contagem de não lidas
       const resCounts = await fetch(`${API_URL}/msg/unread-counts`, {
         headers: { 'x-user-id': user.id.toString() }
       });
       const dataCounts = await resCounts.json();
       setUnreadPerUser(dataCounts);
       
-      // Atualiza o badge global
+      if (users.length === 0) {
+        const resUsers = await fetch(`${API_URL}/user/paginated?statusConta=ativo&limit=1000`);
+        const dataUsers = await resUsers.json();
+        const others = dataUsers.users.filter(u => u.id !== user.id);
+        setUsers(others);
+      }
+      
       fetchCounts();
 
     } catch (error) {
@@ -48,14 +80,33 @@ export default function MessagesScreen({ navigation }) {
     }
   };
 
-  const filteredUsers = users.filter(u => 
+  // Ordenação: Mantém quem mandou mensagem por último no topo
+  const sortedUsers = useMemo(() => {
+    return [...users].sort((a, b) => {
+        const timeA = lastActivity[a.id] || 0;
+        const timeB = lastActivity[b.id] || 0;
+
+        if (timeA !== timeB) return timeB - timeA;
+
+        const unreadA = unreadPerUser[a.id] ? 1 : 0;
+        const unreadB = unreadPerUser[b.id] ? 1 : 0;
+
+        if (unreadA !== unreadB) return unreadB - unreadA;
+
+        return a.nome.localeCompare(b.nome);
+    });
+  }, [users, lastActivity, unreadPerUser]);
+
+
+  const filteredUsers = sortedUsers.filter(u => 
       u.nome.toLowerCase().includes(search.toLowerCase()) ||
       u.cargo.toLowerCase().includes(search.toLowerCase())
   );
 
   const renderItem = ({ item }) => {
     const count = unreadPerUser[item.id] || 0;
-
+    const hasRecentActivity = lastActivity[item.id];
+    
     return (
       <TouchableOpacity 
         style={styles.card} 
@@ -70,9 +121,24 @@ export default function MessagesScreen({ navigation }) {
         <View style={styles.infoContainer}>
             <View style={styles.row}>
                 <Text style={styles.name}>{item.nome}</Text>
-                <Text style={styles.role}>{item.cargo}</Text>
+                
+                {/* 
+                   AQUI ESTÁ A MUDANÇA:
+                   Só mostra o horário se tiver atividade recente E contador > 0.
+                   Caso contrário, mostra o Cargo.
+                */}
+                {(hasRecentActivity && count > 0) ? (
+                    <Text style={styles.timeText}>
+                        {new Date(hasRecentActivity).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </Text>
+                ) : (
+                    <Text style={styles.role}>{item.cargo}</Text>
+                )}
             </View>
-            <Text style={styles.preview}>Toque para conversar</Text>
+
+            <Text style={styles.preview} numberOfLines={1}>
+                {count > 0 ? "Novas mensagens recebidas" : "Toque para conversar"}
+            </Text>
         </View>
 
         {count > 0 && (
@@ -83,7 +149,7 @@ export default function MessagesScreen({ navigation }) {
             </View>
         )}
         
-        <Ionicons name="chevron-forward" size={20} color="#ccc" />
+        <Ionicons name="chevron-forward" size={20} color="#ccc" style={{marginLeft: 5}} />
       </TouchableOpacity>
     );
   };
@@ -109,6 +175,7 @@ export default function MessagesScreen({ navigation }) {
             renderItem={renderItem}
             contentContainerStyle={styles.list}
             ListEmptyComponent={<Text style={styles.empty}>Nenhum contato encontrado</Text>}
+            extraData={{unreadPerUser, lastActivity}} 
         />
       )}
     </View>
@@ -146,9 +213,10 @@ const styles = StyleSheet.create({
   },
   avatarText: { fontSize: 20, fontWeight: 'bold', color: '#555' },
   infoContainer: { flex: 1 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginRight: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   name: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   role: { fontSize: 12, color: '#888', textTransform: 'capitalize' },
+  timeText: { fontSize: 11, color: '#28a745', fontWeight: 'bold' },
   preview: { fontSize: 14, color: '#888', marginTop: 2 },
   badge: {
       backgroundColor: '#28a745',
@@ -158,7 +226,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 6,
-      marginRight: 10
+      marginLeft: 5
   },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
   empty: { textAlign: 'center', marginTop: 50, color: '#999' }

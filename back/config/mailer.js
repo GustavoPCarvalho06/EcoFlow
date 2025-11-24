@@ -42,7 +42,7 @@ export const sendRecoveryEmail = async (to, code) => {
 export const sendVerificationEmail = async (to, token) => {
     try {
         // IMPORTANTE: Troque 'localhost:3000' pelo domínio do seu site em produção
-        const verificationLink = `http://localhost:3000/verificar-conta?token=${token}`;
+        const verificationLink = `http://10.84.6.136:3000/verificar-conta?token=${token}`;
 
         await transporter.sendMail({
             from: '"EcoFlow Suporte" <ecoflowsuport@gmail.com>', // Use seu e-mail de suporte

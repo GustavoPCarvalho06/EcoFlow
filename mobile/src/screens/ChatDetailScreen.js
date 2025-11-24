@@ -3,7 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Keyboard
 import { Ionicons } from '@expo/vector-icons';
 import { useNotification } from '../context/NotificationContext';
 
-const API_URL = 'http://10.84.6.136:3001';
+// const API_URL = 'http://10.84.6.136:3001';
+
+import API_URL from '../config/api'; 
 
 export default function ChatDetailScreen({ route, navigation }) {
   const { recipient } = route.params; // Usuário com quem estamos falando

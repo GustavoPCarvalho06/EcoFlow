@@ -7,7 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNotification } from '../context/NotificationContext';
 
 // ⚠️ CONFIRA SE O IP ESTÁ CERTO (Deve ser o do seu PC na rede local)
-const API_URL = 'http://10.84.6.136:3001';
+// const API_URL = 'http://10.84.6.136:3001';
+
+import API_URL from '../config/api'; 
 
 export default function ComunicadosScreen() {
   // Pegamos o usuário e a função de atualizar o badge (fetchCounts) do contexto

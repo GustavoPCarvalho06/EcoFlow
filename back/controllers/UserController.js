@@ -72,31 +72,31 @@ const findUsersPaginatedController = async (req, res) => {
 
 const updateUserController = async (req, res) => {
     try {
+      // 1. Pega o CPF e os dados
       const { cpf } = req.body; 
       const userData = req.body; 
   
       if (!cpf) {
         return res.status(400).json({ mensagem: "CPF do usuário não fornecido para atualização" });
       }
+
+      // [CORREÇÃO IMPORTANTE] Limpa o CPF (remove pontos e traços)
+      // Isso garante que o 'WHERE cpf = ...' no banco funcione
+      const cleanCpf = cpf.replace(/\D/g, '');
   
-      await updateUser(userData, cpf);
+      // Passa o CPF limpo para a função
+      await updateUser(userData, cleanCpf);
+      
       return res.status(200).json({ mensagem: "Usuário atualizado com sucesso" });
   
     } catch (err) {
-      // =======================================================
-      // LÓGICA DE TRATAMENTO DE ERRO COMPLETA ADICIONADA AQUI
-      // =======================================================
-      // CAPTURA DO ERRO DE CEP NÃO ENCONTRADO
       if (err.statusCode === 404) {
         return res.status(404).json({ mensagem: err.message });
       }
-
-      // CAPTURA DO ERRO DE FORMATO INVÁLIDO (ex: CEP com menos de 8 dígitos)
       if (err.statusCode === 400) {
         return res.status(400).json({ mensagem: err.message });
       }
       
-      // CAPTURA DE OUTROS ERROS
       console.error("Erro no controller ao atualizar usuário: ", err);
       return res.status(500).json({ mensagem: "Erro interno ao atualizar o usuário" });
     }

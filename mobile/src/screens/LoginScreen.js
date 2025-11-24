@@ -3,7 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import novo
 
 // !! IMPORTANTE !! Substitua pelo IP do seu backend.
-const API_URL = 'http://10.84.6.136:3001';
+// const API_URL = 'http://10.84.6.136:3001';
+
+import API_URL from '../config/api'; 
 
 // Função para formatar o CPF enquanto o usuário digita
 const formatCPF = (value) => {

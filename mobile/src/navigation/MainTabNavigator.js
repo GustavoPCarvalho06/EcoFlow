@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: mobile/src/navigation/MainTabNavigator.js
+// =================================================================================
+
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +10,7 @@ import { useNotification } from '../context/NotificationContext';
 import HomeScreen from '../screens/HomeScreen';
 import ComunicadosScreen from '../screens/ComunicadosScreen';
 import MessagesScreen from '../screens/MessagesScreen';
+import ProfileScreen from '../screens/ProfileScreen'; // Importação nova
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +32,8 @@ export default function MainTabNavigator() {
             iconName = focused ? 'newspaper' : 'newspaper-outline';
           } else if (route.name === 'Mensagens') {
             iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+          } else if (route.name === 'Perfil') {
+            iconName = focused ? 'person' : 'person-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -49,9 +56,17 @@ export default function MainTabNavigator() {
         component={MessagesScreen} 
         options={{ 
           title: 'Chat',
-          // Badge para mensagens
           tabBarBadge: msgCount > 0 ? msgCount : null,
           tabBarBadgeStyle: { backgroundColor: '#ef4444', color: 'white', fontSize: 11 }
+        }} 
+      />
+
+      <Tab.Screen 
+        name="Perfil" 
+        component={ProfileScreen} 
+        options={{ 
+          title: 'Meu Perfil',
+          headerShown: false // A tela de perfil tem seu próprio header personalizado
         }} 
       />
     </Tab.Navigator>
