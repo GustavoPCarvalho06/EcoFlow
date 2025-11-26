@@ -1,3 +1,6 @@
+// =================================================================================
+// Arquivo: C:\Users\24250668\Documents\3md\teste\test_EcoFlow\EcoFlow\front\src\app\comunicados\page.jsx
+// =================================================================================
 
 import { ComunicadosComponenteCoordenador } from "@/components/dashboard/ComunicadosComponenteCoordenador";
 import { cookies } from "next/headers";
@@ -8,11 +11,14 @@ import { ComunicadosComponenteAdministrador } from "@/components/dashboard/Comun
 export default async function ComunicadosPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
+  
+  // Extrai a string do token para passar aos componentes
+  const token = tokenCookie?.value;
 
   let user = null;
-  if (tokenCookie && tokenCookie.value) {
+  if (token) {
     try {
-      const decodedToken = jwt.decode(tokenCookie.value);
+      const decodedToken = jwt.decode(token);
       user = decodedToken;
     } catch (error) {
       console.error("Erro ao decodificar o token:", error);
@@ -25,10 +31,10 @@ export default async function ComunicadosPage() {
         <Layout>
           <main className="flex flex-1 flex-col p-4 md:p-6">
             <div className="flex items-center mb-4">
-              <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados coordenador</h1>
+              <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados (Coord)</h1>
             </div>
-            {/* O componente principal dos comunicados será renderizado aqui */}
-            <ComunicadosComponenteCoordenador user={user} />
+            {/* PASSANDO O TOKEN AQUI */}
+            <ComunicadosComponenteCoordenador user={user} token={token} />
           </main>
         </Layout>
       );
@@ -38,13 +44,21 @@ export default async function ComunicadosPage() {
         <Layout>
           <main className="flex flex-1 flex-col p-4 md:p-6">
             <div className="flex items-center mb-4">
-              <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados admin</h1>
+              <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados (Admin)</h1>
             </div>
-            {/* O componente principal dos comunicados será renderizado aqui */}
-            <ComunicadosComponenteAdministrador user={user} />
+            {/* PASSANDO O TOKEN AQUI */}
+            <ComunicadosComponenteAdministrador user={user} token={token} />
           </main>
         </Layout>
-      )
+      );
+      
+    default:
+        return (
+            <Layout>
+                <main className="flex flex-1 flex-col p-4 md:p-6">
+                    <h1>Acesso restrito ou cargo desconhecido.</h1>
+                </main>
+            </Layout>
+        )
   }
-
 }

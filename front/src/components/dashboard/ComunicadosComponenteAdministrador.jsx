@@ -1,4 +1,6 @@
-// Local do arquivo: src/components/dashboard/ComunicadosComponenteAdministrador.jsx
+// =================================================================================
+// Arquivo: src/components/dashboard/ComunicadosComponenteAdministrador.jsx
+// =================================================================================
 
 "use client";
 
@@ -8,14 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-// Importa o hook customizado para obter a URL da API dinamicamente.
 import { useApiUrl } from "@/app/context/ApiContext";
 
-/**
- * Componente Dialog para exibir o conteúdo completo de um comunicado.
- * Não precisa de alterações.
- */
 function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   if (!comunicado) return null;
   const isEdited = !!comunicado.data_edicao;
@@ -36,15 +32,10 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   );
 }
 
-/**
- * Componente principal que exibe o mural de comunicados.
- * Refatorado para usar a URL da API de forma dinâmica.
- */
-export function ComunicadosComponenteAdministrador({ user }) {
-  // Obtém a URL da API (seja localhost ou IP) do nosso contexto.
+// 1. Recebe 'token' nas props
+export function ComunicadosComponenteAdministrador({ user, token }) {
   const apiUrl = useApiUrl();
   
-  // Estados do componente
   const [todosComunicados, setTodosComunicados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -54,10 +45,9 @@ export function ComunicadosComponenteAdministrador({ user }) {
   const [unseenIds, setUnseenIds] = useState(new Set());
   const [editedUnseenIds, setEditedUnseenIds] = useState(new Set());
 
-  // Função para buscar todos os dados necessários (comunicados e status de visualização)
   const fetchData = useCallback(async () => {
-    // A função agora depende da 'apiUrl' para ser executada.
-    if (!apiUrl || !user?.id) { 
+    // 2. Verifica token
+    if (!apiUrl || !user?.id || !token) { 
       setLoading(false);
       return;
     }
@@ -65,17 +55,20 @@ export function ComunicadosComponenteAdministrador({ user }) {
     setLoading(true);
     setError("");
     
+    // 3. Headers com Auth
+    const headers = {
+        'Content-Type': 'application/json',
+        'x-user-id': user.id.toString(),
+        'Authorization': `Bearer ${token}`
+    };
+
     try {
-      // Usa a 'apiUrl' dinâmica para buscar os comunicados.
-      const comunicadosRes = await fetch(`${apiUrl}/comunicados`);
+      const comunicadosRes = await fetch(`${apiUrl}/comunicados`, { headers });
       if (!comunicadosRes.ok) throw new Error('Falha ao buscar comunicados');
       const comunicadosData = await comunicadosRes.json();
       setTodosComunicados(comunicadosData);
 
-      // Usa a 'apiUrl' dinâmica para buscar os comunicados não vistos.
-      const unseenIdsRes = await fetch(`${apiUrl}/comunicados/unseen-ids-detailed`, {
-        headers: { 'x-user-id': user.id.toString() }
-      });
+      const unseenIdsRes = await fetch(`${apiUrl}/comunicados/unseen-ids-detailed`, { headers });
       if (unseenIdsRes.ok) {
         const unseenData = await unseenIdsRes.json();
         setUnseenIds(new Set(unseenData.new_ids));
@@ -86,35 +79,28 @@ export function ComunicadosComponenteAdministrador({ user }) {
       setError("Não foi possível carregar o mural de comunicados.");
     }
     finally { setLoading(false); }
-  }, [user, apiUrl]); // Adiciona 'apiUrl' como dependência
+  }, [user, apiUrl, token]);
 
-  // Efeito para buscar os dados iniciais assim que a apiUrl estiver disponível.
   useEffect(() => { 
     if (apiUrl) {
       fetchData();
     }
   }, [fetchData, apiUrl]);
 
-  // Efeito para configurar a conexão com o Socket.IO.
   useEffect(() => {
     if (!apiUrl) return;
-
-    // Usa a 'apiUrl' dinâmica para a conexão do socket.
     const socket = io(apiUrl);
-    
     socket.on('comunicados_atualizados', fetchData);
-    
     return () => { 
       socket.off('comunicados_atualizados', fetchData); 
       socket.disconnect(); 
     };
-  }, [fetchData, apiUrl]); // Adiciona 'apiUrl' como dependência
+  }, [fetchData, apiUrl]);
 
   const truncarTexto = (texto, limite) => (texto.length > limite ? { texto: texto.substring(0, limite) + "...", truncado: true } : { texto, truncado: false });
 
-  // Função para abrir um comunicado e marcá-lo como visto.
   const handleExibirCompleto = async (comunicado) => {
-    if (!apiUrl) {
+    if (!apiUrl || !token) {
         setError("Não foi possível conectar ao servidor. Tente novamente.");
         return;
     }
@@ -125,10 +111,13 @@ export function ComunicadosComponenteAdministrador({ user }) {
     
     if (isUnseen && user?.id) {
       try {
-        // Usa a 'apiUrl' dinâmica para marcar o comunicado como visto.
         await fetch(`${apiUrl}/comunicados/mark-one-seen/${comunicado.id}`, { 
             method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 'x-user-id': user.id.toString() } 
+            headers: { 
+                'Content-Type': 'application/json', 
+                'x-user-id': user.id.toString(),
+                'Authorization': `Bearer ${token}` // Header Auth
+            } 
         });
         setUnseenIds(prev => { const next = new Set(prev); next.delete(comunicado.id); return next; });
         setEditedUnseenIds(prev => { const next = new Set(prev); next.delete(comunicado.id); return next; });
@@ -136,6 +125,7 @@ export function ComunicadosComponenteAdministrador({ user }) {
     }
   };
   
+  // ... (Renderização igual) ...
   const comunicadosVisiveis = todosComunicados.slice(0, limiteExibicao);
   const mostrarBotaoExibirMais = todosComunicados.length > limiteExibicao;
 
@@ -148,13 +138,11 @@ export function ComunicadosComponenteAdministrador({ user }) {
       });
   }
 
-  // Renderização condicional baseada nos estados de conexão e carregamento.
   if (!apiUrl) return <p className="text-center text-muted-foreground">Conectando ao servidor...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
   if (loading) return <p className="text-center text-muted-foreground">Carregando...</p>;
   if (todosComunicados.length === 0) return <p className="text-center text-muted-foreground">Nenhum comunicado no mural.</p>;
 
-  // Renderização principal do componente
   return (
     <>
       <div className="space-y-4 overflow-y-auto h-[calc(100vh-12rem)] pr-2">

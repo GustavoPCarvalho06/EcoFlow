@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: front/src/components/dashboard/Sidebar/AdministradorSidebar.jsx
+// =================================================================================
+
 "use client";
 
 import * as React from "react";
@@ -26,7 +30,7 @@ import {
 import { useUnreadCount } from "@/app/context/UnreadCountContext";
 
 const navItems = [
-    { title: "Dashboard", href: "/dashboard/", icon: IconDashboard },
+    { title: "Dashboard", href: "/dashboard", icon: IconDashboard },
     { title: "Usuários", href: "/usuarios", icon: IconUsers },
     { title: "Mensagem", href: "/mensagens", icon: IconMail },
     { title: "Comunicados", href: "/comunicados", icon: IconBroadcast },
@@ -39,14 +43,8 @@ const coletorNavItems = [
 export function AdministradorSidebar({ usuario, ...props }) {
     const pathname = usePathname();
     
-    // Consumindo do contexto - TUDO vem do contexto agora
-    const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount, isConnected } = useUnreadCount();
-
-    console.log('🔔 Estado da sidebar:', { 
-        totalMsgUnread, 
-        totalComunicadoUnread, 
-        isConnected 
-    });
+    // Consumindo do contexto
+    const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount();
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>
@@ -66,7 +64,6 @@ export function AdministradorSidebar({ usuario, ...props }) {
                                     className="rounded-sm"
                                 />
                                 <span className="text-lg font-semibold">EcoFlow.</span>
-                                
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -74,6 +71,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
             </SidebarHeader>
 
             <SidebarContent className="p-4">
+                {/* Área de Notificações (Sino) */}
                 <div className="mb-4 flex items-center gap-2">
                     <Link href="/comunicados" passHref>
                         <Button 
@@ -84,6 +82,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                             onClick={clearComunicadoCount}
                         >
                             <IconBell className="h-6 w-6" />
+                            {/* Badge de Comunicados */}
                             {totalComunicadoUnread > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                                     {totalComunicadoUnread > 99 ? `+99` : totalComunicadoUnread}
@@ -109,6 +108,8 @@ export function AdministradorSidebar({ usuario, ...props }) {
                         >
                             <item.icon className="h-6 w-6" />
                             <span>{item.title}</span>
+                            
+                            {/* Badge de Mensagens */}
                             {item.title === "Mensagem" && totalMsgUnread > 0 && (
                                 <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
                                     {totalMsgUnread > 99 ? '+99' : totalMsgUnread}

@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: C:\Users\24250668\Documents\3md\teste\test_EcoFlow\EcoFlow\front\src\components\dashboard\ChatComponent.jsx
+// =================================================================================
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -11,7 +15,8 @@ import { Send, UserSearch } from "lucide-react";
 import { useUnreadCount } from "@/app/context/UnreadCountContext";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-export function ChatComponent({ user }) {
+// 1. Recebemos o 'token' via props
+export function ChatComponent({ user, token }) {
   const apiUrl = useApiUrl();
   const meuUserId = user?.id;
 
@@ -40,11 +45,7 @@ export function ChatComponent({ user }) {
       return;
     }
 
-    console.log('🎯 Configurando listeners do chat');
-
     const handleNewMessage = (novaMensagem) => {
-      console.log('💬 Nova mensagem no chat:', novaMensagem);
-      
       const currentUser = selectedUserRef.current;
 
       // Verifica se a mensagem é para a conversa atual
@@ -61,9 +62,7 @@ export function ChatComponent({ user }) {
           markMessagesAsRead(currentUser.id);
         }
       } else if (isFromMe && novaMensagem.destinatario_id === currentUser?.id) {
-        // CORREÇÃO: Se é uma mensagem que eu enviei, apenas atualiza se não existir
         setMessages(prev => {
-          // Verifica se já existe uma mensagem com este conteúdo (para evitar duplicação)
           const mensagemExiste = prev.some(msg => 
             msg.id === novaMensagem.id || 
             (msg.conteudo === novaMensagem.conteudo && msg.remetente_id === meuUserId)
@@ -75,13 +74,13 @@ export function ChatComponent({ user }) {
           return prev;
         });
       } else if (isToMe && !isFromMe) {
-        // Atualiza contador para outras conversas EM TEMPO REAL
+        // Atualiza contador local para outras conversas
         setUnreadCounts(prev => ({
           ...prev,
           [novaMensagem.remetente_id]: (prev[novaMensagem.remetente_id] || 0) + 1
         }));
         
-        // Atualiza contagem total na sidebar EM TEMPO REAL
+        // Atualiza contagem global
         fetchTotalMsgUnread();
       }
     };
@@ -95,28 +94,35 @@ export function ChatComponent({ user }) {
 
   // Buscar usuários e contagens iniciais
   useEffect(() => {
-    if (!meuUserId || !apiUrl) return;
+    if (!meuUserId || !apiUrl || !token) return; // Verifica se o token existe
 
     async function initializeChat() {
       try {
         console.log('🔄 Inicializando chat...');
         setIsLoading(true);
         
-        // Buscar usuários
-        const usersResponse = await fetch(`${apiUrl}/user/paginated?statusConta=ativo&limit=9999999`);
+        // 2. Adicionamos o Header Authorization na busca de usuários
+        const usersResponse = await fetch(`${apiUrl}/user/paginated?statusConta=ativo&limit=9999999`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
         if (!usersResponse.ok) throw new Error("Falha ao buscar usuários");
         
         const data = await usersResponse.json();
         setUsers(data.users.filter(u => u.id !== meuUserId));
 
-        // Buscar contagens não lidas
+        // 3. Adicionamos o Header Authorization na busca de contagens
         const countsResponse = await fetch(`${apiUrl}/msg/unread-counts`, {
-          headers: { 'x-user-id': meuUserId.toString() }
+          headers: { 
+              'x-user-id': meuUserId.toString(),
+              'Authorization': `Bearer ${token}` 
+            }
         });
         if (countsResponse.ok) {
           const counts = await countsResponse.json();
           setUnreadCounts(counts);
-          console.log('📊 Contagens iniciais:', counts);
         }
       } catch (error) {
         console.error("❌ Erro ao inicializar o chat:", error);
@@ -126,16 +132,20 @@ export function ChatComponent({ user }) {
     }
 
     initializeChat();
-  }, [meuUserId, apiUrl]);
+  }, [meuUserId, apiUrl, token]);
 
   // Buscar histórico quando selecionar usuário
   useEffect(() => {
-    if (!selectedUser || !meuUserId || !apiUrl) return;
+    if (!selectedUser || !meuUserId || !apiUrl || !token) return;
 
     async function fetchHistory() {
       try {
+        // 4. Adicionamos o Header Authorization na busca do histórico
         const response = await fetch(`${apiUrl}/msg/historico/${selectedUser.id}`, {
-          headers: { 'x-user-id': meuUserId.toString() }
+          headers: { 
+              'x-user-id': meuUserId.toString(),
+              'Authorization': `Bearer ${token}`
+            }
         });
         if (!response.ok) throw new Error("Falha ao buscar histórico");
         
@@ -152,7 +162,7 @@ export function ChatComponent({ user }) {
     }
 
     fetchHistory();
-  }, [selectedUser, meuUserId, apiUrl]);
+  }, [selectedUser, meuUserId, apiUrl, token]);
 
   // Rolagem automática para a última mensagem
   useEffect(() => {
@@ -161,12 +171,16 @@ export function ChatComponent({ user }) {
 
   // Função para marcar mensagens como lidas
   const markMessagesAsRead = async (remetenteId) => {
-    if (!apiUrl || !meuUserId) return;
+    if (!apiUrl || !meuUserId || !token) return;
     
     try {
+      // 5. Adicionamos o Header Authorization ao marcar como lida
       await fetch(`${apiUrl}/msg/mark-as-read/${remetenteId}`, {
         method: 'PUT',
-        headers: { 'x-user-id': meuUserId.toString() }
+        headers: { 
+            'x-user-id': meuUserId.toString(),
+            'Authorization': `Bearer ${token}`
+        }
       });
       
       // Atualizar contagens locais
@@ -183,56 +197,38 @@ export function ChatComponent({ user }) {
     }
   };
 
-  // Enviar mensagem - CORREÇÃO: Cria mensagem local APENAS para feedback visual
+  // Enviar mensagem
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!replyText.trim() || !selectedUser || !socket) {
-      console.log('⚠️ Não pode enviar:', { 
-        replyText: !!replyText.trim(), 
-        selectedUser: !!selectedUser, 
-        socket: !!socket 
-      });
-      return;
-    }
+    if (!replyText.trim() || !selectedUser || !socket) return;
 
-    console.log('📤 Enviando mensagem:', { 
-      remetenteId: meuUserId, 
-      destinatarioId: selectedUser.id 
-    });
-    
     const mensagemData = { 
       remetenteId: meuUserId, 
       destinatarioId: selectedUser.id, 
       conteudo: replyText.trim()
     };
     
-    // CORREÇÃO: Cria uma mensagem local APENAS para feedback visual imediato
+    // Feedback visual imediato
     const mensagemLocal = {
-      id: `local_${Date.now()}_${Math.random()}`, // ID único local
+      id: `local_${Date.now()}_${Math.random()}`,
       remetente_id: meuUserId,
       destinatario_id: selectedUser.id,
       conteudo: replyText.trim(),
       data_envio: new Date().toISOString(),
       status_leitura: 0,
       remetente_nome: user?.nome || "Você",
-      isLocal: true // Flag para identificar que é mensagem local
+      isLocal: true
     };
     
-    // Adiciona a mensagem local para feedback visual IMEDIATO
     setMessages(prev => [...prev, mensagemLocal]);
-    
-    // Limpa o campo de texto IMEDIATAMENTE
     setReplyText("");
     
-    // Emite a mensagem via socket
     socket.emit('private_message', mensagemData);
   };
 
   // Selecionar usuário
   const handleSelectUser = async (user) => {
     setSelectedUser(user);
-    
-    // Se houver mensagens não lidas, marca como lidas
     if (unreadCounts[user.id] > 0) {
       await markMessagesAsRead(user.id);
     }
@@ -339,11 +335,6 @@ export function ChatComponent({ user }) {
                 <CardTitle>{selectedUser.nome}</CardTitle>
                 <p className="text-sm text-muted-foreground capitalize">{selectedUser.cargo}</p>
               </div>
-              {unreadCounts[selectedUser.id] > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                  {unreadCounts[selectedUser.id]}
-                </span>
-              )}
             </CardHeader>
             
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -434,7 +425,7 @@ export function ChatComponent({ user }) {
               <UserSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <h3 className="font-semibold text-lg mb-2">Selecione um contato</h3>
               <p className="text-sm">
-                Escolha um contato da lista ao lado para iniciar uma conversa ou visualizar o histórico de mensagens.
+                Escolha um contato da lista ao lado para iniciar uma conversa.
               </p>
             </div>
           </div>

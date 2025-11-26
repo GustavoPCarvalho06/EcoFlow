@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, Modal } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import novo
-
-// !! IMPORTANTE !! Substitua pelo IP do seu backend.
-// const API_URL = 'http://10.84.6.136:3001';
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import API_URL from '../config/api'; 
 
 // Função para formatar o CPF enquanto o usuário digita
@@ -42,7 +38,11 @@ const ForgotPasswordModal = ({ visible, onClose }) => {
     const handleSendCode = async () => { 
         setIsLoading(true); setError(''); 
         try { 
-            const response = await fetch(`${API_URL}/recuperacao/enviar-codigo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, '') }), }); 
+            const response = await fetch(`${API_URL}/recuperacao/enviar-codigo`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ cpf: cpf.replace(/\D/g, '') }), 
+            }); 
             const data = await response.json(); 
             if (!response.ok) throw new Error(data.mensagem); 
             setSuccess('Código enviado para seu e-mail!'); setStep(2); 
@@ -52,7 +52,11 @@ const ForgotPasswordModal = ({ visible, onClose }) => {
     const handleVerifyCode = async () => { 
         setIsLoading(true); setError(''); 
         try { 
-            const response = await fetch(`${API_URL}/recuperacao/verificar-codigo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo }), }); 
+            const response = await fetch(`${API_URL}/recuperacao/verificar-codigo`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo }), 
+            }); 
             const data = await response.json(); 
             if (!response.ok) throw new Error(data.mensagem); 
             setSuccess('Código verificado com sucesso!'); setStep(3); 
@@ -63,7 +67,11 @@ const ForgotPasswordModal = ({ visible, onClose }) => {
         if (novaSenha !== confirmarSenha) { setError('As senhas não coincidem.'); return; } 
         setIsLoading(true); setError(''); 
         try { 
-            const response = await fetch(`${API_URL}/recuperacao/redefinir-senha`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo, novaSenha }), }); 
+            const response = await fetch(`${API_URL}/recuperacao/redefinir-senha`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ cpf: cpf.replace(/\D/g, ''), codigo, novaSenha }), 
+            }); 
             const data = await response.json(); 
             if (!response.ok) throw new Error(data.mensagem); 
             setSuccess('Senha redefinida com sucesso!'); setTimeout(resetModal, 2000); 
@@ -139,6 +147,7 @@ export default function LoginScreen({ navigation }) {
     const rawCpf = cpf.replace(/\D/g, "");
 
     try {
+      console.log(`Tentando login em: ${API_URL}/login`);
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,21 +160,27 @@ export default function LoginScreen({ navigation }) {
         if (data.erro === 'Senha inválida.') {
           setSenhaError(data.erro);
         } else {
-          setCpfError(data.erro);
+          setCpfError(data.erro || 'Erro ao fazer login');
         }
         return;
       }
 
+      // Verifica se é coletor
       if (data.user && data.user.cargo === 'coletor') {
-        // AQUI ESTÁ O CORRETO: MainTabs
+        // IMPORTANTE: O backend retorna { user: { id, nome, token, ... } }
+        // Salvamos o objeto user completo, que inclui o token.
         await AsyncStorage.setItem('userData', JSON.stringify(data.user));
         
+        console.log("Login sucesso! Token salvo.");
+        
+        // Navega para a rota principal
         navigation.replace('MainTabs', { user: data.user });
       } else {
         setCpfError("Acesso negado. App exclusivo para coletores.");
       }
 
     } catch (error) {
+      console.error("Erro login:", error);
       setCpfError("Não foi possível conectar ao servidor. Verifique sua conexão.");
     } finally {
       setIsLoading(false);
@@ -173,60 +188,68 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Image source={require('../../assets/icon.png')} style={styles.logo} />
-      <Text style={styles.title}>EcoFlow Coletor</Text>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image source={require('../../assets/icon.png')} style={styles.logo} />
+        <Text style={styles.title}>EcoFlow Coletor</Text>
 
-      {cpfError ? <Text style={styles.errorText}>{cpfError}</Text> : null}
-      
-      <TextInput
-        style={[styles.input, cpfError ? styles.inputError : null]}
-        placeholder="CPF"
-        keyboardType="numeric"
-        value={cpf}
-        onChangeText={(text) => setCpf(formatCPF(text))}
-      />
+        {cpfError ? <Text style={styles.errorText}>{cpfError}</Text> : null}
+        
+        <TextInput
+          style={[styles.input, cpfError ? styles.inputError : null]}
+          placeholder="CPF"
+          keyboardType="numeric"
+          value={cpf}
+          onChangeText={(text) => setCpf(formatCPF(text))}
+        />
 
-      <TextInput
-        style={[styles.input, senhaError ? styles.inputError : null]}
-        placeholder="Senha"
-        secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
-      />
+        <TextInput
+          style={[styles.input, senhaError ? styles.inputError : null]}
+          placeholder="Senha"
+          secureTextEntry
+          value={senha}
+          onChangeText={setSenha}
+        />
 
-      {senhaError ? <Text style={styles.errorText}>{senhaError}</Text> : null}
+        {senhaError ? <Text style={styles.errorText}>{senhaError}</Text> : null}
 
-      <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-        <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
-      </TouchableOpacity>
-
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#28a745" style={{ marginTop: 20 }}/>
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
+        <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+          <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
         </TouchableOpacity>
-      )}
 
-      <ForgotPasswordModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-      />
-    </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#28a745" style={{ marginTop: 20 }}/>
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
+        )}
+
+        <ForgotPasswordModal
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#f5f5f5', },
-  logo: { width: 120, height: 120, marginBottom: 20, },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  logo: { width: 120, height: 120, marginBottom: 20, borderRadius: 15 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#333', marginBottom: 30, },
   input: { width: '100%', height: 50, backgroundColor: '#fff', borderRadius: 8, paddingHorizontal: 15, fontSize: 16, borderWidth: 1, borderColor: '#ddd', marginBottom: 15, },
   button: { width: '100%', height: 50, backgroundColor: '#28a745', borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginTop: 10, },
   buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold', },
   forgotPasswordText: { color: '#007bff', fontSize: 14, textAlign: 'right', width: '100%', marginBottom: 20, marginTop: -10 },
-  errorText: { color: 'red', fontSize: 14, marginBottom: 10, textAlign: 'center', },
+  errorText: { color: 'red', fontSize: 14, marginBottom: 10, textAlign: 'center', width: '100%' },
   inputError: { borderColor: 'red', borderWidth: 1, },
+  
+  // Modal Styles
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', },
   modalView: { width: '90%', backgroundColor: 'white', borderRadius: 20, padding: 25, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5, },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, },

@@ -1,14 +1,15 @@
+// =================================================================================
+// Arquivo: mobile/src/screens/ChatDetailScreen.js
+// =================================================================================
+
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotification } from '../context/NotificationContext';
-
-// const API_URL = 'http://10.84.6.136:3001';
-
 import API_URL from '../config/api'; 
 
 export default function ChatDetailScreen({ route, navigation }) {
-  const { recipient } = route.params; // Usuário com quem estamos falando
+  const { recipient } = route.params; 
   const { user, socket, fetchCounts } = useNotification();
   
   const [messages, setMessages] = useState([]);
@@ -16,27 +17,28 @@ export default function ChatDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const flatListRef = useRef(null);
 
-  // 1. Configura Header e marca como lida ao entrar
   useEffect(() => {
     navigation.setOptions({ title: recipient.nome });
     markAsRead();
   }, []);
 
-  // 2. Busca histórico e configura socket para ESSA conversa
   useEffect(() => {
     if(!user) return;
 
     fetchHistory();
 
     const handleNewMessage = (msg) => {
-      // Se a mensagem for dessa conversa (enviada por mim ou pelo outro)
       const isFromRecipient = msg.remetente_id === recipient.id;
       const isFromMe = msg.remetente_id === user.id;
 
       if (isFromRecipient || (isFromMe && msg.destinatario_id === recipient.id)) {
-        setMessages(prev => [...prev, msg]);
+        setMessages(prev => {
+            // Evita duplicação se a mensagem já estiver na lista (ex: adicionada localmente)
+            const exists = prev.some(m => m.id === msg.id || (m.conteudo === msg.conteudo && m.remetente_id === msg.remetente_id));
+            if (exists) return prev;
+            return [...prev, msg];
+        });
         
-        // Se recebi mensagem com a tela aberta, marca como lida na hora
         if (isFromRecipient) {
              markAsRead();
         }
@@ -47,18 +49,27 @@ export default function ChatDetailScreen({ route, navigation }) {
 
     return () => {
       socket.off('new_message', handleNewMessage);
-      // Atualiza o badge global ao sair da tela
       fetchCounts(); 
     };
   }, [user]);
 
+  // 1. BUSCAR HISTÓRICO COM TOKEN
   const fetchHistory = async () => {
+    if (!user || !user.token) return;
     try {
       const response = await fetch(`${API_URL}/msg/historico/${recipient.id}`, {
-        headers: { 'x-user-id': user.id.toString() }
+        headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': user.id.toString(),
+            'Authorization': `Bearer ${user.token}` // <--- ADICIONADO
+        }
       });
-      const data = await response.json();
-      setMessages(data);
+      if(response.ok){
+          const data = await response.json();
+          setMessages(data);
+      } else {
+          console.log("Erro fetch history status:", response.status);
+      }
     } catch (error) {
       console.error("Erro histórico:", error);
     } finally {
@@ -66,13 +77,19 @@ export default function ChatDetailScreen({ route, navigation }) {
     }
   };
 
+  // 2. MARCAR COMO LIDA COM TOKEN
   const markAsRead = async () => {
+    if (!user || !user.token) return;
     try {
       await fetch(`${API_URL}/msg/mark-as-read/${recipient.id}`, {
         method: 'PUT',
-        headers: { 'x-user-id': user.id.toString() }
+        headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': user.id.toString(),
+            'Authorization': `Bearer ${user.token}` // <--- ADICIONADO
+        }
       });
-      fetchCounts(); // Atualiza contexto global
+      fetchCounts(); 
     } catch (error) {
       console.error("Erro marcar lido:", error);
     }
@@ -87,10 +104,18 @@ export default function ChatDetailScreen({ route, navigation }) {
       conteudo: text.trim()
     };
 
-    // Emite via socket
+    // Cria msg local para feedback instantâneo
+    const localMsg = {
+        id: Math.random().toString(),
+        remetente_id: user.id,
+        destinatario_id: recipient.id,
+        conteudo: text.trim(),
+        data_envio: new Date().toISOString(),
+        remetente_nome: user.nome
+    };
+
+    setMessages(prev => [...prev, localMsg]);
     socket.emit('private_message', msgData);
-    
-    // Limpa input (a mensagem volta pelo socket e entra na lista)
     setText('');
   };
 
@@ -123,8 +148,8 @@ export default function ChatDetailScreen({ route, navigation }) {
             keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-            onLayout={() => flatListRef.current?.scrollToEnd()}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+            onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
         />
       )}
 
@@ -146,50 +171,15 @@ export default function ChatDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e5ddd5' },
   listContent: { padding: 10, paddingBottom: 20 },
-  bubble: {
-      maxWidth: '80%',
-      padding: 10,
-      borderRadius: 10,
-      marginBottom: 10,
-  },
-  bubbleLeft: {
-      alignSelf: 'flex-start',
-      backgroundColor: '#fff',
-      borderTopLeftRadius: 0,
-  },
-  bubbleRight: {
-      alignSelf: 'flex-end',
-      backgroundColor: '#dcf8c6',
-      borderTopRightRadius: 0,
-  },
+  bubble: { maxWidth: '80%', padding: 10, borderRadius: 10, marginBottom: 10 },
+  bubbleLeft: { alignSelf: 'flex-start', backgroundColor: '#fff', borderTopLeftRadius: 0 },
+  bubbleRight: { alignSelf: 'flex-end', backgroundColor: '#dcf8c6', borderTopRightRadius: 0 },
   msgText: { fontSize: 16, color: '#303030' },
   textLeft: { color: '#000' },
   textRight: { color: '#000' },
   timeText: { fontSize: 10, color: '#999', alignSelf: 'flex-end', marginTop: 4 },
   textTimeRight: { color: '#7fa672' },
-
-  inputContainer: {
-      flexDirection: 'row',
-      padding: 10,
-      backgroundColor: '#f0f0f0',
-      alignItems: 'center'
-  },
-  input: {
-      flex: 1,
-      backgroundColor: '#fff',
-      borderRadius: 20,
-      paddingHorizontal: 15,
-      paddingVertical: 8,
-      fontSize: 16,
-      marginRight: 10,
-      maxHeight: 100
-  },
-  sendBtn: {
-      backgroundColor: '#28a745',
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      justifyContent: 'center',
-      alignItems: 'center'
-  }
+  inputContainer: { flexDirection: 'row', padding: 10, backgroundColor: '#f0f0f0', alignItems: 'center' },
+  input: { flex: 1, backgroundColor: '#fff', borderRadius: 20, paddingHorizontal: 15, paddingVertical: 8, fontSize: 16, marginRight: 10, maxHeight: 100 },
+  sendBtn: { backgroundColor: '#28a745', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }
 });

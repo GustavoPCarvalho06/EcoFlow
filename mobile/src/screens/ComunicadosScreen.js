@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: mobile/src/screens/ComunicadosScreen.js
+// =================================================================================
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import io from 'socket.io-client';
@@ -5,9 +9,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Importa o contexto para atualizar o número na aba lá embaixo
 import { useNotification } from '../context/NotificationContext';
-
-// ⚠️ CONFIRA SE O IP ESTÁ CERTO (Deve ser o do seu PC na rede local)
-// const API_URL = 'http://10.84.6.136:3001';
 
 import API_URL from '../config/api'; 
 
@@ -26,15 +27,23 @@ export default function ComunicadosScreen() {
 
   // Função principal que busca os dados
   const fetchData = async () => {
-    if (!user) return;
+    // 1. Verificação de segurança: precisa do token
+    if (!user || !user.token) return;
 
     try {
+      // 2. Cria os Headers com o Token
+      const headers = { 
+        'Content-Type': 'application/json',
+        'x-user-id': user.id.toString(),
+        'Authorization': `Bearer ${user.token}` // <--- ADICIONADO
+      };
+
       // Busca a lista de comunicados E os IDs detalhados (quem é novo, quem é editado)
       const [comunicadosRes, unseenRes] = await Promise.all([
-        fetch(`${API_URL}/comunicados`),
-        fetch(`${API_URL}/comunicados/unseen-ids-detailed`, {
-            headers: { 'x-user-id': user.id.toString() }
-        })
+        // 3. Passa os headers na requisição da lista
+        fetch(`${API_URL}/comunicados`, { headers }),
+        // 4. Passa os headers na requisição dos não vistos
+        fetch(`${API_URL}/comunicados/unseen-ids-detailed`, { headers })
       ]);
 
       const comunicadosData = await comunicadosRes.json();
@@ -47,7 +56,6 @@ export default function ComunicadosScreen() {
       setEditedUnseenIds(new Set(unseenData.edited_ids));
 
       // Garante que a bolinha vermelha da aba esteja sincronizada
-      // CORREÇÃO: Usando o nome certo da função do contexto
       fetchCounts();
 
     } catch (error) {
@@ -87,7 +95,7 @@ export default function ComunicadosScreen() {
     const isEdited = editedUnseenIds.has(id);
 
     // Se for um comunicado não lido (Novo ou Editado)
-    if ((isUnseen || isEdited) && user) {
+    if ((isUnseen || isEdited) && user && user.token) {
         
         // 1. Atualiza a interface LOCALMENTE na hora (remove o badge azul/laranja)
         if (isUnseen) {
@@ -107,12 +115,12 @@ export default function ComunicadosScreen() {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'x-user-id': user.id.toString() 
+                    'x-user-id': user.id.toString(),
+                    'Authorization': `Bearer ${user.token}` // <--- ADICIONADO
                 }
             });
             
             // 3. Atualiza a bolinha vermelha na aba de navegação
-            // CORREÇÃO: Usando o nome certo da função
             fetchCounts(); 
 
         } catch (error) {
@@ -219,7 +227,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    // Sombras suaves
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -249,7 +256,6 @@ const styles = StyleSheet.create({
   },
   cardMeta: { fontSize: 12, color: '#888' },
   
-  // Estilos das Etiquetas (Badges)
   badge: {
       paddingHorizontal: 6,
       paddingVertical: 2,

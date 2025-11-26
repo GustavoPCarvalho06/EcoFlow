@@ -1,4 +1,6 @@
-// src/components/dashboard/ComunicadosComponenteCoordenador.jsx
+// =================================================================================
+// Arquivo: src/components/dashboard/ComunicadosComponenteCoordenador.jsx
+// =================================================================================
 
 "use client";
 
@@ -13,12 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { IconPlus, IconPencil, IconTrash } from "@tabler/icons-react";
-
-// Importa o hook customizado para obter a URL da API dinamicamente.
-// VERIFIQUE se este caminho está correto para a sua estrutura de pastas.
 import { useApiUrl } from "../../app/context/ApiContext"; 
 
-// Componente para exibir um comunicado completo em um Dialog (sem alterações).
+// ... (Mantenha as funções auxiliares ComunicadoCompletoDialog e ComunicadoForm iguais) ...
 function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   if (!comunicado) return null;
   const isEdited = !!comunicado.data_edicao;
@@ -39,7 +38,6 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   );
 }
 
-// Componente de formulário para criar/editar um comunicado (sem alterações).
 function ComunicadoForm({ onSubmit, initialData = null, onClose }) {
     const [titulo, setTitulo] = useState(initialData?.titulo || "");
     const [conteudo, setConteudo] = useState(initialData?.conteudo || "");
@@ -53,11 +51,10 @@ function ComunicadoForm({ onSubmit, initialData = null, onClose }) {
     );
 }
 
-export function ComunicadosComponenteCoordenador({ user }) {
-    // Obtém a URL da API (seja localhost ou IP) do nosso contexto.
+// 1. Recebe 'token' nas props
+export function ComunicadosComponenteCoordenador({ user, token }) {
     const apiUrl = useApiUrl();
     
-    // Estados do componente
     const [todosComunicados, setTodosComunicados] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -71,17 +68,26 @@ export function ComunicadosComponenteCoordenador({ user }) {
 
     const canManage = user?.cargo === 'coordenador' || user?.cargo === 'administrador';
 
-    // Função para buscar todos os dados, agora usando a apiUrl dinâmica.
     const fetchData = useCallback(async () => {
-        if (!user?.id || !apiUrl) { 
+        // 2. Verifica se tem token
+        if (!user?.id || !apiUrl || !token) { 
             setLoading(false); 
             return; 
         }
+        
+        // 3. Define os Headers com Authorization
+        const headers = { 
+            'Content-Type': 'application/json',
+            'x-user-id': user.id.toString(),
+            'Authorization': `Bearer ${token}` 
+        };
+
         try {
             const [comunicadosRes, unseenIdsRes] = await Promise.all([
-                fetch(`${apiUrl}/comunicados`),
-                fetch(`${apiUrl}/comunicados/unseen-ids-detailed`, { headers: { 'x-user-id': user.id.toString() } })
+                fetch(`${apiUrl}/comunicados`, { headers }),
+                fetch(`${apiUrl}/comunicados/unseen-ids-detailed`, { headers })
             ]);
+            
             if (comunicadosRes.ok) setTodosComunicados(await comunicadosRes.json());
             if (unseenIdsRes.ok) {
                 const data = await unseenIdsRes.json();
@@ -93,11 +99,10 @@ export function ComunicadosComponenteCoordenador({ user }) {
             setError("Não foi possível carregar os comunicados.");
         } 
         finally { setLoading(false); }
-    }, [user, apiUrl]);
+    }, [user, apiUrl, token]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    // Efeito para o Socket.IO, agora usando a apiUrl dinâmica.
     useEffect(() => {
         if (!apiUrl) return;
         const socket = io(apiUrl);
@@ -108,44 +113,65 @@ export function ComunicadosComponenteCoordenador({ user }) {
     const handleOpenForm = (comunicado = null) => { setEditingComunicado(comunicado); setIsFormOpen(true); };
     const handleCloseForm = () => { setIsFormOpen(false); setEditingComunicado(null); };
 
-    // Função para marcar um comunicado como visto, agora com apiUrl dinâmica.
     const handleExibirCompleto = async (comunicado) => {
-        if (!apiUrl) return;
+        if (!apiUrl || !token) return;
         setViewingComunicado(comunicado);
         setIsViewOpen(true);
+        
         const isUnseen = unseenIds.has(comunicado.id) || editedUnseenIds.has(comunicado.id);
+        
         if (isUnseen && user?.id) {
             try {
-                await fetch(`${apiUrl}/comunicados/mark-one-seen/${comunicado.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-user-id': user.id.toString() } });
+                await fetch(`${apiUrl}/comunicados/mark-one-seen/${comunicado.id}`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'x-user-id': user.id.toString(),
+                        'Authorization': `Bearer ${token}` // Header Auth
+                    } 
+                });
                 setUnseenIds(prev => { const next = new Set(prev); next.delete(comunicado.id); return next; });
                 setEditedUnseenIds(prev => { const next = new Set(prev); next.delete(comunicado.id); return next; });
             } catch (error) { console.error("Erro ao marcar como visto:", error); }
         }
     };
 
-    // Função de CRUD para criar/editar, agora com apiUrl dinâmica.
     const handleSubmit = async (formData) => {
-        if (!apiUrl) return;
+        if (!apiUrl || !token) return;
         const isEditing = !!editingComunicado;
         const url = isEditing ? `${apiUrl}/comunicados/${editingComunicado.id}` : `${apiUrl}/comunicados`;
         const method = isEditing ? 'PUT' : 'POST';
         const body = { ...formData, ...(!isEditing && { autor_id: user.id }) };
+        
         try {
-            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...(isEditing && { 'x-user-id': user.id.toString() }) }, body: JSON.stringify(body) });
+            const res = await fetch(url, { 
+                method, 
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'x-user-id': user.id.toString(),
+                    'Authorization': `Bearer ${token}` // Header Auth
+                }, 
+                body: JSON.stringify(body) 
+            });
             if (!res.ok) throw new Error('Falha ao salvar');
             handleCloseForm();
         } catch (error) { console.error("Erro ao salvar:", error); }
     };
 
-    // Função para deletar, agora com apiUrl dinâmica.
     const handleDelete = async (id) => {
-        if (!apiUrl) return;
+        if (!apiUrl || !token) return;
         try { 
-            await fetch(`${apiUrl}/comunicados/${id}`, { method: 'DELETE' }); 
+            await fetch(`${apiUrl}/comunicados/${id}`, { 
+                method: 'DELETE',
+                headers: { 
+                    'Authorization': `Bearer ${token}` // Header Auth
+                }
+            }); 
         }
         catch (error) { console.error("Erro ao deletar:", error); }
     };
 
+    // ... (Restante do renderização permanece igual) ...
     const truncarTexto = (texto, limite) => (texto.length > limite ? { texto: texto.substring(0, limite) + "...", truncado: true } : { texto, truncado: false });
     const comunicadosVisiveis = todosComunicados.slice(0, limiteExibicao);
     const mostrarBotaoExibirMais = todosComunicados.length > limiteExibicao;
@@ -159,7 +185,6 @@ export function ComunicadosComponenteCoordenador({ user }) {
         });
     }
 
-    // Renderização condicional para os estados de conexão e carregamento.
     if (!apiUrl) return <p className="text-center text-muted-foreground">Conectando ao servidor...</p>;
     if (loading) return <p className="text-center text-muted-foreground">Carregando...</p>;
     if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -209,7 +234,6 @@ export function ComunicadosComponenteCoordenador({ user }) {
                             </Card>
                         );
                     })}
-                    
                     {mostrarBotaoExibirMais && (
                       <div className="flex justify-center py-4">
                         <Button variant="outline" onClick={() => setLimiteExibicao(todosComunicados.length)} className="relative">

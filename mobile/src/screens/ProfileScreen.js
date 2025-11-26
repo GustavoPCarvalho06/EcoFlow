@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: mobile/src/screens/ProfileScreen.js
-// =================================================================================
-
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, StyleSheet, TextInput, TouchableOpacity, 
@@ -25,11 +21,6 @@ const formatCEP = (text) => {
 export default function ProfileScreen({ navigation }) {
   const { user, updateUserLocal, logout } = useNotification();
 
-  // DEBUG: Veja no seu terminal o que está chegando aqui!
-  useEffect(() => {
-    console.log("Dados do Usuário na Tela de Perfil:", user);
-  }, [user]);
-
   // Controle do Modal de Edição
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   
@@ -50,14 +41,13 @@ export default function ProfileScreen({ navigation }) {
   // Carrega os dados no formulário quando abre o modal
   const openEditModal = () => {
     if (user) {
-      // Preenche com os dados atuais OU deixa vazio se não tiver
       setEditNome(user.nome || '');
       setEditEmail(user.email || '');
       setEditCep(formatCEP(user.CEP || ''));
       setEditSexo(user.sexo || '');
       setEditEstadoCivil(user.estadoCivil || '');
       
-      // Senha sempre começa vazia
+      // Senha sempre começa vazia para segurança
       setEditSenha('');
       setEditConfirmarSenha('');
     }
@@ -65,39 +55,55 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleSave = async () => {
-    // REMOVIDO: A validação que obrigava preencher tudo.
-    
-    // Validação apenas de senha, SE o usuário tentar mudar
+    // Validação de senha
     if (editSenha && editSenha !== editConfirmarSenha) {
       Alert.alert("Erro", "As senhas não coincidem.");
       return;
     }
 
+    // Verifica se existe token
+    if (!user || !user.token) {
+        Alert.alert("Sessão Inválida", "Não foi possível identificar suas credenciais. Faça login novamente.");
+        await logout();
+        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+        return;
+    }
+
     setLoading(true);
 
-    // Monta o objeto com os dados editados
-    // Se o campo estiver vazio no state, enviamos vazio ou o que estava antes?
-    // Aqui enviamos o que está no input. Se o usuário apagou, envia vazio.
+    // Monta o corpo da requisição
     const body = {
-      cpf: user.cpf, // Identificador (não alterável)
+      cpf: user.cpf, 
       nome: editNome,
       email: editEmail,
-      CEP: editCep.replace(/\D/g, ''),
+      CEP: editCep.replace(/\D/g, ''), // Remove formatação
       sexo: editSexo,
       estadoCivil: editEstadoCivil,
     };
 
-    // Só envia senha se foi preenchida
     if (editSenha) {
       body.senha = editSenha;
     }
 
     try {
+      console.log("Enviando atualização de perfil...");
+      
       const response = await fetch(`${API_URL}/user/put`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}` // <--- TOKEN NO HEADER
+        },
         body: JSON.stringify(body),
       });
+
+      // Se o token expirou ou é inválido
+      if (response.status === 401 || response.status === 403) {
+          Alert.alert("Sessão Expirada", "Sua sessão expirou. Por favor, faça login novamente.");
+          await logout();
+          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+          return;
+      }
 
       const data = await response.json();
 
@@ -105,7 +111,7 @@ export default function ProfileScreen({ navigation }) {
         throw new Error(data.mensagem || "Erro ao atualizar perfil.");
       }
 
-      // Atualiza o contexto localmente para refletir na hora
+      // Atualiza o contexto localmente
       await updateUserLocal({
         nome: editNome,
         email: editEmail,
@@ -118,7 +124,8 @@ export default function ProfileScreen({ navigation }) {
       setEditModalVisible(false);
 
     } catch (error) {
-      Alert.alert("Erro", error.message);
+      console.error("Erro ao atualizar:", error);
+      Alert.alert("Erro", error.message || "Falha na conexão.");
     } finally {
       setLoading(false);
     }
@@ -138,7 +145,7 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
-  // --- Componente de Linha de Informação (Visualização) ---
+  // --- Componente de Linha de Informação ---
   const InfoRow = ({ icon, label, value }) => (
     <View style={styles.infoRow}>
       <View style={styles.iconBox}>
@@ -166,7 +173,7 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </View>
 
-        {/* --- LISTA DE INFORMAÇÕES (SOMENTE LEITURA) --- */}
+        {/* --- LISTA DE INFORMAÇÕES (LEITURA) --- */}
         <View style={styles.cardContainer}>
           <Text style={styles.sectionTitle}>Dados Pessoais</Text>
           
@@ -228,7 +235,6 @@ export default function ProfileScreen({ navigation }) {
 
             <View style={styles.divider} />
 
-            {/* Campos Editáveis - JÁ PREENCHIDOS PELO openEditModal */}
             <Text style={styles.label}>Nome Completo</Text>
             <TextInput 
                 style={styles.input} 
@@ -255,7 +261,7 @@ export default function ProfileScreen({ navigation }) {
                 maxLength={9} 
             />
 
-            {/* Seletores */}
+            {/* Seletores Customizados */}
             <View style={{flexDirection: 'row', gap: 10}}>
               <View style={{flex: 1}}>
                 <Text style={styles.label}>Sexo</Text>
@@ -303,8 +309,8 @@ export default function ProfileScreen({ navigation }) {
                 </Text>
                 
                 {(selectorType === 'sexo' 
-                  ? ['Masculino', 'Feminino', 'Outro'] 
-                  : ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viuvo(a)']
+                  ? ['masculino', 'feminino', 'outros'] 
+                  : ['solteiro(a)', 'casado(a)', 'divorciado(a)', 'viuvo(a)']
                 ).map((opt) => (
                   <TouchableOpacity 
                     key={opt} 
@@ -372,7 +378,7 @@ const styles = StyleSheet.create({
   disabledText: { color: '#6c757d', fontSize: 16 },
 
   selector: { backgroundColor: '#f9f9f9', borderRadius: 8, paddingHorizontal: 15, height: 50, borderWidth: 1, borderColor: '#ddd', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  selectorText: { fontSize: 16, color: '#333' },
+  selectorText: { fontSize: 16, color: '#333', textTransform: 'capitalize' },
 
   saveButton: { backgroundColor: '#28a745', height: 55, borderRadius: 10, justifyContent: 'center', alignItems: 'center', shadowColor: "#000", shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 2, elevation: 3 },
   saveButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
@@ -382,6 +388,6 @@ const styles = StyleSheet.create({
   selectorModal: { width: '80%', backgroundColor: '#fff', borderRadius: 15, padding: 20, elevation: 10 },
   selectorTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 15 },
   selectorOption: { paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', flexDirection: 'row', justifyContent: 'space-between' },
-  selectorOptionText: { fontSize: 16, color: '#333' },
+  selectorOptionText: { fontSize: 16, color: '#333', textTransform: 'capitalize' },
   cancelSelector: { marginTop: 15, alignItems: 'center', padding: 10 },
 });
