@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation"; // ADICIONADO: Para redirecionamento
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PlusCircle, Pencil, Search, PowerOff, Power, ChevronLeft, ChevronRight } from "lucide-react";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-// Funções auxiliares
+// --- Funções auxiliares ---
 const formatCPF = (cpf) => {
   if (!cpf) return "";
   const cleanCpf = cpf.replace(/\D/g, '').slice(0, 11);
@@ -37,9 +38,9 @@ const formatCEP = (cep) => {
     return cleanCep;
 };
 
-
 export function UserManagementTable() {
   const apiUrl = useApiUrl();
+  const router = useRouter(); // ADICIONADO
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,10 +63,39 @@ export function UserManagementTable() {
   const [createCep, setCreateCep] = useState("");
   const [editCep, setEditCep] = useState("");
 
-  // ADIÇÃO 1: Estado para controlar o modal de sucesso
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
+  // --- 1. FUNÇÃO DE FETCH AUTENTICADO ---
+  const authFetch = useCallback(async (url, options = {}) => {
+    // Pega o token salvo no Login
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    // Se tiver token, injeta no header
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
+
+    // Verifica se a sessão expirou (401 ou 403)
+    if (response.status === 401 || response.status === 403) {
+        if (typeof window !== 'undefined') localStorage.removeItem('token');
+        router.push('/'); // Redireciona para o login
+        throw new Error("SESSION_EXPIRED");
+    }
+
+    return response;
+  }, [router]);
+
+  // --- 2. BUSCAR USUÁRIOS ---
   const fetchUsers = useCallback(async () => {
     if (!apiUrl) {
       setIsLoading(false);
@@ -81,7 +111,10 @@ export function UserManagementTable() {
         statusConta: statusFilter,
         cargo: cargoFilter,
       });
-      const response = await fetch(`${apiUrl}/user/paginated?${params.toString()}`);
+      
+      // Usa authFetch em vez de fetch
+      const response = await authFetch(`${apiUrl}/user/paginated?${params.toString()}`);
+      
       if (!response.ok) throw new Error('Falha ao buscar dados dos usuários');
       
       const data = await response.json();
@@ -89,13 +122,16 @@ export function UserManagementTable() {
       setTotalPages(data.totalPages);
       setTotalUsers(data.total);
     } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      setError("Não foi possível carregar os usuários.");
-      setUsers([]);
+      // Se o erro for de sessão, não exibe erro na tela (o redirect cuida)
+      if (error.message !== "SESSION_EXPIRED") {
+          console.error("Erro ao buscar usuários:", error);
+          setError("Não foi possível carregar os usuários.");
+          setUsers([]);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [page, limit, searchQuery, statusFilter, cargoFilter, apiUrl]);
+  }, [page, limit, searchQuery, statusFilter, cargoFilter, apiUrl, authFetch]);
 
   useEffect(() => {
     const debounceTimeout = searchQuery ? 500 : 0; 
@@ -136,7 +172,7 @@ export function UserManagementTable() {
     setEditCep(formatCEP(e.target.value));
   };
 
-
+  // --- 3. CHAMADAS DE API GENÉRICAS (PUT/DELETE) ---
   const handleApiCall = async (endpoint, method, body, successCallback) => {
     if (!apiUrl) {
       setError("Conexão com o servidor não estabelecida. Tente novamente.");
@@ -145,22 +181,25 @@ export function UserManagementTable() {
 
     try {
       setError("");
-      const response = await fetch(`${apiUrl}/user/${endpoint}`, {
+      // Usa authFetch
+      const response = await authFetch(`${apiUrl}/user/${endpoint}`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.mensagem || 'Ocorreu um erro');
       }
       successCallback();
     } catch (err) {
-      setError(err.message);
+      if (err.message !== "SESSION_EXPIRED") {
+        setError(err.message);
+      }
     }
   };
 
-  // ADIÇÃO 2: Lógica do handleCreateUser modificada
+  // --- 4. CRIAR USUÁRIO (POST) ---
   const handleCreateUser = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -170,28 +209,29 @@ export function UserManagementTable() {
     data.CEP = data.CEP.replace(/\D/g, '');
 
     try {
-      setError(""); // Limpa erros de tentativas anteriores
-      const response = await fetch(`${apiUrl}/user/post`, {
+      setError(""); 
+      // Usa authFetch
+      const response = await authFetch(`${apiUrl}/user/post`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       
-      const responseData = await response.json(); // Sempre leia a resposta
+      const responseData = await response.json(); 
 
       if (!response.ok) {
         throw new Error(responseData.mensagem || 'Ocorreu um erro');
       }
 
-      // SUCESSO!
-      setIsCreateModalOpen(false); // Fecha o modal de criação
-      setCreateCpf("");            // Limpa os campos
+      setIsCreateModalOpen(false); 
+      setCreateCpf("");            
       setCreateCep("");
-      setIsSuccessModalOpen(true); // Abre o modal de sucesso
-      forceRefresh();              // Atualiza a tabela
+      setIsSuccessModalOpen(true); 
+      forceRefresh();              
 
     } catch (err) {
-      setError(err.message);
+      if (err.message !== "SESSION_EXPIRED") {
+        setError(err.message);
+      }
     }
   };
   
@@ -398,7 +438,6 @@ export function UserManagementTable() {
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Esta ação irá desativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>. O usuário não poderá mais acessar o sistema.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleConfirmDeactivate} className="bg-red-600 hover:bg-red-700">Sim, desativar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
       <AlertDialog open={isReactivateAlertOpen} onOpenChange={setIsReactivateAlertOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Confirmar Reativação</AlertDialogTitle><AlertDialogDescription>Tem certeza que deseja reativar a conta de <span className="font-semibold">{selectedUser?.nome}</span>? O usuário voltará a ter acesso ao sistema.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleConfirmReactivate} className="bg-blue-600 hover:bg-blue-700">Sim, reativar</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
     
-      {/* ADIÇÃO 3: O JSX DO MODAL DE SUCESSO */}
       <AlertDialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

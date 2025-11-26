@@ -1,17 +1,36 @@
+// =================================================================================
+// Arquivo: src/components/administrador/page.jsx (ou o caminho correto do seu PageAdmin)
+// =================================================================================
+
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
 import { UserPreviewTable } from "@/components/dashboard/UserPreviewTable";
 import Layout from "../dashboard/layout/Layout";
 
+// 1. A função agora aceita o 'token' como argumento
+async function getUserData(token) {
+  // Se não tiver token, nem tenta buscar
+  if (!token) {
+    console.log("Token não encontrado no Server Component.");
+    return [];
+  }
 
-
-async function getUserData() {
   try {
-    const response = await fetch('http://localhost:3001/user/get', { cache: 'no-store' });
+    // 2. Adicionamos o Header de Autorização
+    const response = await fetch('http://localhost:3001/user/get', { 
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // <--- O PULO DO GATO
+      }
+    });
+
     if (!response.ok) {
-      throw new Error('Falha ao buscar dados dos usuários');
+      // Se o token for inválido ou expirado (401/403), o backend vai rejeitar
+      throw new Error(`Falha ao buscar dados (Status: ${response.status})`);
     }
+
     const users = await response.json();
     return users;
   } catch (error) {
@@ -20,21 +39,24 @@ async function getUserData() {
   }
 }
 
-export default async function PageAdmin( usuario ) {
+export default async function PageAdmin() {
+  // 3. Pegamos o cookie do token aqui
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
+  const token = tokenCookie?.value; // Extrai a string do token
 
   let user = null;
-  if (tokenCookie && tokenCookie.value) {
+  if (token) {
     try {
-      const decodedToken = jwt.decode(tokenCookie.value);
-      user = decodedToken;
+      // Apenas decodifica para saber quem é o admin logado (para UI)
+      user = jwt.decode(token);
     } catch (error) {
       console.error("Erro ao decodificar o token:", error);
     }
   }
 
-  const allUsers = await getUserData();
+  // 4. Passamos o token extraído para a função de busca
+  const allUsers = await getUserData(token);
 
   const stats = {
     totalUsers: allUsers.length,
@@ -44,7 +66,7 @@ export default async function PageAdmin( usuario ) {
   };
 
   // =======================================================
-  // NOVA LÓGICA PARA SELECIONAR OS USUÁRIOS DA PRÉ-VISUALIZAÇÃO
+  // LÓGICA DE PRÉ-VISUALIZAÇÃO (Mantida)
   // =======================================================
   
   // 1. Ordena todos os usuários por ID decrescente (mais recentes primeiro)

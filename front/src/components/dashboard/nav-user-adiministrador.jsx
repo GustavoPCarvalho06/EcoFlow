@@ -52,6 +52,14 @@ export function NavUser({
     const name = getUserName()
     return name ? name.charAt(0).toUpperCase() : "U"
   }
+    const handleLogoutClick = async () => {
+      // 1. Limpa o token do cliente
+      if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+      }
+      // 2. Chama a server action que limpa o cookie
+      await logout();
+  };
 
   return (
     <SidebarMenu>
@@ -107,7 +115,8 @@ export function NavUser({
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}> 
+             <DropdownMenuItem onClick={handleLogoutClick} className="cursor-pointer"> 
+              
               <IconLogout />
               Log out
             </DropdownMenuItem>

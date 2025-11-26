@@ -1,5 +1,3 @@
-// Local do arquivo: front\src\components\Perfil\perfil.jsx
-
 "use client"; // ESSENCIAL: Transforma este em um Componente Cliente
 
 import { useState } from "react";
@@ -45,6 +43,7 @@ function ProfileInfoItem({ icon: Icon, label, value }) {
 // Modal para Editar o Perfil
 function EditProfileModal({ user, isOpen, onOpenChange, onProfileUpdate }) {
     const apiUrl = useApiUrl();
+    const router = useRouter(); // ADICIONADO: Para redirecionar se o token expirar
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [cepValue, setCepValue] = useState(formatCEP(user.CEP));
@@ -64,11 +63,27 @@ function EditProfileModal({ user, isOpen, onOpenChange, onProfileUpdate }) {
         };
 
         try {
+            // 1. Pega o token
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+            // 2. Configura headers com Autorização
+            const headers = { 
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+            };
+
             const response = await fetch(`${apiUrl}/user/put`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(data),
             });
+
+            // 3. Verifica expiração de sessão
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('token');
+                router.push('/');
+                throw new Error("Sessão expirada. Faça login novamente.");
+            }
 
             const result = await response.json();
             if (!response.ok) {
@@ -136,6 +151,7 @@ function EditProfileModal({ user, isOpen, onOpenChange, onProfileUpdate }) {
 // Modal para Alterar a Senha
 function ChangePasswordModal({ user, isOpen, onOpenChange }) {
     const apiUrl = useApiUrl();
+    const router = useRouter(); // ADICIONADO
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -162,11 +178,27 @@ function ChangePasswordModal({ user, isOpen, onOpenChange }) {
         };
 
         try {
+            // 1. Pega o token
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+            // 2. Configura headers
+            const headers = { 
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+            };
+
             const response = await fetch(`${apiUrl}/user/put`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(data),
             });
+
+            // 3. Verifica sessão
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('token');
+                router.push('/');
+                throw new Error("Sessão expirada. Faça login novamente.");
+            }
 
             const result = await response.json();
             if (!response.ok) {
@@ -233,9 +265,7 @@ export default function Perfil({ initialUser }) {
         // 1. ATUALIZA O ESTADO LOCAL DO USUÁRIO COM OS NOVOS DADOS
         setUser(prevUser => ({ ...prevUser, ...updatedData }));
         
-        // 2. [IMPORTANTE] ATUALIZA O TOKEN NO BACKEND E RECARREGA OS DADOS
-        // Esta é a parte mais complexa. A forma mais simples de garantir que o token
-        // também seja atualizado é forçar um refresh dos dados do servidor.
+        // 2. [IMPORTANTE] RECARREGA OS DADOS DO SERVIDOR
         router.refresh(); 
     };
 
