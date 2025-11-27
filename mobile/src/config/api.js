@@ -1,28 +1,38 @@
-// Arquivo: mobile/src/config/api.js
-
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-let API_URL = '';
-
-const getLocalIp = () => {
-  // Tenta pegar o IP através do manifesto do Expo (funciona no Expo Go)
+const getApiUrl = () => {
+  // Tenta pegar o endereço de onde o Expo está rodando
   const debuggerHost = Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost;
 
   if (debuggerHost) {
-    // O debuggerHost vem no formato "192.168.1.5:8081"
-    // Nós pegamos apenas o IP antes dos dois pontos
+    // Separa o IP da porta (ex: "127.0.0.1:8081" vira ip="127.0.0.1")
     const ip = debuggerHost.split(':')[0];
-    
-    // Retornamos o IP com a porta do seu backend (3001)
+
+    // LÓGICA DE CORREÇÃO:
+    // Se o Expo disser que é "localhost" ou "127.0.0.1"
+    if (ip === 'localhost' || ip === '127.0.0.1') {
+      
+      // Se for Android (Emulador), o IP do computador é SEMPRE 10.0.2.2
+      if (Platform.OS === 'android') {
+        console.log('[API] Emulador Android detectado. Trocando para 10.0.2.2');
+        return 'http://10.0.2.2:3001';
+      }
+      
+      // Se for iOS (Simulador), localhost funciona normal
+      return 'http://localhost:3001';
+    }
+
+    // Se o Expo já pegou o IP real da rede (ex: 192.168.0.15), usa ele
     return `http://${ip}:3001`;
   }
 
-  // Fallback: Se não conseguir detectar (ex: Emulador Android usa 10.0.2.2 para localhost)
-  return 'http://10.0.2.2:3001'; 
+  // Fallback de segurança (caso não detecte nada, assume emulador Android)
+  return 'http://10.0.2.2:3001';
 };
 
-API_URL = getLocalIp();
+const API_URL = getApiUrl();
 
-console.log('🔗 API URL configurada para:', API_URL);
+console.log('🔗 API configurada para:', API_URL);
 
 export default API_URL;
