@@ -1,34 +1,65 @@
-// controllers/ComunicadoController.js (VERSÃO ATUALIZADA)
+// =================================================================================
+// Arquivo: back/controllers/ComunicadoController.js
+// =================================================================================
 
-import { getAllComunicados, createComunicado, updateComunicado,
-     deleteComunicado ,countUnseenComunicados, markAllAsSeen,markOneAsSeen ,
-     getUnseenComunicadoIds,getDetailedUnseenIds} from "../models/ComunicadoModel.js";
+import {
+    getAllComunicados,
+    createComunicado,
+    updateComunicado,
+    deleteComunicado,
+    countUnseenComunicados,
+    markAllAsSeen,
+    markOneAsSeen,
+    getUnseenComunicadoIds,
+    getDetailedUnseenIds
+} from "../models/ComunicadoModel.js";
+
+// Importação do sistema de logs
+import { registrarLog } from "../models/LogModel.js";
 
 const getAllComunicadosController = async (req, res) => {
-  try {
-    const comunicados = await getAllComunicados();
-    return res.status(200).json(comunicados);
-  } catch (err) {
-    console.error("Erro no controller ao buscar comunicados: ", err);
-    return res.status(500).json({ mensagem: "Erro interno ao buscar comunicados." });
-  }
+    try {
+        const comunicados = await getAllComunicados();
+        return res.status(200).json(comunicados);
+    } catch (err) {
+        console.error("Erro no controller ao buscar comunicados: ", err);
+        return res.status(500).json({ mensagem: "Erro interno ao buscar comunicados." });
+    }
 };
+
 const createComunicadoController = async (req, res) => {
     try {
         const { titulo, conteudo, autor_id } = req.body;
-        if (!titulo || !conteudo || !autor_id) return res.status(400).json({ mensagem: "Dados insuficientes." });
         
+        // Pega o usuário logado via token (middleware) para o Log
+        const usuarioLogado = req.user; 
+
+        if (!titulo || !conteudo || !autor_id) return res.status(400).json({ mensagem: "Dados insuficientes." });
+
         // 1. Cria o comunicado e pega o ID dele
         const newComunicadoId = await createComunicado({ titulo, conteudo, autor_id });
 
-        // 2. [LÓGICA NOVA] Marca imediatamente como visto pelo próprio autor
+        // 2. Marca imediatamente como visto pelo próprio autor
         if (newComunicadoId) {
             await markOneAsSeen(autor_id, newComunicadoId);
         }
-        
+
+        // --- [LOG] REGISTRA A CRIAÇÃO ---
+        if (usuarioLogado) {
+            await registrarLog({
+                usuario_id: usuarioLogado.id,
+                nome_usuario: usuarioLogado.nome,
+                cargo_usuario: usuarioLogado.cargo,
+                acao: 'CRIACAO_COMUNICADO',
+                detalhes: `Criou um novo comunicado: "${titulo}"`,
+                ip: req.ip
+            });
+        }
+        // --------------------------------
+
         // 3. Emite o evento global para todos os outros
         req.io.emit('comunicados_atualizados');
-        
+
         return res.status(201).json({ mensagem: "Comunicado criado com sucesso." });
     } catch (err) {
         console.error("Erro no controller ao criar comunicado: ", err);
@@ -40,20 +71,36 @@ const updateComunicadoController = async (req, res) => {
     try {
         const { id } = req.params;
         const { titulo, conteudo } = req.body;
-        const autor_id = req.headers['x-user-id']; // Assumindo que o autor da edição é o usuário logado
+        const autor_id = req.headers['x-user-id']; 
+        
+        // Pega o usuário logado via token para o Log
+        const usuarioLogado = req.user;
 
         if (!titulo && !conteudo) return res.status(400).json({ mensagem: "Pelo menos um campo é necessário." });
         if (!autor_id) return res.status(401).json({ mensagem: "Usuário não autenticado." });
-        
+
         // 1. Atualiza o comunicado
         await updateComunicado(id, { titulo, conteudo });
 
-        // 2. [LÓGICA NOVA] Marca como visto/re-visto pelo editor
+        // 2. Marca como visto/re-visto pelo editor
         await markOneAsSeen(autor_id, id);
+
+        // --- [LOG] REGISTRA A ATUALIZAÇÃO ---
+        if (usuarioLogado) {
+            await registrarLog({
+                usuario_id: usuarioLogado.id,
+                nome_usuario: usuarioLogado.nome,
+                cargo_usuario: usuarioLogado.cargo,
+                acao: 'EDICAO_COMUNICADO',
+                detalhes: `Editou o comunicado ID: ${id} ${titulo ? `(Novo título: "${titulo}")` : ''}`,
+                ip: req.ip
+            });
+        }
+        // ------------------------------------
 
         // 3. Emite o evento global
         req.io.emit('comunicados_atualizados');
-        
+
         return res.status(200).json({ mensagem: "Comunicado atualizado com sucesso." });
     } catch (err) {
         console.error("Erro no controller ao atualizar comunicado: ", err);
@@ -64,9 +111,26 @@ const updateComunicadoController = async (req, res) => {
 const deleteComunicadoController = async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Pega o usuário logado via token para o Log
+        const usuarioLogado = req.user;
+
         await deleteComunicado(id);
 
-        // [NOVO] Emite o mesmo evento após deletar
+        // --- [LOG] REGISTRA A EXCLUSÃO ---
+        if (usuarioLogado) {
+            await registrarLog({
+                usuario_id: usuarioLogado.id,
+                nome_usuario: usuarioLogado.nome,
+                cargo_usuario: usuarioLogado.cargo,
+                acao: 'EXCLUSAO_COMUNICADO',
+                detalhes: `Excluiu o comunicado ID: ${id}`,
+                ip: req.ip
+            });
+        }
+        // ---------------------------------
+
+        // Emite o mesmo evento após deletar
         req.io.emit('comunicados_atualizados');
 
         return res.status(200).json({ mensagem: "Comunicado deletado com sucesso." });
@@ -76,7 +140,6 @@ const deleteComunicadoController = async (req, res) => {
     }
 };
 
-// [NOVO] Controller para contar comunicados não vistos
 const countUnseenController = async (req, res) => {
     try {
         const usuarioId = req.headers['x-user-id'];
@@ -91,7 +154,6 @@ const countUnseenController = async (req, res) => {
     }
 };
 
-// [NOVO] Controller para marcar todos como vistos
 const markAllSeenController = async (req, res) => {
     try {
         const usuarioId = req.headers['x-user-id'];
@@ -106,18 +168,16 @@ const markAllSeenController = async (req, res) => {
     }
 };
 
-
 const markOneSeenController = async (req, res) => {
     try {
         const usuarioId = req.headers['x-user-id'];
-        const { comunicadoId } = req.params; // Pega o ID do comunicado da URL
+        const { comunicadoId } = req.params;
 
         if (!usuarioId || !comunicadoId) {
             return res.status(400).json({ mensagem: "ID do usuário e do comunicado são obrigatórios." });
         }
         await markOneAsSeen(usuarioId, comunicadoId);
-        
-        // [IMPORTANTE] Avisa a todos que a contagem de alguém pode ter mudado
+
         req.io.emit('comunicados_atualizados');
 
         return res.status(200).json({ mensagem: "Comunicado marcado como visto." });
@@ -135,7 +195,8 @@ const getUnseenIdsController = async (req, res) => {
         const unseen_ids = await getUnseenComunicadoIds(usuarioId);
         return res.status(200).json({ unseen_ids });
     } catch (err) {
-        // ... tratamento de erro
+        console.error(err);
+        return res.status(500).json({ mensagem: "Erro interno." });
     }
 };
 
@@ -151,12 +212,12 @@ const getDetailedUnseenIdsController = async (req, res) => {
     }
 };
 
-export default { 
-    getAllComunicadosController, 
-    createComunicadoController, 
-    updateComunicadoController, 
-    deleteComunicadoController ,
-    countUnseenController, // [NOVO]
+export default {
+    getAllComunicadosController,
+    createComunicadoController,
+    updateComunicadoController,
+    deleteComunicadoController,
+    countUnseenController,
     markAllSeenController,
     markOneSeenController,
     getUnseenIdsController,

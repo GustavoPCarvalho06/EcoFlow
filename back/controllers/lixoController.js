@@ -1,9 +1,17 @@
+// =================================================================================
+// Arquivo: back/controllers/lixoController.js
+// =================================================================================
+
 import { createLixo, updateLixo, deleteLixo } from "../models/lixeiraModels.js";
+import { registrarLog } from "../models/LogModel.js"; // Importando o sistema de logs
 
 // Criar
 const createLixoController = async (req, res) => {
   try {
     const { statusLixo, localizacao, endereco } = req.body;
+    
+    // Pega o usuário logado para o log
+    const usuarioLogado = req.user;
 
     if (!statusLixo || !localizacao || localizacao.x === undefined || localizacao.y === undefined || !endereco) {
       return res.status(400).json({ mensagem: "statusLixo, localizacao e endereco inválidos" });
@@ -14,6 +22,20 @@ const createLixoController = async (req, res) => {
     }
 
     await createLixo({ statusLixo, localizacao, endereco });
+
+    // --- [LOG] REGISTRA A CRIAÇÃO ---
+    if (usuarioLogado) {
+      await registrarLog({
+        usuario_id: usuarioLogado.id,
+        nome_usuario: usuarioLogado.nome,
+        cargo_usuario: usuarioLogado.cargo,
+        acao: 'CRIACAO_PONTO_COLETA',
+        detalhes: `Criou um novo ponto de coleta em: ${endereco} (Status inicial: ${statusLixo})`,
+        ip: req.ip
+      });
+    }
+    // --------------------------------
+
     return res.status(200).json({ mensagem: "Lixeira criada com sucesso" });
 
   } catch (err) {
@@ -25,11 +47,29 @@ const createLixoController = async (req, res) => {
 const updateLixoController = async (req, res) => {
   try {
     const { id, statusLixo } = req.body;
+    
+    // Pega o usuário logado para o log
+    const usuarioLogado = req.user;
+
     if (!id) {
       return res.status(400).json({ mensagem: "id não fornecido" });
     }
 
     const resultado = await updateLixo({ statusLixo }, id);
+
+    // --- [LOG] REGISTRA A ATUALIZAÇÃO ---
+    if (usuarioLogado) {
+      await registrarLog({
+        usuario_id: usuarioLogado.id,
+        nome_usuario: usuarioLogado.nome,
+        cargo_usuario: usuarioLogado.cargo,
+        acao: 'EDICAO_PONTO_COLETA',
+        detalhes: `Atualizou o status do ponto ID ${id} para: "${statusLixo}"`,
+        ip: req.ip
+      });
+    }
+    // ------------------------------------
+
     return res.status(200).json({ mensagem: resultado });
   } catch (err) {
     console.error("Erro ao atualizar lixeira:", err);
@@ -41,11 +81,29 @@ const updateLixoController = async (req, res) => {
 const deleteLixoController = async (req, res) => {
   try {
     const { id } = req.body;
+    
+    // Pega o usuário logado para o log
+    const usuarioLogado = req.user;
+
     if (!id) {
       return res.status(400).json({ mensagem: "id não fornecido" });
     }
 
     const resultado = await deleteLixo(id);
+
+    // --- [LOG] REGISTRA A EXCLUSÃO ---
+    if (usuarioLogado) {
+      await registrarLog({
+        usuario_id: usuarioLogado.id,
+        nome_usuario: usuarioLogado.nome,
+        cargo_usuario: usuarioLogado.cargo,
+        acao: 'EXCLUSAO_PONTO_COLETA',
+        detalhes: `Removeu o ponto de coleta ID ${id}`,
+        ip: req.ip
+      });
+    }
+    // ---------------------------------
+
     return res.status(200).json({ mensagem: "Lixeira deletada com sucesso", resultado });
   } catch (err) {
     console.error("Erro ao deletar lixeira:", err);

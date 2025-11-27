@@ -14,6 +14,7 @@ import {
     IconBell,
     IconMail,
     IconBroadcast,
+    IconHistory ,
     IconMapPin
 } from "@tabler/icons-react";
 import { NavUser } from "@/components/dashboard/nav-user-adiministrador";
@@ -34,6 +35,7 @@ const navItems = [
     { title: "Usuários", href: "/usuarios", icon: IconUsers },
     { title: "Mensagem", href: "/mensagens", icon: IconMail },
     { title: "Comunicados", href: "/comunicados", icon: IconBroadcast },
+    { title: "Histórico", href: "/historico", icon: IconHistory },
 ];
 
 const coletorNavItems = [

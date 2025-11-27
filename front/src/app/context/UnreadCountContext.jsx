@@ -1,4 +1,3 @@
-// app/context/UnreadCountContext.jsx
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -7,7 +6,8 @@ import { useApiUrl } from './ApiContext';
 
 const UnreadCountContext = createContext();
 
-export function UnreadCountProvider({ children, user }) {
+// ADICIONADO: Recebemos 'token' nas props
+export function UnreadCountProvider({ children, user, token }) {
   const apiUrl = useApiUrl();
   const meuUserId = user?.id;
 
@@ -18,42 +18,54 @@ export function UnreadCountProvider({ children, user }) {
 
   // Função para buscar contagem de mensagens
   const fetchTotalMsgUnread = useCallback(async () => {
-    if (!meuUserId || !apiUrl) {
+    // ADICIONADO: Verifica se tem token
+    if (!meuUserId || !apiUrl || !token) {
       setTotalMsgUnread(0);
       return;
     }
     try {
       const response = await fetch(`${apiUrl}/msg/unread-counts`, {
-        headers: { 'x-user-id': meuUserId.toString() }
+        // ADICIONADO: Authorization header
+        headers: { 
+            'x-user-id': meuUserId.toString(),
+            'Authorization': `Bearer ${token}` 
+        }
       });
       if (!response.ok) throw new Error("Falha na busca de mensagens");
       const countsBySender = await response.json();
       const total = Object.values(countsBySender).reduce((sum, current) => sum + current, 0);
       setTotalMsgUnread(total);
-      console.log('📊 Contagem de mensagens atualizada:', total);
     } catch (error) {
       console.error("Erro ao buscar contagem de mensagens:", error);
     }
-  }, [meuUserId, apiUrl]);
+  }, [meuUserId, apiUrl, token]); // ADICIONADO: dependência token
 
   // Função para buscar contagem de comunicados
   const fetchTotalComunicadoUnread = useCallback(async () => {
-    if (!meuUserId || !apiUrl) {
+    // ADICIONADO: Verifica se tem token
+    if (!meuUserId || !apiUrl || !token) {
       setTotalComunicadoUnread(0);
       return;
     }
     try {
       const response = await fetch(`${apiUrl}/comunicados/unseen-count`, {
-        headers: { 'x-user-id': meuUserId.toString() }
+        // ADICIONADO: Authorization header
+        headers: { 
+            'x-user-id': meuUserId.toString(),
+            'Authorization': `Bearer ${token}` 
+        }
       });
+      
+      // Se a sessão expirou, não joga erro no console, apenas ignora
+      if (response.status === 401 || response.status === 403) return;
+
       if (!response.ok) throw new Error("Falha na busca de comunicados");
       const data = await response.json();
       setTotalComunicadoUnread(data.count);
-      console.log('📢 Contagem de comunicados atualizada:', data.count);
     } catch (error) {
       console.error("Erro ao buscar contagem de comunicados:", error);
     }
-  }, [meuUserId, apiUrl]);
+  }, [meuUserId, apiUrl, token]); // ADICIONADO: dependência token
 
   const clearComunicadoCount = () => {
     setTotalComunicadoUnread(0);
@@ -63,21 +75,16 @@ export function UnreadCountProvider({ children, user }) {
   useEffect(() => {
     if (!meuUserId || !apiUrl) return;
 
-    console.log('🔌 Iniciando conexão socket para usuário:', meuUserId);
-    
-    // Cria nova instância do socket
+    // Conecta o socket (Socket.io geralmente não precisa do token na conexão inicial se não configurado, 
+    // mas as rotas HTTP precisam)
     const newSocket = io(apiUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000
     });
 
     setSocket(newSocket);
 
-    // Configura listeners do socket
     newSocket.on('connect', () => {
-      console.log('✅ Socket conectado, fazendo join:', meuUserId);
       setIsConnected(true);
       newSocket.emit('join', meuUserId);
       
@@ -86,43 +93,21 @@ export function UnreadCountProvider({ children, user }) {
       fetchTotalComunicadoUnread();
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('❌ Socket desconectado');
-      setIsConnected(false);
-    });
-
-    newSocket.on('connect_error', (error) => {
-      console.error('❌ Erro de conexão socket:', error);
-      setIsConnected(false);
-    });
-
-    // Listener para novas mensagens - ATUALIZA EM TEMPO REAL
+    newSocket.on('disconnect', () => setIsConnected(false));
+    
     newSocket.on('new_message', (mensagem) => {
-      console.log('📨 Nova mensagem recebida via socket:', mensagem);
-      
-      // Se a mensagem é para mim, atualiza a contagem
       if (mensagem.destinatario_id === meuUserId) {
-        fetchTotalMsgUnread(); // Atualiza contagem automaticamente
+        fetchTotalMsgUnread();
       }
     });
 
-    // Listener para comunicados - ATUALIZA EM TEMPO REAL
     newSocket.on('comunicados_atualizados', () => {
-      console.log('📢 Comunicados atualizados via socket');
-      fetchTotalComunicadoUnread(); // Atualiza contagem automaticamente
+      fetchTotalComunicadoUnread();
     });
 
-    // Cleanup
     return () => {
-      console.log('🧹 Limpando conexão socket');
-      newSocket.off('connect');
-      newSocket.off('disconnect');
-      newSocket.off('connect_error');
-      newSocket.off('new_message');
-      newSocket.off('comunicados_atualizados');
       newSocket.disconnect();
       setSocket(null);
-      setIsConnected(false);
     };
   }, [meuUserId, apiUrl, fetchTotalMsgUnread, fetchTotalComunicadoUnread]);
 

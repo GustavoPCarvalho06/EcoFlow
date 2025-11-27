@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from "next/image";
-import { IconDashboard, IconMapPin, IconBroadcast, IconMail, IconBell } from "@tabler/icons-react"; 
+import { IconDashboard, IconMapPin, IconBroadcast,IconHistory , IconMail, IconBell } from "@tabler/icons-react"; 
 import { NavUser } from "@/components/dashboard/nav-user-coordenador"; // VERIFIQUE este caminho
 import { Button } from "@/components/ui/button";
 import { 
@@ -25,6 +25,7 @@ const navItemsCoordenador = [
     { title: "Mensagem", href: "/mensagens", icon: IconMail },
     { title: "Mapa de Coleta", href: "/mapa", icon: IconMapPin },
     { title: "Gerenciar Comunicados", href: "/comunicados", icon: IconBroadcast },
+    { title: "Histórico", href: "/historico", icon: IconHistory },
 ];
 
 export function CoordenadorSidebar(usuario, ...props) {

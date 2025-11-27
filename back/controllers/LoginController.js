@@ -3,14 +3,17 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { findUserByCpf } from "../models/loginModel.js";
 import { JWT_SECRET } from "../config/jwt.js";
+import { registrarLog } from "../models/LogModel.js";
 
 const login = async (req, res) => {
   try {
     const { cpf, senha } = req.body;
+    const ip = req.ip || req.connection.remoteAddress;
 
     // Busca o usuário pelo CPF direto (sem base64)
     const user = await findUserByCpf(cpf);
     console.log("Usuário encontrado:", user);
+
 
     if (!user) {
       return res.status(404).json({ erro: "Usuário não encontrado." });
@@ -50,6 +53,16 @@ const login = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
       maxAge: 3600000, // 1 hora
+    });
+
+
+     await registrarLog({
+        usuario_id: user.id,
+        nome_usuario: user.nome,
+        cargo_usuario: user.cargo,
+        acao: 'LOGIN',
+        detalhes: `O usuário ${user.nome} realizou login no sistema.`,
+        ip: ip
     });
 
     // Retorna resposta de sucesso
