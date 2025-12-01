@@ -1,52 +1,55 @@
-import { updateLixo } from "../models/lixeiraModels.js"; // Importamos seu model existente
-import { registrarLog } from "../models/LogModel.js"; // Importamos logs
+import { updateLixo } from "../models/lixeiraModels.js";
+import { registrarLog } from "../models/LogModel.js";
+import { read } from "../config/database.js"; // [NOVO] Importar read para buscar o endereço
 
 export const handleMqttMessage = async (topic, payload, io) => {
   try {
-    // 1. Converte a mensagem (Buffer) para String e depois para JSON
     const mensagemString = payload.toString();
-    console.log(`[MQTT] Mensagem recebida no tópico "${topic}":`, mensagemString);
+    console.log(`[MQTT] Mensagem:`, mensagemString);
 
-    // O Arduino deve enviar um JSON, ex: { "id": 1, "status": "Cheia" }
     let dados;
     try {
       dados = JSON.parse(mensagemString);
     } catch (e) {
-      console.error("[MQTT] Erro: A mensagem não é um JSON válido.");
+      console.error("[MQTT] JSON inválido.");
       return;
     }
 
-    // 2. Verifica o tópico para saber o que fazer
-    // Vamos supor que o Arduino publica em: "ecoflow/sensor/atualizar"
     if (topic === "ecoflow/sensor/atualizar") {
-      
       const { id, status } = dados;
 
-      if (!id || !status) {
-        console.error("[MQTT] Dados incompletos (precisa de id e status).");
-        return;
+      if (!id || !status) return;
+
+      // 1. Atualiza o Status
+      await updateLixo({ statusLixo: status }, id);
+
+      // [NOVO] 2. Busca o endereço do sensor para colocar no Log
+      let localizacaoTexto = "Local desconhecido";
+      try {
+        // Ajuste o nome da tabela e coluna conforme seu banco (supondo SistemaSensor e id_Sensor)
+        const sql = "SELECT endereco FROM SistemaSensor WHERE id_Sensor = ?"; 
+        const resultado = await read(sql, [id]);
+        if (resultado && resultado.length > 0) {
+          localizacaoTexto = resultado[0].endereco;
+        }
+      } catch (err) {
+        console.error("Erro ao buscar endereço do sensor:", err);
       }
 
-      // 3. Atualiza no Banco de Dados (Reutilizando sua função existente)
-      await updateLixo({ statusLixo: status }, id);
-      console.log(`[MQTT] Lixeira ${id} atualizada para ${status} no Banco.`);
-
-      // 4. Cria um Log do Sistema (Opcional, mas bom para rastreio)
+      // 3. Registra o Log com o Endereço
       await registrarLog({
-        usuario_id: null, // É o sistema/arduino, não um usuário logado
-        nome_usuario: "Sistema Arduino",
-        cargo_usuario: "IoT",
+        usuario_id: null,
+        nome_usuario: "Sensor IoT", // Nome fixo para identificar
+        cargo_usuario: "IoT",       // Cargo fixo para o filtro funcionar
         acao: "ATUALIZACAO_SENSOR",
-        detalhes: `Sensor ${id} atualizou status para: ${status}`,
+        detalhes: `Sensor ID ${id} em [${localizacaoTexto}] mudou para: ${status}`,
         ip: "MQTT"
       });
 
-      // 5. Avisa o Frontend em Tempo Real (Socket.IO)
-      // O frontend vai ouvir esse evento e atualizar o mapa/lista sem F5
       io.emit("sensor_atualizado", { id, status });
     }
 
   } catch (err) {
-    console.error("[MQTT] Erro ao processar mensagem:", err);
+    console.error("[MQTT] Erro geral:", err);
   }
 };
