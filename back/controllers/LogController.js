@@ -2,14 +2,15 @@ import { getLogsPaginated } from "../models/LogModel.js";
 
 const listarLogsController = async (req, res) => {
     try {
-        // Pega os filtros da URL (ex: /logs?page=1&search=joao&acao=CRIAR)
-        const { page, limit, search, acao } = req.query;
+        // [MODIFICADO] Adicionado usuario_id na desestruturação
+        const { page, limit, search, acao, usuario_id } = req.query;
 
         const resultado = await getLogsPaginated({ 
             page: page || 1, 
             limit: limit || 10,
             search: search || '',
-            acao: acao || ''
+            acao: acao || '',
+            target_user_id: usuario_id // [NOVO] Passamos para o model
         });
 
         return res.status(200).json(resultado);

@@ -4,6 +4,7 @@
 
 import { create, read } from "../config/database.js";
 
+// Função para registrar um novo log no sistema
 const registrarLog = async ({ usuario_id, nome_usuario, cargo_usuario, acao, detalhes, ip }) => {
     try {
         const data = {
@@ -20,7 +21,8 @@ const registrarLog = async ({ usuario_id, nome_usuario, cargo_usuario, acao, det
     }
 };
 
-const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }) => {
+// Função para buscar logs com paginação e filtros
+const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '', target_user_id = null }) => {
     try {
         const pageNum = parseInt(page);
         const limitNum = parseInt(limit);
@@ -29,40 +31,57 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
         const params = [];
         let whereClause = "WHERE 1=1"; 
 
-        // --- 1. LÓGICA DE PESQUISA (Busca por texto) ---
+        // --- 1. FILTRO POR USUÁRIO ESPECÍFICO (Para o Perfil) ---
+        if (target_user_id) {
+            whereClause += ` AND l.usuario_id = ?`;
+            params.push(target_user_id);
+        }
+
+        // --- 2. LÓGICA DE PESQUISA (Busca por texto) ---
         if (search && search.trim() !== '') {
             const term = `%${search.trim()}%`;
+            
+            // Tenta extrair apenas números para buscar no CPF
             const numbersOnly = search.replace(/\D/g, '');
             const termCpf = numbersOnly.length > 0 ? `%${numbersOnly}%` : null;
 
+            // Monta as condições de busca dinamicamente
             let searchConditions = [
-                `l.nome_usuario LIKE ?`,
-                `u.nome LIKE ?`,
-                `u.email LIKE ?`,
-                `l.detalhes LIKE ?`
+                `l.nome_usuario LIKE ?`, // Nome gravado no log
+                `u.nome LIKE ?`,         // Nome atual do usuário
+                `u.email LIKE ?`,        // Email
+                `l.detalhes LIKE ?`      // Detalhes da ação
             ];
             
+            // Adiciona os parametros para as 4 condições acima
             params.push(term, term, term, term);
 
+            // Se o usuário digitou números, adicionamos a busca por CPF
             if (termCpf) {
                 searchConditions.push(`u.cpf LIKE ?`);
                 params.push(termCpf);
             }
 
+            // Concatena tudo com OR dentro de parenteses
             whereClause += ` AND (${searchConditions.join(' OR ')})`;
         }
 
-        // --- 2. LÓGICA DE FILTROS CORRIGIDA ---
+        // --- 3. LÓGICA DE FILTROS DE AÇÃO E IOT ---
         
+        // CENÁRIO A: O usuário selecionou explicitamente o filtro "IOT"
         if (acao === 'IOT') {
-            // CASO 1: Se o usuário selecionou "IoT", mostra APENAS IoT
             whereClause += ` AND l.cargo_usuario = 'IoT'`;
-        } else {
-            // CASO 2: Para qualquer outro caso (padrão 'todos', LOGIN, CRIAR...), ESCONDE IoT
-            // A condição (l.cargo_usuario != 'IoT' OR l.cargo_usuario IS NULL) garante que IoT suma
-            whereClause += ` AND (l.cargo_usuario != 'IoT' OR l.cargo_usuario IS NULL)`;
+        } 
+        
+        // CENÁRIO B: Qualquer outro filtro ou padrão (esconde IoT)
+        else {
+            // Se estou filtrando por um usuário específico (perfil), não preciso esconder IoT explicitamente
+            // pois o usuario_id já filtra. Mas se for listagem geral, escondemos.
+            if (!target_user_id) {
+                whereClause += ` AND (l.cargo_usuario != 'IoT' OR l.cargo_usuario IS NULL)`;
+            }
 
-            // Aplica os outros filtros de ação se necessário
+            // Filtros específicos de ação
             if (acao && acao !== 'todos') {
                 if (acao === 'CRIAR') {
                     whereClause += ` AND (l.acao LIKE '%CRIACAO%' OR l.acao LIKE '%ADD%')`;
@@ -73,13 +92,14 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
                 } else if (acao === 'LOGIN') {
                     whereClause += ` AND l.acao = 'LOGIN'`;
                 } else {
+                    // Caso genérico
                     whereClause += ` AND l.acao = ?`;
                     params.push(acao);
                 }
             }
         }
 
-        // --- 3. QUERY DE DADOS ---
+        // --- 4. QUERY PRINCIPAL DE DADOS ---
         const sqlData = `
             SELECT 
                 l.*, 
@@ -94,10 +114,11 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
             LIMIT ? OFFSET ?
         `;
 
+        // Adiciona limit e offset aos parâmetros finais
         const dataParams = [...params, limitNum, offset];
         const logs = await read(sqlData, dataParams);
 
-        // --- 4. QUERY DE CONTAGEM ---
+        // --- 5. QUERY DE CONTAGEM (Para paginação correta) ---
         const sqlCount = `
             SELECT COUNT(*) as total
             FROM logs_sistema l
@@ -105,6 +126,7 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
             ${whereClause}
         `;
         
+        // Para o count, usamos apenas os params do filtro (sem limit/offset)
         const [countResult] = await read(sqlCount, params);
         const total = countResult ? countResult.total : 0;
 
