@@ -94,7 +94,7 @@ export default async function MapaPage() {
                   </DialogHeader>
 
                   <div className="py-6 text-muted-foreground">
-                    <MapBoxManejarWrapper />
+                    <MapBoxManejarWrapper token={cookieStore}/>
                   </div>
                 </DialogContent>
               </Dialog>

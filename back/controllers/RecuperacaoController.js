@@ -1,6 +1,6 @@
-import { findUserByCpfWithEmail, saveRecoveryCode, findUserByCpfAndCode, updatePasswordByCpf } from '../models/UserModels.js'; // Vamos adicionar essas funções
+import { findUserByCpfWithEmail, saveRecoveryCode, findUserByCpfAndCode, updatePasswordByCpf } from '../models/UserModels.js';
 import { sendRecoveryEmail } from '../config/mailer.js';
-import crypto from 'crypto'; // Módulo nativo do Node para gerar o código
+import crypto from 'crypto'; 
 
 const enviarCodigoController = async (req, res) => {
     try {
