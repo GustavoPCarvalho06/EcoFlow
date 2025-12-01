@@ -29,52 +29,57 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
         const params = [];
         let whereClause = "WHERE 1=1"; 
 
-        // --- LÓGICA DE PESQUISA CORRIGIDA ---
+        // --- 1. LÓGICA DE PESQUISA (Busca por texto) ---
         if (search && search.trim() !== '') {
             const term = `%${search.trim()}%`;
-            
-            // Tenta extrair apenas números para buscar no CPF
             const numbersOnly = search.replace(/\D/g, '');
             const termCpf = numbersOnly.length > 0 ? `%${numbersOnly}%` : null;
 
-            // Monta as condições de busca dinamicamente
             let searchConditions = [
-                `l.nome_usuario LIKE ?`, // Nome gravado no log
-                `u.nome LIKE ?`,         // Nome atual do usuário
-                `u.email LIKE ?`,        // Email
-                `l.detalhes LIKE ?`      // Detalhes da ação
+                `l.nome_usuario LIKE ?`,
+                `u.nome LIKE ?`,
+                `u.email LIKE ?`,
+                `l.detalhes LIKE ?`
             ];
             
-            // Adiciona os parametros para as 4 condições acima
             params.push(term, term, term, term);
 
-            // Se o usuário digitou números, adicionamos a busca por CPF
             if (termCpf) {
                 searchConditions.push(`u.cpf LIKE ?`);
                 params.push(termCpf);
             }
 
-            // Concatena tudo com OR dentro de parenteses
             whereClause += ` AND (${searchConditions.join(' OR ')})`;
         }
 
-        // --- FILTROS DE AÇÃO ---
-        if (acao && acao !== 'todos') {
-            if (acao === 'CRIAR') {
-                whereClause += ` AND (l.acao LIKE '%CRIACAO%' OR l.acao LIKE '%ADD%')`;
-            } else if (acao === 'EDITAR') {
-                whereClause += ` AND (l.acao LIKE '%EDICAO%' OR l.acao LIKE '%UPDATE%' OR l.acao LIKE '%FUNCAO%')`;
-            } else if (acao === 'DELETAR') {
-                whereClause += ` AND (l.acao LIKE '%EXCLUSAO%' OR l.acao LIKE '%DELET%' OR l.acao LIKE '%DESLIGAMENTO%' OR l.acao LIKE '%ATIVACAO%')`;
-            } else if (acao === 'LOGIN') {
-                whereClause += ` AND l.acao = 'LOGIN'`;
-            } else {
-                whereClause += ` AND l.acao = ?`;
-                params.push(acao);
+        // --- 2. LÓGICA DE FILTROS CORRIGIDA ---
+        
+        if (acao === 'IOT') {
+            // CASO 1: Se o usuário selecionou "IoT", mostra APENAS IoT
+            whereClause += ` AND l.cargo_usuario = 'IoT'`;
+        } else {
+            // CASO 2: Para qualquer outro caso (padrão 'todos', LOGIN, CRIAR...), ESCONDE IoT
+            // A condição (l.cargo_usuario != 'IoT' OR l.cargo_usuario IS NULL) garante que IoT suma
+            whereClause += ` AND (l.cargo_usuario != 'IoT' OR l.cargo_usuario IS NULL)`;
+
+            // Aplica os outros filtros de ação se necessário
+            if (acao && acao !== 'todos') {
+                if (acao === 'CRIAR') {
+                    whereClause += ` AND (l.acao LIKE '%CRIACAO%' OR l.acao LIKE '%ADD%')`;
+                } else if (acao === 'EDITAR') {
+                    whereClause += ` AND (l.acao LIKE '%EDICAO%' OR l.acao LIKE '%UPDATE%' OR l.acao LIKE '%FUNCAO%')`;
+                } else if (acao === 'DELETAR') {
+                    whereClause += ` AND (l.acao LIKE '%EXCLUSAO%' OR l.acao LIKE '%DELET%' OR l.acao LIKE '%DESLIGAMENTO%' OR l.acao LIKE '%ATIVACAO%')`;
+                } else if (acao === 'LOGIN') {
+                    whereClause += ` AND l.acao = 'LOGIN'`;
+                } else {
+                    whereClause += ` AND l.acao = ?`;
+                    params.push(acao);
+                }
             }
         }
 
-        // --- QUERY PRINCIPAL ---
+        // --- 3. QUERY DE DADOS ---
         const sqlData = `
             SELECT 
                 l.*, 
@@ -89,11 +94,10 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
             LIMIT ? OFFSET ?
         `;
 
-        // Adiciona limit e offset aos parâmetros finais
         const dataParams = [...params, limitNum, offset];
         const logs = await read(sqlData, dataParams);
 
-        // --- QUERY DE CONTAGEM (Para paginação) ---
+        // --- 4. QUERY DE CONTAGEM ---
         const sqlCount = `
             SELECT COUNT(*) as total
             FROM logs_sistema l
@@ -101,7 +105,6 @@ const getLogsPaginated = async ({ page = 1, limit = 10, search = '', acao = '' }
             ${whereClause}
         `;
         
-        // Para o count, usamos apenas os params do filtro (sem limit/offset)
         const [countResult] = await read(sqlCount, params);
         const total = countResult ? countResult.total : 0;
 

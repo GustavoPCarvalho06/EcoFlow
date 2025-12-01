@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "aedes": "^0.51.3",
     "bcryptjs": "^3.0.2",
     "cep-promise": "^4.4.1",
     "cookie-parser": "^1.4.7",
