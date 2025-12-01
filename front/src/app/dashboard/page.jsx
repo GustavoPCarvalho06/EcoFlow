@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import PageAdmin from "@/components/administrador/page";
 import ColetorPage from "@/components/coletor/page";
 import CoordenadorPage from "@/components/coordenador/page";
+import { redirect } from "next/navigation";
 
 export default function dashboard() {
   const cookieStore = cookies();
@@ -17,19 +18,22 @@ export default function dashboard() {
       console.error("Erro ao decodificar o token:", error);
     }
   }
+  if (!user) {
+    redirect('/');
+  };
 
-  switch(user.cargo){
-    case('administrador'):
-      return(
-        <PageAdmin/>
+  switch (user.cargo) {
+    case ('administrador'):
+      return (
+        <PageAdmin />
       )
-      case('coordenador'):
-      return(
-        <CoordenadorPage/>
+    case ('coordenador'):
+      return (
+        <CoordenadorPage />
       )
-      case('coletor'):
-      return(
-        <ColetorPage/>
+    case ('coletor'):
+      return (
+        <ColetorPage />
       )
   }
 }
