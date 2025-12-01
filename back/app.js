@@ -1,9 +1,18 @@
+// =================================================================================
+// Arquivo: C:\Users\24250668\Documents\3md\teste\test_EcoFlow\EcoFlow\back\app.js
+// =================================================================================
+
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import { Server } from 'socket.io';
 import os from 'os'; // Módulo para obter informações do sistema
+
+// [NOVO] Importações para o MQTT
+import Aedes from 'aedes';
+import { createServer } from 'net';
+import { handleMqttMessage } from './mqtt/mqttHandler.js'; // Certifique-se de ter criado este arquivo
 
 // Importação das suas rotas
 import user from "./routes/userRotas.js"
@@ -76,6 +85,48 @@ const io = new Server(server, {
   cors: corsOptions
 });
 
+// =================================================================
+// [NOVO] --- CONFIGURAÇÃO DO SERVIDOR MQTT ---
+// =================================================================
+
+const aedes = Aedes();
+const mqttServer = createServer(aedes.handle);
+const MQTT_PORT = 1883; // Porta padrão do MQTT
+
+// Evento: Cliente Conectado (Ex: Arduino conectou)
+aedes.on('client', (client) => {
+  if (client) {
+    console.log(`[MQTT] Cliente conectado: ${client.id}`);
+  }
+});
+
+// Evento: Cliente Desconectado
+aedes.on('clientDisconnect', (client) => {
+  if (client) {
+    console.log(`[MQTT] Cliente desconectado: ${client.id}`);
+  }
+});
+
+// Evento: Publicação de Mensagem
+// Quando o Arduino mandar algo, cai aqui
+aedes.on('publish', (packet, client) => {
+  // Verificamos 'client' para garantir que não é uma mensagem interna do sistema ($SYS)
+  if (client) {
+    // Chama a função externa para tratar a mensagem e atualizar o banco/socket
+    handleMqttMessage(packet.topic, packet.payload, io);
+  }
+});
+
+// Inicia o servidor MQTT
+mqttServer.listen(MQTT_PORT, () => {
+  console.log(`✅ Servidor MQTT rodando na porta ${MQTT_PORT}`);
+});
+
+// =================================================================
+// [FIM] --- FIM DA CONFIGURAÇÃO MQTT ---
+// =================================================================
+
+
 // 5. Aplica o middleware do CORS ao Express com as mesmas opções
 app.use(cors(corsOptions));
 
@@ -116,21 +167,36 @@ configureChat(io);
 const PORT = 3001;
 const HOST = '0.0.0.0'; // 6. Essencial para escutar em todas as interfaces de rede
 
-// Inicia o servidor
+// Inicia o servidor HTTP (Express + Socket.IO)
 server.listen(PORT, HOST, () => {
-  console.log(`\n✅ Servidor Backend rodando!`);
+  console.log(`\n✅ Servidor Backend (HTTP) rodando!`);
   console.log(`   - Acesso Local:   http://localhost:${PORT}`);
   console.log(`   - Acesso na Rede: http://${localIp}:${PORT}`);
+  
+  // [NOVO] Log informativo para o MQTT
+  console.log(`\n📡 Para conectar o Arduino:`);
+  console.log(`   - Broker IP:      ${localIp}`);
+  console.log(`   - Porta MQTT:     ${MQTT_PORT}`);
 });
 
 // Handler para encerramento gracioso
 process.on('SIGTERM', () => {
+  console.log('Encerrando servidores...');
+  
   if (server) { 
     server.close(() => {
-      console.log('Servidor encerrado');
+      console.log('Servidor HTTP encerrado');
     });
-  } else {
-    console.log('Servidor encerrado (sem referência a "server")');
+  }
+  
+  // [NOVO] Encerra o MQTT também
+  if (mqttServer) {
+    mqttServer.close(() => {
+      console.log('Servidor MQTT encerrado');
+    });
+  }
+  
+  if (!server && !mqttServer) {
     process.exit(0);
   }
 });

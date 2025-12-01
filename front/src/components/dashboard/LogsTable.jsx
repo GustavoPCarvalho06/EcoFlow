@@ -193,7 +193,7 @@ export function LogsTable({ token }) {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[160px]">Data</TableHead>
-                            <TableHead>Quem fez (Autor)</TableHead>
+                            <TableHead>Usuario</TableHead>
                             <TableHead>Identificação</TableHead>
                             <TableHead>Ação</TableHead>
                             <TableHead>Detalhes</TableHead>

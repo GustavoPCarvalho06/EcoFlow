@@ -64,6 +64,19 @@ CREATE TABLE historico_sensores (
 );
 
 
+CREATE TABLE logs_sistema (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT, -- Quem fez a ação (pode ser NULL se for erro de login, mas ideal é pegar o ID)
+    nome_usuario VARCHAR(100), -- Gravamos o nome para facilitar a leitura sem muitos JOINs
+    cargo_usuario VARCHAR(50),
+    acao VARCHAR(50), -- Ex: 'LOGIN', 'CRIACAO_USUARIO', 'EDICAO'
+    detalhes TEXT, -- Ex: 'Usuario Mateus logou', 'Admin Miguel criou o usuario Nicolas'
+    ip_origem VARCHAR(45),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+);
+
+
 -- =============================================================================================
 -- [NOVO] Tabela para o Mural de Comunicados
 -- =============================================================================================
