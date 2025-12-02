@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: front/src/components/dashboard/Sidebar/AdministradorSidebar.jsx
-// =================================================================================
-
 "use client";
 
 import * as React from "react";
@@ -13,8 +9,8 @@ import {
     IconUsers,
     IconBell,
     IconMail,
+    IconHistory,
     IconBroadcast,
-    IconHistory ,
     IconMapPin
 } from "@tabler/icons-react";
 import { NavUser } from "@/components/dashboard/nav-user-adiministrador";
@@ -29,6 +25,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useUnreadCount } from "@/app/context/UnreadCountContext";
+import { cn } from "@/lib/utils";
 
 const navItems = [
     { title: "Dashboard", href: "/dashboard", icon: IconDashboard },
@@ -44,49 +41,53 @@ const coletorNavItems = [
 
 export function AdministradorSidebar({ usuario, ...props }) {
     const pathname = usePathname();
-    
-    // Consumindo do contexto
     const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount();
 
+    const getLinkClasses = (isActive) => cn(
+        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+        isActive
+            ? "bg-green-600 text-white shadow-lg shadow-green-600/20" 
+            : "text-gray-500 hover:bg-green-100 hover:text-green-700"
+    );
+
     return (
-        <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader className="border-b">
+        <Sidebar collapsible="offcanvas" className="border-r-1 border-green-600" {...props}>
+            <SidebarHeader className="py-5 px-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
-                            className="data-[slot=sidebar-menu-button]:!p-1.5 h-15"
+                            className="hover:bg-transparent data-[slot=sidebar-menu-button]:!p-0 h-auto"
                         >
-                            <Link href="/dashboard">
-                                <Image
-                                    src="/imagen/Logo.png"
-                                    alt="EcoFlow logo"
-                                    width={80}
-                                    height={80}
-                                    className="rounded-sm"
-                                />
-                                <span className="text-lg font-semibold">EcoFlow.</span>
+                            <Link href="/dashboard" className="flex items-center gap-3">
+                                <div className="relative w-20 h-20">
+                                    <Image
+                                        src="/imagen/Logo.png"
+                                        alt="EcoFlow logo"
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
+                                <span className="text-xl font-bold text-green-700 tracking-tight">EcoFlow.</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className="p-4">
-                {/* Área de Notificações (Sino) */}
-                <div className="mb-4 flex items-center gap-2">
+            <SidebarContent className="px-3 py-2">
+                <div className="mb-6 px-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Notificações</span>
                     <Link href="/comunicados" passHref>
                         <Button 
                             size="icon" 
                             variant="ghost" 
-                            aria-label="Notifications" 
-                            className="relative"
+                            className="relative h-8 w-8 hover:bg-green-50 hover:text-green-600 transition-colors cursor-pointer"
                             onClick={clearComunicadoCount}
                         >
-                            <IconBell className="h-6 w-6" />
-                            {/* Badge de Comunicados */}
+                            <IconBell className="h-5 w-5 text-green-600" />
                             {totalComunicadoUnread > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
                                     {totalComunicadoUnread > 99 ? `+99` : totalComunicadoUnread}
                                 </span>
                             )}
@@ -99,21 +100,18 @@ export function AdministradorSidebar({ usuario, ...props }) {
                         <Link
                             key={index}
                             href={item.href}
-                            className={`
-                                flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
-                                transition-colors
-                                ${pathname === item.href
-                                    ? 'bg-muted text-foreground'
-                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                                }
-                            `}
+                            className={cn(getLinkClasses(pathname === item.href), "group")}
                         >
-                            <item.icon className="h-6 w-6" />
+                            <item.icon
+                                className={cn(
+                                    "h-5 w-5",
+                                    pathname === item.href ? "text-white" : "text-green-600"
+                                )}
+                            />
                             <span>{item.title}</span>
                             
-                            {/* Badge de Mensagens */}
                             {item.title === "Mensagem" && totalMsgUnread > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
+                                <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold rounded-full h-5 px-2 flex items-center justify-center">
                                     {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
                                 </span>
                             )}
@@ -123,24 +121,21 @@ export function AdministradorSidebar({ usuario, ...props }) {
 
                 <div className="mt-8">
                     <div className="px-3 pb-2">
-                        <span className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase">Coletor</span>
+                        <span className="text-xs font-semibold text-gray-400 tracking-wider uppercase">Coletor</span>
                     </div>
-                    <div className="border-t mx-3 mb-2"></div>
-                    <nav className="flex flex-col gap-2">
+                    <nav className="flex flex-col gap-2 mt-1">
                         {coletorNavItems.map((item, index) => (
                             <Link
                                 key={index}
                                 href={item.href}
-                                className={`
-                                    flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
-                                    transition-colors
-                                    ${pathname === item.href
-                                        ? 'bg-muted text-foreground'
-                                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                                    }
-                                `}
+                                className={cn(getLinkClasses(pathname === item.href), "group")}
                             >
-                                <item.icon className="h-6 w-6" />
+                                <item.icon
+                                    className={cn(
+                                        "h-5 w-5",
+                                        pathname === item.href ? "text-white" : "text-green-600"
+                                    )}
+                                />
                                 <span>{item.title}</span>
                             </Link>
                         ))}
@@ -148,7 +143,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                 </div>
             </SidebarContent>
 
-            <SidebarFooter className="border-t">
+            <SidebarFooter className="border-t border-gray-200 p-4">
                 <NavUser usuario={usuario} />
             </SidebarFooter>
         </Sidebar>

@@ -3,22 +3,20 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from "next/image";
-import { IconDashboard, IconMapPin, IconBroadcast,IconHistory , IconMail, IconBell } from "@tabler/icons-react"; 
-import { NavUser } from "@/components/dashboard/nav-user-coordenador"; // VERIFIQUE este caminho
+import { IconDashboard, IconMapPin, IconBroadcast, IconMail, IconBell, IconHistory } from "@tabler/icons-react"; 
+import { NavUser } from "@/components/dashboard/nav-user-coordenador"; 
 import { Button } from "@/components/ui/button";
 import { 
     Sidebar, 
     SidebarContent, 
     SidebarFooter, 
-    SidebarHeader, 
+    SidebarHeader,
     SidebarMenu, 
     SidebarMenuButton, 
     SidebarMenuItem 
 } from "@/components/ui/sidebar";
-
-// Importa o hook que agora centraliza TODA a lógica de notificações.
-// VERIFIQUE se este caminho está correto para a sua estrutura de pastas.
-import { useUnreadCount } from "../../../app/context/UnreadCountContext.jsx"; 
+import { useUnreadCount } from "@/app/context/UnreadCountContext"; // Fixed path
+import { cn } from "@/lib/utils";
 
 const navItemsCoordenador = [
     { title: "Dashboard", href: "/dashboard", icon: IconDashboard },
@@ -28,44 +26,47 @@ const navItemsCoordenador = [
     { title: "Histórico", href: "/historico", icon: IconHistory },
 ];
 
-export function CoordenadorSidebar(usuario, ...props) {
+export function CoordenadorSidebar({ usuario, ...props }) {
     const pathname = usePathname();
-    
-    // Consome os valores e funções diretamente do nosso contexto centralizado.
-    // Isso substitui toda a lógica de useState, useCallback, useEffect e socket.io
-    // que existia anteriormente neste componente.
-    const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount() || {};
+    const { totalMsgUnread, totalComunicadoUnread } = useUnreadCount() || {};
 
-
+    const getLinkClasses = (isActive) => cn(
+        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+        isActive
+            ? "bg-green-600 text-white shadow-lg shadow-green-600/20" 
+            : "text-gray-500 hover:bg-green-100 hover:text-green-700"
+    );
 
     return (
-        <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader className="border-b">
+         <Sidebar collapsible="offcanvas" className="border-r-1 border-green-600" {...props}>
+            <SidebarHeader className="py-5 px-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5 h-auto">
-                            <a href="/dashboard">
-                                <Image
-                                    src="/imagen/Logo.png"
-                                    alt="EcoFlow logo"
-                                    width={50}
-                                    height={50}
-                                    className="rounded-sm"
-                                />
-                                <span className="text-base font-semibold">EcoFlow.</span>
-                            </a>
+                        <SidebarMenuButton asChild className="hover:bg-transparent data-[slot=sidebar-menu-button]:!p-0 h-auto">
+                            <Link href="/dashboard" className="flex items-center gap-3">
+                                <div className="relative w-10 h-10">
+                                    <Image
+                                        src="/imagen/Logo.png"
+                                        alt="EcoFlow logo"
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
+                                <span className="text-xl font-bold text-green-700 tracking-tight">EcoFlow.</span>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent className="p-4">
-                 <div className="mb-4 flex items-center gap-2">
+
+            <SidebarContent className="px-3 py-2">
+                 <div className="mb-6 px-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ações</span>
                     <Link href="/comunicados" passHref>
-                        <Button size="icon" variant="ghost" aria-label="Notifications" className="relative">
-                            <IconBell className="h-6 w-6" />
-                            {/* Usa o estado 'totalComunicadoUnread' vindo do contexto */}
+                        <Button size="icon" variant="ghost" className="relative h-8 w-8 hover:bg-green-50 hover:text-green-600 transition-colors">
+                            <IconBell className="h-5 w-5" />
                             {(totalComunicadoUnread > 0) && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
                                     {totalComunicadoUnread > 9 ? '9+' : totalComunicadoUnread}
                                 </span>
                             )}
@@ -78,30 +79,22 @@ export function CoordenadorSidebar(usuario, ...props) {
                         <Link
                             key={index}
                             href={item.href}
-                            className={`
-                                flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium
-                                transition-colors
-                                ${pathname === item.href
-                                    ? 'bg-muted text-foreground' 
-                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                                }
-                            `}
+                            className={getLinkClasses(pathname === item.href)}
                         >
-                            <item.icon className="h-6 w-6" />
+                            <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-white" : "text-gray-400")} />
                             <span>{item.title}</span>
 
-                            {/* Usa o estado 'totalMsgUnread' vindo do contexto */}
                             {item.title === "Mensagem" && totalMsgUnread > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-auto min-w-[1.25rem] flex items-center justify-center px-1">
+                                <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold rounded-full h-5 px-2 flex items-center justify-center">
                                     {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
                                 </span>
-                            
                             )}
                         </Link>
                     ))}
                 </nav>
             </SidebarContent>
-            <SidebarFooter className="border-t">
+            
+            <SidebarFooter className="border-t border-gray-100 p-4">
                 <NavUser usuario={usuario}/>
             </SidebarFooter>
         </Sidebar>
