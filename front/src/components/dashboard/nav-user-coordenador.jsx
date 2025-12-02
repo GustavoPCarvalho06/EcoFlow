@@ -1,10 +1,10 @@
+// Arquivo: src/components/dashboard/nav-user-coordenador.jsx
+
 "use client"
 
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
 
@@ -13,7 +13,6 @@ import Link from "next/link"
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -31,13 +30,29 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-import { AppSidebarCoordenador } from "@/components/dashboard/Sidebar/SidebarCoordenador";
 import { logout } from "@/hooks/logout"
+
 export function NavUser({
   usuario,
 }) {
   const { isMobile } = useSidebar()
 
+  // --- CORREÇÃO DO ERRO ---
+  // Verifica se o dado está direto em 'usuario.nome' ou aninhado em 'usuario.usuario.nome'
+  // Isso evita o erro "Cannot read properties of undefined"
+  const nomeUser = usuario?.nome || usuario?.usuario?.nome || "Usuário";
+  const cpfUser = usuario?.cpf || usuario?.usuario?.cpf || "";
+  
+  // Pega a inicial de forma segura
+  const inicial = nomeUser ? nomeUser.charAt(0).toUpperCase() : "U";
+
+  const handleLogoutClick = async () => {
+    // Garante limpeza do localStorage também no cliente
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+    }
+    await logout();
+  };
 
   return (
     <SidebarMenu>
@@ -50,13 +65,13 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarFallback className="rounded-lg">
-                  {usuario.usuario.nome ? usuario.usuario.nome.charAt(0).toUpperCase() : ""}
+                  {inicial}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{usuario.usuario.nome}</span>
+                <span className="truncate font-medium">{nomeUser}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {usuario.cpf}
+                  {cpfUser}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -72,13 +87,13 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarFallback className="rounded-lg">
-                    {usuario.usuario.nome ? usuario.usuario.nome.charAt(0).toUpperCase() : ""}
+                    {inicial}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{usuario.usuario.nome}</span>
+                  <span className="truncate font-medium">{nomeUser}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {usuario.usuario.cpf}
+                    {cpfUser}
                   </span>
                 </div>
               </div>
@@ -86,20 +101,16 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
                 <Link href="/Perfil">
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <IconUserCircle />
-                  Account
+                  Perfil
               </DropdownMenuItem>
                   </Link>
-              {/* <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}> 
+            <DropdownMenuItem onClick={handleLogoutClick} className="cursor-pointer"> 
               <IconLogout />
-                Log out
+                Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

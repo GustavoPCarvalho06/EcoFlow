@@ -43,15 +43,16 @@ export function AdministradorSidebar({ usuario, ...props }) {
     const pathname = usePathname();
     const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount();
 
+    // Função ajustada para usar as cores do tema (Dark/Light)
     const getLinkClasses = (isActive) => cn(
-        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 group",
         isActive
-            ? "bg-green-600 text-white shadow-lg shadow-green-600/20" 
-            : "text-gray-500 hover:bg-green-100 hover:text-green-700"
+            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md" 
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
     );
 
     return (
-        <Sidebar collapsible="offcanvas" className="border-r-1 border-green-600" {...props}>
+        <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar" {...props}>
             <SidebarHeader className="py-5 px-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -60,7 +61,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                             className="hover:bg-transparent data-[slot=sidebar-menu-button]:!p-0 h-auto"
                         >
                             <Link href="/dashboard" className="flex items-center gap-3">
-                                <div className="relative w-20 h-20">
+                                <div className="relative w-10 h-10 md:w-12 md:h-12">
                                     <Image
                                         src="/imagen/Logo.png"
                                         alt="EcoFlow logo"
@@ -68,7 +69,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                                         className="object-contain"
                                     />
                                 </div>
-                                <span className="text-xl font-bold text-green-700 tracking-tight">EcoFlow.</span>
+                                <span className="text-xl font-bold text-primary tracking-tight">EcoFlow.</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -77,17 +78,17 @@ export function AdministradorSidebar({ usuario, ...props }) {
 
             <SidebarContent className="px-3 py-2">
                 <div className="mb-6 px-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Notificações</span>
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Notificações</span>
                     <Link href="/comunicados" passHref>
                         <Button 
                             size="icon" 
                             variant="ghost" 
-                            className="relative h-8 w-8 hover:bg-green-50 hover:text-green-600 transition-colors cursor-pointer"
+                            className="relative h-8 w-8 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors cursor-pointer"
                             onClick={clearComunicadoCount}
                         >
-                            <IconBell className="h-5 w-5 text-green-600" />
+                            <IconBell className="h-5 w-5 text-primary" />
                             {totalComunicadoUnread > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-sm">
                                     {totalComunicadoUnread > 99 ? `+99` : totalComunicadoUnread}
                                 </span>
                             )}
@@ -100,18 +101,19 @@ export function AdministradorSidebar({ usuario, ...props }) {
                         <Link
                             key={index}
                             href={item.href}
-                            className={cn(getLinkClasses(pathname === item.href), "group")}
+                            className={getLinkClasses(pathname === item.href)}
                         >
                             <item.icon
                                 className={cn(
                                     "h-5 w-5",
-                                    pathname === item.href ? "text-white" : "text-green-600"
+                                    // Se ativo, usa a cor de texto do primary (branco/preto), se não, usa a cor primária (verde)
+                                    pathname === item.href ? "text-sidebar-primary-foreground" : "text-primary"
                                 )}
                             />
                             <span>{item.title}</span>
                             
                             {item.title === "Mensagem" && totalMsgUnread > 0 && (
-                                <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold rounded-full h-5 px-2 flex items-center justify-center">
+                                <span className="ml-auto bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-5 px-2 flex items-center justify-center">
                                     {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
                                 </span>
                             )}
@@ -121,19 +123,19 @@ export function AdministradorSidebar({ usuario, ...props }) {
 
                 <div className="mt-8">
                     <div className="px-3 pb-2">
-                        <span className="text-xs font-semibold text-gray-400 tracking-wider uppercase">Coletor</span>
+                        <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">Coletor</span>
                     </div>
                     <nav className="flex flex-col gap-2 mt-1">
                         {coletorNavItems.map((item, index) => (
                             <Link
                                 key={index}
                                 href={item.href}
-                                className={cn(getLinkClasses(pathname === item.href), "group")}
+                                className={getLinkClasses(pathname === item.href)}
                             >
                                 <item.icon
                                     className={cn(
                                         "h-5 w-5",
-                                        pathname === item.href ? "text-white" : "text-green-600"
+                                        pathname === item.href ? "text-sidebar-primary-foreground" : "text-primary"
                                     )}
                                 />
                                 <span>{item.title}</span>
@@ -143,7 +145,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                 </div>
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-gray-200 p-4">
+            <SidebarFooter className="border-t border-sidebar-border p-4">
                 <NavUser usuario={usuario} />
             </SidebarFooter>
         </Sidebar>

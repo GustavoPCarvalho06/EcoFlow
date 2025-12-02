@@ -1,11 +1,13 @@
-// Local do arquivo: app/layout.js
+// Arquivo: src/app/layout.js
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import os from 'os';
 import { cookies } from 'next/headers';
 
-// Corrigimos os caminhos de importação baseados na sua estrutura de pastas.
+// Importação do ThemeProvider para o Dark Mode
+import { ThemeProvider } from "@/components/theme-provider";
+
 import { ApiProvider } from './context/ApiContext';
 import { UnreadCountProvider } from './context/UnreadCountContext.jsx';
 
@@ -60,13 +62,24 @@ export default function RootLayout({ children }) {
   }
 
   return (
-    <html lang="pt-BR">
+    // Adicionado suppressHydrationWarning para evitar erros de hidratação do next-themes
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ApiProvider initialUrl={apiUrl}>
-          <UnreadCountProvider user={user}>
-            {children}
-          </UnreadCountProvider>
-        </ApiProvider> {/* <--- A CORREÇÃO ESTÁ AQUI! (removido o hífen) */}
+        
+        {/* Envolvendo a aplicação com o ThemeProvider */}
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <ApiProvider initialUrl={apiUrl}>
+            <UnreadCountProvider user={user}>
+              {children}
+            </UnreadCountProvider>
+          </ApiProvider>
+        </ThemeProvider>
+
       </body>
     </html>
   );

@@ -1,18 +1,23 @@
+// =================================================================================
+// Arquivo: src/components/Map/MapBoxPainelCriar.jsx
+// =================================================================================
+
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { useApiUrl } from "@/app/context/ApiContext";
 
 export default function MapBoxPainelCriar({ coords, setCoords }) {
     const [loadingRua, setLoadingRua] = useState(false);
     const [status, setStatus] = useState("Vazia");
-
-    // NEW: message handler (tipo: "erro" | "sucesso")
     const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const apiUrl = useApiUrl();
 
+    // Busca o endereço reverso (Geocoding) quando as coordenadas mudam
     useEffect(() => {
         if (!coords.lat || !coords.lng) return;
 
@@ -35,6 +40,7 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
         fetchStreetName();
     }, [coords.lat, coords.lng, setCoords]);
 
+    // Envia os dados para o backend
     const handleCreate = async () => {
         setMensagem({ tipo: "", texto: "" });
 
@@ -42,6 +48,8 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
             setMensagem({ tipo: "erro", texto: "Clique no mapa primeiro!" });
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             const res = await fetch(`${apiUrl}/lixo`, {
@@ -63,69 +71,107 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
 
             if (!res.ok) {
                 console.error("Erro ao criar:", data);
-                setMensagem({ tipo: "erro", texto: "Erro ao criar ponto de coleta" });
+                setMensagem({ tipo: "erro", texto: "Erro ao criar ponto." });
                 return;
             }
 
-            setMensagem({ tipo: "sucesso", texto: "Ponto de coleta criado com sucesso!" });
+            setMensagem({ tipo: "sucesso", texto: "Criado com sucesso!" });
 
         } catch (err) {
             console.error("Erro ao enviar:", err);
-            setMensagem({ tipo: "erro", texto: "Erro ao enviar os dados" });
+            setMensagem({ tipo: "erro", texto: "Erro de conexão." });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="w-[260px] rounded-xl border shadow-sm p-5 flex flex-col items-center gap-4 bg-white">
+        // bg-card e border-border garantem a adaptação ao tema (Branco ou Deep Forest)
+        <div className="w-[280px] rounded-xl border border-border shadow-lg p-5 flex flex-col items-center gap-4 bg-card text-foreground transition-colors duration-300">
 
-            <h3 className="text-center text-lg font-semibold">
-                Novo Ponto de Coleta
+            <h3 className="text-center text-lg font-bold tracking-tight">
+                Novo Ponto
             </h3>
 
-            {/* MESSAGE AREA */}
+            {/* Mensagem de Feedback */}
             {mensagem.texto && (
                 <div
-                    className={`text-sm font-medium text-center ${mensagem.tipo === "erro" ? "text-red-600" : "text-green-600"
-                        }`}
+                    className={`text-xs font-bold text-center px-3 py-1 rounded-full ${
+                        mensagem.tipo === "erro" 
+                            ? "bg-destructive/10 text-destructive" 
+                            : "bg-green-500/10 text-green-600 dark:text-green-400"
+                    }`}
                 >
                     {mensagem.texto}
                 </div>
             )}
 
-            <div className="w-full">
-                <label className="text-sm font-medium">Latitude</label>
-                <input type="text" value={coords.lat} readOnly className="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm" />
-            </div>
+            <div className="w-full space-y-3">
+                {/* Latitude */}
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Latitude</label>
+                    <input 
+                        type="text" 
+                        value={coords.lat} 
+                        readOnly 
+                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground font-mono focus:outline-none cursor-not-allowed" 
+                    />
+                </div>
 
-            <div className="w-full">
-                <label className="text-sm font-medium">Longitude</label>
-                <input type="text" value={coords.lng} readOnly className="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm" />
-            </div>
+                {/* Longitude */}
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Longitude</label>
+                    <input 
+                        type="text" 
+                        value={coords.lng} 
+                        readOnly 
+                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground font-mono focus:outline-none cursor-not-allowed" 
+                    />
+                </div>
 
-            <div className="w-full">
-                <label className="text-sm font-medium">Rua</label>
-                <input type="text" value={coords.rua ?? ""} readOnly className="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm" />
-            </div>
+                {/* Endereço */}
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase flex justify-between">
+                        Endereço
+                        {loadingRua && <Loader2 className="h-3 w-3 animate-spin text-primary"/>}
+                    </label>
+                    <input 
+                        type="text" 
+                        value={coords.rua ?? ""} 
+                        readOnly 
+                        placeholder={loadingRua ? "Buscando..." : "Clique no mapa"}
+                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground focus:outline-none truncate cursor-not-allowed" 
+                    />
+                </div>
 
-            <div className="w-full">
-                <label className="text-sm font-medium">Status do Lixo</label>
-                <select
-                    className="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm"
-                    onChange={(e) => setStatus(e.target.value)}
-                    value={status}
-                >
-                    <option value="Vazia">Vazia</option>
-                    <option value="Quase Cheia">Quase Cheia</option>
-                    <option value="Cheia">Cheia</option>
-                </select>
+                {/* Status Selection */}
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Status Inicial</label>
+                    <select
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
+                        onChange={(e) => setStatus(e.target.value)}
+                        value={status}
+                    >
+                        <option value="Vazia">Vazia (Verde)</option>
+                        <option value="Quase Cheia">Quase Cheia (Amarelo)</option>
+                        <option value="Cheia">Cheia (Vermelho)</option>
+                    </select>
+                </div>
             </div>
 
             <Button
                 size="lg"
-                className="w-full gap-2 cursor-pointer text-md"
+                className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10 mt-2"
                 onClick={handleCreate}
+                disabled={isSubmitting || !coords.lat}
             >
-                <PlusCircle className="h-5 w-5" /> Criar Ponto de Coleta
+                {isSubmitting ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                    <>
+                        <PlusCircle className="h-5 w-5" /> Criar Ponto
+                    </>
+                )}
             </Button>
         </div>
     );

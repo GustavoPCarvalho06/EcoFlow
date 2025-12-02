@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: src/components/loginForm/EsqueciSenhaModal.jsx
+// =================================================================================
+
 "use client";
 
 import { useState } from "react";
@@ -125,27 +129,35 @@ export function EsqueciSenhaModal({ isOpen, onOpenChange }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleModalStateChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] bg-card border-border">
                 <DialogHeader>
-                    <DialogTitle>Redefinir Senha</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-foreground">Redefinir Senha</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {step === 'cpf' && "Informe seu CPF para enviarmos um código de recuperação."}
                         {step === 'codigo' && "Verifique seu e-mail e insira o código de 6 dígitos."}
                         {step === 'senha' && "Crie uma nova senha para sua conta."}
                     </DialogDescription>
                 </DialogHeader>
 
-                {error && <p className="text-sm text-center text-red-500 bg-red-100 p-2 rounded-md">{error}</p>}
-                {success && <p className="text-sm text-center text-green-700 bg-green-100 p-2 rounded-md">{success}</p>}
+                {error && <p className="text-sm text-center text-destructive bg-destructive/10 p-2 rounded-md">{error}</p>}
+                {success && <p className="text-sm text-center text-primary bg-primary/10 p-2 rounded-md font-medium">{success}</p>}
 
                 {step === 'cpf' && (
                     <form onSubmit={handleCpfSubmit} className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="cpf" className="text-right">CPF</Label>
-                            <Input id="cpf" value={cpf} onChange={(e) => setCpf(formatCPF(e.target.value))} className="col-span-3" required />
+                            <Label htmlFor="cpf" className="text-right text-foreground">CPF</Label>
+                            <Input 
+                                id="cpf" 
+                                value={cpf} 
+                                onChange={(e) => setCpf(formatCPF(e.target.value))} 
+                                className="col-span-3 bg-muted/50 border-input text-foreground" 
+                                required 
+                            />
                         </div>
                         <DialogFooter>
-                            <Button type="submit" disabled={isLoading}>{isLoading ? "Enviando..." : "Enviar Código"}</Button>
+                            <Button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                                {isLoading ? "Enviando..." : "Enviar Código"}
+                            </Button>
                         </DialogFooter>
                     </form>
                 )}
@@ -153,11 +165,20 @@ export function EsqueciSenhaModal({ isOpen, onOpenChange }) {
                 {step === 'codigo' && (
                     <form onSubmit={handleCodigoSubmit} className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="codigo" className="text-right">Código</Label>
-                            <Input id="codigo" value={codigo} onChange={(e) => setCodigo(e.target.value)} className="col-span-3" maxLength="6" required />
+                            <Label htmlFor="codigo" className="text-right text-foreground">Código</Label>
+                            <Input 
+                                id="codigo" 
+                                value={codigo} 
+                                onChange={(e) => setCodigo(e.target.value)} 
+                                className="col-span-3 bg-muted/50 border-input text-foreground" 
+                                maxLength="6" 
+                                required 
+                            />
                         </div>
                         <DialogFooter>
-                            <Button type="submit" disabled={isLoading}>{isLoading ? "Verificando..." : "Verificar Código"}</Button>
+                            <Button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                                {isLoading ? "Verificando..." : "Verificar Código"}
+                            </Button>
                         </DialogFooter>
                     </form>
                 )}
@@ -165,15 +186,31 @@ export function EsqueciSenhaModal({ isOpen, onOpenChange }) {
                 {step === 'senha' && (
                     <form onSubmit={handleSenhaSubmit} className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="novaSenha">Nova Senha</Label>
-                            <Input id="novaSenha" type="password" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} required />
+                            <Label htmlFor="novaSenha" className="text-foreground">Nova Senha</Label>
+                            <Input 
+                                id="novaSenha" 
+                                type="password" 
+                                value={novaSenha} 
+                                onChange={(e) => setNovaSenha(e.target.value)} 
+                                className="bg-muted/50 border-input text-foreground" 
+                                required 
+                            />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
-                            <Input id="confirmarSenha" type="password" value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} required />
+                            <Label htmlFor="confirmarSenha" className="text-foreground">Confirmar Senha</Label>
+                            <Input 
+                                id="confirmarSenha" 
+                                type="password" 
+                                value={confirmarSenha} 
+                                onChange={(e) => setConfirmarSenha(e.target.value)} 
+                                className="bg-muted/50 border-input text-foreground" 
+                                required 
+                            />
                         </div>
                         <DialogFooter>
-                            <Button type="submit" disabled={isLoading}>{isLoading ? "Salvando..." : "Redefinir Senha"}</Button>
+                            <Button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                                {isLoading ? "Salvando..." : "Redefinir Senha"}
+                            </Button>
                         </DialogFooter>
                     </form>
                 )}

@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: src/components/dashboard/AdminStatsCards.jsx
+// =================================================================================
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, UserX, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,8 +13,9 @@ export function AdminStatsCards({ stats }) {
       value: stats?.totalUsers || 0,
       description: "Todas as contas do sistema",
       icon: Users,
-      iconColor: "text-blue-600",
-      iconBg: "bg-blue-50",
+      // No modo dark, clareamos o texto do ícone e deixamos o fundo transparente
+      iconColor: "text-blue-600 dark:text-blue-400",
+      iconBg: "bg-blue-50 dark:bg-blue-900/20",
       borderColor: "border-l-blue-500",
     },
     {
@@ -18,8 +23,8 @@ export function AdminStatsCards({ stats }) {
       value: stats?.activeCollectors || 0,
       description: "Usuários com cargo coletor e ativos",
       icon: UserCheck,
-      iconColor: "text-green-600",
-      iconBg: "bg-green-50",
+      iconColor: "text-green-600 dark:text-green-400",
+      iconBg: "bg-green-50 dark:bg-green-900/20",
       borderColor: "border-l-green-500",
     },
     {
@@ -27,8 +32,8 @@ export function AdminStatsCards({ stats }) {
       value: stats?.inactiveUsers || 0,
       description: "Usuários com status desligado",
       icon: UserX,
-      iconColor: "text-red-600",
-      iconBg: "bg-red-50",
+      iconColor: "text-red-600 dark:text-red-400",
+      iconBg: "bg-red-50 dark:bg-red-900/20",
       borderColor: "border-l-red-500",
     },
     {
@@ -36,8 +41,8 @@ export function AdminStatsCards({ stats }) {
       value: stats?.roles || 3,
       description: "Administrador, Coordenador, Coletor",
       icon: Briefcase,
-      iconColor: "text-purple-600",
-      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600 dark:text-purple-400",
+      iconBg: "bg-purple-50 dark:bg-purple-900/20",
       borderColor: "border-l-purple-500",
     },
   ];
@@ -48,25 +53,28 @@ export function AdminStatsCards({ stats }) {
         <Card 
           key={index}
           className={cn(
-            "rounded-xl border border-gray-100 shadow-sm transition-all duration-300",
+            // 'bg-card' puxa a cor exata definida no seu CSS (branco ou Deep Forest)
+            "rounded-xl border shadow-sm transition-all duration-300 bg-card",
             "hover:shadow-lg hover:-translate-y-1",
-            "border-l-[4px]",
+            "border-l-[4px]", // Mantém a borda colorida lateral
             item.borderColor
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold text-gray-600">
+            {/* 'text-muted-foreground' deixa o título cinza suave nos dois modos */}
+            <CardTitle className="text-sm font-semibold text-muted-foreground">
               {item.title}
             </CardTitle>
-            <div className={cn("p-2 rounded-lg", item.iconBg)}>
+            <div className={cn("p-2 rounded-lg transition-colors", item.iconBg)}>
               <item.icon className={cn("h-5 w-5", item.iconColor)} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-gray-900 mt-2">
+            {/* 'text-foreground' garante preto no claro e branco no escuro */}
+            <div className="text-3xl font-bold text-foreground mt-2">
               {item.value}
             </div>
-            <p className="text-xs text-gray-400 mt-1 font-medium">
+            <p className="text-xs text-muted-foreground mt-1 font-medium">
               {item.description}
             </p>
           </CardContent>

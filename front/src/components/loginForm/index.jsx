@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: src/components/loginForm/index.jsx
+// =================================================================================
+
 "use client";
 
 import Image from "next/image";
@@ -71,6 +75,22 @@ export function LoginForm({ className, ...props }) {
         }
     };
 
+    // Classe CSS para limpar o azul do autofill e controlar as cores
+    // 1. [&:-webkit-autofill]:shadow-... -> Força a cor de fundo interna para cobrir o azul do navegador
+    // 2. focus:bg-gray-100 -> Cinza claro ao clicar
+    const inputClasses = "pl-10 h-12 rounded-xl transition-all duration-200 placeholder:text-gray-400 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 " +
+        // Cores padrão (Branco e Texto Escuro)
+        "bg-white dark:bg-white text-gray-900 dark:text-gray-900 " +
+        // Cor ao Focar (Cinza Claro)
+        "focus:bg-gray-100 dark:focus:bg-gray-100 " +
+        // TRUQUE PARA REMOVER O AZUL DO AUTOFILL:
+        // Quando o navegador preenche, forçamos o fundo branco.
+        "[&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#ffffff] " +
+        // Quando o navegador preenche E o usuário clica, forçamos o cinza claro (#f3f4f6 é o gray-100)
+        "[&:-webkit-autofill]:focus:shadow-[inset_0_0_0px_1000px_#f3f4f6] " +
+        // Força a cor do texto no autofill para preto
+        "[&:-webkit-autofill]:-webkit-text-fill-color-[#111827]";
+
     return (
         <>
             <div className={cn("flex flex-col w-full max-w-[380px] mx-auto animate-in fade-in zoom-in duration-500", className)} {...props}>
@@ -84,16 +104,16 @@ export function LoginForm({ className, ...props }) {
                             priority
                         />
                     </div>
-                    <h1 className="text-3xl font-bold text-green-700 tracking-tight">EcoFlow</h1>
+                    <h1 className="text-3xl font-bold text-primary tracking-tight">EcoFlow</h1>
                     <div className="pt-4">
-                        <h2 className="text-2xl font-bold text-gray-900">Bem-vindo(a)!</h2>
-                        <p className="text-gray-500 mt-1 text-sm">Acesse sua conta para continuar</p>
+                        <h2 className="text-2xl font-bold text-foreground">Bem-vindo(a)!</h2>
+                        <p className="text-muted-foreground mt-1 text-sm">Acesse sua conta para continuar</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleLogin} className="flex flex-col gap-5">
                     <div className="space-y-2">
-                        <Label htmlFor="cpf" className="text-sm font-semibold text-gray-700 ml-1">CPF</Label>
+                        <Label htmlFor="cpf" className="text-sm font-semibold text-foreground ml-1">CPF</Label>
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
                                 <User className="h-5 w-5" />
@@ -105,13 +125,13 @@ export function LoginForm({ className, ...props }) {
                                 required
                                 value={cpf}
                                 onChange={handleCpfChange}
-                                className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 focus:ring-green-500/20 rounded-xl transition-all duration-200"
+                                className={inputClasses}
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="password" className="text-sm font-semibold text-gray-700 ml-1">Senha</Label>
+                        <Label htmlFor="password" className="text-sm font-semibold text-foreground ml-1">Senha</Label>
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
                                 <Lock className="h-5 w-5" />
@@ -123,7 +143,7 @@ export function LoginForm({ className, ...props }) {
                                 placeholder="••••••"
                                 value={senha}
                                 onChange={(e) => setSenha(e.target.value)}
-                                className="pl-10 pr-10 h-12 bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 focus:ring-green-500/20 rounded-xl transition-all duration-200"
+                                className={`${inputClasses} pr-10`}
                             />
                             <button
                                 type="button"
@@ -137,7 +157,7 @@ export function LoginForm({ className, ...props }) {
                             <button
                                 type="button"
                                 onClick={() => setIsModalOpen(true)}
-                                className="text-sm font-medium text-gray-500 hover:text-green-600 transition-colors cursor-pointer"
+                                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                             >
                                 Esqueceu sua senha?
                             </button>
@@ -145,7 +165,7 @@ export function LoginForm({ className, ...props }) {
                     </div>
 
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm text-center font-medium animate-in slide-in-from-top-2">
+                        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm text-center font-medium animate-in slide-in-from-top-2">
                             {error}
                         </div>
                     )}
@@ -153,11 +173,11 @@ export function LoginForm({ className, ...props }) {
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-bold text-base rounded-xl shadow-lg shadow-green-600/20 hover:shadow-green-600/40 transition-all duration-300 mt-2 cursor-pointer"
+                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 mt-2 cursor-pointer"
                     >
                         {isLoading ? (
                             <div className="flex items-center gap-2 ">
-                                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                                 <span>Entrando...</span>
                             </div>
                         ) : "Entrar"}

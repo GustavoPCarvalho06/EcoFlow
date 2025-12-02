@@ -1,7 +1,11 @@
+// =================================================================================
+// Arquivo: src/app/historico/page.jsx
+// =================================================================================
+
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 import Layout from "@/components/dashboard/layout/Layout";
-import { LogsTable } from "@/components/dashboard/LogsTable"; // Vamos criar esse componente abaixo
+import { LogsTable } from "@/components/dashboard/LogsTable"; 
 
 export default function HistoricoPage() {
   const cookieStore = cookies();
@@ -19,7 +23,7 @@ export default function HistoricoPage() {
   if (!user || (user.cargo !== 'administrador' && user.cargo !== 'coordenador')) {
     return (
         <Layout>
-            <div className="p-8 text-center text-red-500">
+            <div className="p-8 text-center text-destructive">
                 Acesso negado. Apenas Admins e Coordenadores podem ver o histórico.
             </div>
         </Layout>
@@ -28,14 +32,16 @@ export default function HistoricoPage() {
 
   return (
     <Layout>
-      <main className="flex flex-1 flex-col gap-6 p-6 bg-muted/20">
+      {/* 'bg-background' garante o fundo correto no dark mode */}
+      <main className="flex flex-1 flex-col gap-6 p-6 bg-background h-full">
         <div className="flex items-center justify-between pb-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Histórico de Atividades 
           </h1>
         </div>
 
-        <div className="w-full bg-white rounded-xl shadow-md border p-5">
+        {/* 'bg-card' para o fundo branco/escuro e 'border-border' para a borda sutil */}
+        <div className="w-full bg-card rounded-xl shadow-md border border-border p-5">
            {/* Passamos o token para o componente cliente poder fazer o fetch */}
           <LogsTable token={token} />
         </div>

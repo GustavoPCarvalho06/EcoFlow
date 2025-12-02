@@ -1,4 +1,6 @@
-// Local do arquivo: front\src\app\Perfil\page.jsx
+// =================================================================================
+// Arquivo: src/app/Perfil/page.jsx
+// =================================================================================
 
 import Perfil from "@/components/Perfil/perfil";
 import Layout from "@/components/dashboard/layout/Layout";
@@ -22,8 +24,11 @@ export default async function PagePerfil() {
 
   return (
     <Layout>
-      {/* Passamos o objeto 'user' como propriedade para o componente cliente */}
-      <Perfil initialUser={user} />
+      {/* 'bg-background' garante o fundo correto na página toda */}
+      <main className="min-h-screen bg-background">
+        {/* Passamos o objeto 'user' como propriedade para o componente cliente */}
+        <Perfil initialUser={user} />
+      </main>
     </Layout>
   );
 }

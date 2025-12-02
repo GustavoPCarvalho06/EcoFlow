@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: src/components/Perfil/perfil.jsx
+// =================================================================================
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -25,19 +29,20 @@ const formatCEP = (cep) => {
     return String(cep).replace(/\D/g, '').replace(/(\d{5})(\d{1,3})/, '$1-$2');
 };
 
-const inputStyles = "h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-200 text-sm";
-const selectTriggerStyles = "h-11 rounded-xl bg-gray-50 border-gray-200 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all duration-200 text-sm";
-const primaryButtonStyles = "h-11 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 font-medium transition-all hover:-translate-y-0.5 active:translate-y-0";
+// Estilos de Input atualizados para o tema
+const inputStyles = "h-11 rounded-xl bg-muted/50 border-input text-foreground focus:bg-background focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-200 text-sm placeholder:text-muted-foreground";
+const selectTriggerStyles = "h-11 rounded-xl bg-muted/50 border-input text-foreground focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 text-sm";
+const primaryButtonStyles = "h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 font-medium transition-all hover:-translate-y-0.5 active:translate-y-0";
 
 function ProfileInfoItem({ icon: Icon, label, value }) {
     return (
-        <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-green-50 text-green-600 flex-shrink-0">
+        <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors">
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary flex-shrink-0">
                 <Icon className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
-                <p className="text-sm font-medium text-gray-900 break-words">{value}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">{label}</p>
+                <p className="text-sm font-medium text-foreground break-words">{value}</p>
             </div>
         </div>
     );
@@ -85,13 +90,13 @@ function ActivityLogModal({ user, isOpen, onOpenChange }) {
     }, [isOpen, fetchUserLogs]);
 
     const getIcon = (acao) => {
-        if (!acao) return <Activity className="h-4 w-4 text-gray-500" />;
+        if (!acao) return <Activity className="h-4 w-4 text-muted-foreground" />;
         const key = acao.toUpperCase();
-        if (key.includes('LOGIN')) return <LogIn className="h-4 w-4 text-blue-500" />;
-        if (key.includes('CRIA') || key.includes('ADD')) return <UserPlus className="h-4 w-4 text-green-500" />;
-        if (key.includes('EDI') || key.includes('UPD')) return <Edit className="h-4 w-4 text-orange-500" />;
-        if (key.includes('DEL') || key.includes('EXCLU')) return <Trash className="h-4 w-4 text-red-500" />;
-        return <Activity className="h-4 w-4 text-gray-500" />;
+        if (key.includes('LOGIN')) return <LogIn className="h-4 w-4 text-blue-500 dark:text-blue-400" />;
+        if (key.includes('CRIA') || key.includes('ADD')) return <UserPlus className="h-4 w-4 text-green-500 dark:text-green-400" />;
+        if (key.includes('EDI') || key.includes('UPD')) return <Edit className="h-4 w-4 text-orange-500 dark:text-orange-400" />;
+        if (key.includes('DEL') || key.includes('EXCLU')) return <Trash className="h-4 w-4 text-red-500 dark:text-red-400" />;
+        return <Activity className="h-4 w-4 text-muted-foreground" />;
     };
 
     const formatDate = (dateString) => {
@@ -102,42 +107,42 @@ function ActivityLogModal({ user, isOpen, onOpenChange }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-4xl w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden rounded-2xl border-gray-100 shadow-2xl">
-                <DialogHeader className="p-6 pb-4 bg-white border-b border-gray-50">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                        <div className="p-2 bg-blue-50 rounded-lg"><History className="h-5 w-5 text-blue-600" /></div>
+            <DialogContent className="sm:max-w-4xl w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden rounded-2xl border-border bg-card shadow-2xl">
+                <DialogHeader className="p-6 pb-4 bg-card border-b border-border">
+                    <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><History className="h-5 w-5 text-blue-600 dark:text-blue-400" /></div>
                         Meu Histórico
                     </DialogTitle>
-                    <DialogDescription className="text-gray-500 pt-1">Registro completo das suas atividades na plataforma.</DialogDescription>
+                    <DialogDescription className="text-muted-foreground pt-1">Registro completo das suas atividades na plataforma.</DialogDescription>
                 </DialogHeader>
 
-                <div className="p-0 overflow-hidden bg-gray-50/30">
+                <div className="p-0 overflow-hidden bg-muted/20">
                     <Table>
-                        <TableHeader className="bg-gray-50/50">
-                            <TableRow className="border-gray-100 hover:bg-transparent">
-                                <TableHead className="w-[180px] pl-6 h-12 text-xs font-semibold text-gray-400 uppercase">Data</TableHead>
-                                <TableHead className="w-[140px] h-12 text-xs font-semibold text-gray-400 uppercase">Ação</TableHead>
-                                <TableHead className="h-12 text-xs font-semibold text-gray-400 uppercase">Detalhes</TableHead>
+                        <TableHeader className="bg-muted/50">
+                            <TableRow className="border-border hover:bg-transparent">
+                                <TableHead className="w-[180px] pl-6 h-12 text-xs font-semibold text-muted-foreground uppercase">Data</TableHead>
+                                <TableHead className="w-[140px] h-12 text-xs font-semibold text-muted-foreground uppercase">Ação</TableHead>
+                                <TableHead className="h-12 text-xs font-semibold text-muted-foreground uppercase">Detalhes</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
-                                <TableRow><TableCell colSpan={3} className="h-32 text-center"><div className="flex justify-center items-center gap-2 text-gray-400"><Loader2 className="animate-spin h-5 w-5 text-green-600" /> Carregando...</div></TableCell></TableRow>
+                                <TableRow><TableCell colSpan={3} className="h-32 text-center"><div className="flex justify-center items-center gap-2 text-muted-foreground"><Loader2 className="animate-spin h-5 w-5 text-primary" /> Carregando...</div></TableCell></TableRow>
                             ) : logs.length === 0 ? (
-                                <TableRow><TableCell colSpan={3} className="h-32 text-center text-gray-400">Nenhuma atividade registrada.</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={3} className="h-32 text-center text-muted-foreground">Nenhuma atividade registrada.</TableCell></TableRow>
                             ) : (
                                 logs.map((log) => (
-                                    <TableRow key={log.id} className="border-gray-50 hover:bg-white hover:shadow-sm transition-all">
-                                        <TableCell className="pl-6 text-xs font-mono text-gray-500 whitespace-nowrap">{formatDate(log.data_hora)}</TableCell>
+                                    <TableRow key={log.id} className="border-border hover:bg-muted/50 transition-all">
+                                        <TableCell className="pl-6 text-xs font-mono text-muted-foreground whitespace-nowrap">{formatDate(log.data_hora)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 {getIcon(log.acao)}
-                                                <Badge variant="secondary" className="text-[10px] font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                                                <Badge variant="secondary" className="text-[10px] font-medium bg-muted text-foreground border border-border">
                                                     {log.acao?.replace(/_/g, ' ')}
                                                 </Badge>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-sm text-gray-600">
+                                        <TableCell className="text-sm text-foreground">
                                             <div className="whitespace-normal break-words max-w-[200px] sm:max-w-md line-clamp-2" title={log.detalhes}>
                                                 {log.detalhes}
                                             </div>
@@ -149,13 +154,13 @@ function ActivityLogModal({ user, isOpen, onOpenChange }) {
                     </Table>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-white border-t border-gray-50">
-                    <span className="text-xs font-medium text-gray-500">Página {page} de {totalPages}</span>
+                <div className="flex items-center justify-between p-4 bg-card border-t border-border">
+                    <span className="text-xs font-medium text-muted-foreground">Página {page} de {totalPages}</span>
                     <div className="flex gap-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>
+                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-border bg-card hover:bg-muted" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200" onClick={() => setPage(p => (p < totalPages ? p + 1 : p))} disabled={page >= totalPages || loading}>
+                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-border bg-card hover:bg-muted" onClick={() => setPage(p => (p < totalPages ? p + 1 : p))} disabled={page >= totalPages || loading}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -205,31 +210,31 @@ function EditProfileModal({ user, isOpen, onOpenChange, onProfileUpdate }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[480px] rounded-2xl p-0 gap-0 overflow-hidden border-gray-100 shadow-2xl">
-                <DialogHeader className="p-6 pb-4 bg-white border-b border-gray-50">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                        <div className="p-2 bg-green-50 rounded-lg"><Pencil className="h-5 w-5 text-green-600" /></div>
+            <DialogContent className="sm:max-w-[480px] rounded-2xl p-0 gap-0 overflow-hidden border-border bg-card shadow-2xl">
+                <DialogHeader className="p-6 pb-4 bg-card border-b border-border">
+                    <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground">
+                        <div className="p-2 bg-primary/10 rounded-lg"><Pencil className="h-5 w-5 text-primary" /></div>
                         Editar Perfil
                     </DialogTitle>
-                    <DialogDescription className="text-gray-500 pt-1">Atualize suas informações pessoais abaixo.</DialogDescription>
+                    <DialogDescription className="text-muted-foreground pt-1">Atualize suas informações pessoais abaixo.</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    <div className="p-6 space-y-4 bg-white">
+                    <div className="p-6 space-y-4 bg-card">
                         <div className="space-y-2">
-                            <Label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Nome Completo</Label>
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nome Completo</Label>
                             <Input name="nome" defaultValue={user.nome} className={inputStyles} required />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Email</Label>
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</Label>
                             <Input name="email" type="email" defaultValue={user.email} className={inputStyles} required />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">CEP</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">CEP</Label>
                                 <Input name="CEP" value={cepValue} onChange={(e) => setCepValue(formatCEP(e.target.value))} className={inputStyles} required />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Estado Civil</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Estado Civil</Label>
                                 <Select name="estadoCivil" defaultValue={user.estadoCivil}>
                                     <SelectTrigger className={selectTriggerStyles}><SelectValue /></SelectTrigger>
                                     <SelectContent>
@@ -242,9 +247,9 @@ function EditProfileModal({ user, isOpen, onOpenChange, onProfileUpdate }) {
                             </div>
                         </div>
                     </div>
-                    {error && <div className="px-6 pb-2"><p className="text-red-500 text-sm bg-red-50 p-2 rounded-lg text-center">{error}</p></div>}
-                    <DialogFooter className="p-6 pt-2 bg-white border-t border-gray-50">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl text-gray-600 hover:bg-gray-50">Cancelar</Button>
+                    {error && <div className="px-6 pb-2"><p className="text-destructive text-sm bg-destructive/10 p-2 rounded-lg text-center">{error}</p></div>}
+                    <DialogFooter className="p-6 pt-2 bg-card border-t border-border">
+                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl text-muted-foreground hover:bg-muted">Cancelar</Button>
                         <Button type="submit" disabled={isLoading} className={primaryButtonStyles}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar Alterações
                         </Button>
@@ -285,28 +290,28 @@ function ChangePasswordModal({ user, isOpen, onOpenChange }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-2xl p-0 gap-0 overflow-hidden border-gray-100 shadow-2xl">
-                <DialogHeader className="p-6 pb-4 bg-white border-b border-gray-50">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                        <div className="p-2 bg-orange-50 rounded-lg"><LockKeyhole className="h-5 w-5 text-orange-600" /></div>
+            <DialogContent className="sm:max-w-[400px] rounded-2xl p-0 gap-0 overflow-hidden border-border bg-card shadow-2xl">
+                <DialogHeader className="p-6 pb-4 bg-card border-b border-border">
+                    <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground">
+                        <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg"><LockKeyhole className="h-5 w-5 text-orange-600 dark:text-orange-400" /></div>
                         Alterar Senha
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    <div className="p-6 space-y-4 bg-white">
+                    <div className="p-6 space-y-4 bg-card">
                         <div className="space-y-2">
-                            <Label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Nova Senha</Label>
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nova Senha</Label>
                             <Input name="newPassword" type="password" required className={inputStyles} placeholder="••••••••" />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Confirmar Nova Senha</Label>
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Confirmar Nova Senha</Label>
                             <Input name="confirmPassword" type="password" required className={inputStyles} placeholder="••••••••" />
                         </div>
                     </div>
-                    {error && <div className="px-6 pb-2"><p className="text-red-500 text-sm bg-red-50 p-2 rounded-lg text-center">{error}</p></div>}
-                    {success && <div className="px-6 pb-2"><p className="text-green-600 text-sm bg-green-50 p-2 rounded-lg text-center font-medium">{success}</p></div>}
-                    <DialogFooter className="p-6 pt-2 bg-white border-t border-gray-50">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl text-gray-600 hover:bg-gray-50">Cancelar</Button>
+                    {error && <div className="px-6 pb-2"><p className="text-destructive text-sm bg-destructive/10 p-2 rounded-lg text-center">{error}</p></div>}
+                    {success && <div className="px-6 pb-2"><p className="text-primary text-sm bg-primary/10 p-2 rounded-lg text-center font-medium">{success}</p></div>}
+                    <DialogFooter className="p-6 pt-2 bg-card border-t border-border">
+                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl text-muted-foreground hover:bg-muted">Cancelar</Button>
                         <Button type="submit" disabled={isLoading} className={primaryButtonStyles}>Confirmar</Button>
                     </DialogFooter>
                 </form>
@@ -329,9 +334,9 @@ export default function Perfil({ initialUser }) {
 
     if (!user) {
         return (
-            <Card className="rounded-xl border border-gray-100 shadow-sm animate-pulse m-6">
+            <Card className="rounded-xl border border-border shadow-sm animate-pulse m-6 bg-card">
                 <CardHeader>
-                    <CardTitle className="text-gray-400">Carregando perfil...</CardTitle>
+                    <CardTitle className="text-muted-foreground">Carregando perfil...</CardTitle>
                 </CardHeader>
             </Card>
         );
@@ -341,17 +346,17 @@ export default function Perfil({ initialUser }) {
         <div className="container max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <Card className="lg:col-span-1 rounded-2xl border-gray-100 shadow-sm bg-white overflow-hidden h-fit">
+                <Card className="lg:col-span-1 rounded-2xl border-border shadow-sm bg-card overflow-hidden h-fit">
                     <div className="h-24 bg-gradient-to-r from-green-600 to-green-400"></div>
                     <div className="px-6 pb-6 relative">
                         <div className="flex flex-col items-center -mt-12 mb-4">
-                            <Avatar className="h-24 w-24 border-4 border-white shadow-md bg-white">
-                                <AvatarFallback className="text-3xl font-bold bg-green-50 text-green-700">
+                            <Avatar className="h-24 w-24 border-4 border-card shadow-md bg-card">
+                                <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary">
                                     {user.nome ? user.nome.charAt(0).toUpperCase() : "U"}
                                 </AvatarFallback>
                             </Avatar>
-                            <h1 className="mt-3 text-xl font-bold text-gray-900 text-center">{user.nome}</h1>
-                            <Badge variant="secondary" className="mt-1 bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                            <h1 className="mt-3 text-xl font-bold text-foreground text-center">{user.nome}</h1>
+                            <Badge variant="secondary" className="mt-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
                                 {user.cargo ? user.cargo.charAt(0).toUpperCase() + user.cargo.slice(1) : "Usuário"}
                             </Badge>
                         </div>
@@ -363,7 +368,7 @@ export default function Perfil({ initialUser }) {
                             <ProfileInfoItem icon={MapPin} label="CEP" value={formatCEP(user.CEP)} />
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-gray-100">
+                        <div className="mt-8 pt-6 border-t border-border">
                             <Button onClick={() => setIsEditModalOpen(true)} className={`w-full ${primaryButtonStyles} cursor-pointer`}>
                                 Editar Informações
                             </Button>
@@ -373,54 +378,54 @@ export default function Perfil({ initialUser }) {
 
                 <div className="lg:col-span-2 space-y-6">
 
-                    <Card className="rounded-2xl border-gray-100 shadow-sm">
-                        <CardHeader className="pb-3 border-b border-gray-50">
+                    <Card className="rounded-2xl border-border shadow-sm bg-card">
+                        <CardHeader className="pb-3 border-b border-border">
                             <div className="flex items-center gap-2">
-                                <ShieldCheck className="h-5 w-5 text-green-600" />
-                                <CardTitle className="text-lg font-bold text-gray-900">Segurança & Atividades</CardTitle>
+                                <ShieldCheck className="h-5 w-5 text-primary" />
+                                <CardTitle className="text-lg font-bold text-foreground">Segurança & Atividades</CardTitle>
                             </div>
-                            <CardDescription>Gerencie suas credenciais e monitore o acesso.</CardDescription>
+                            <CardDescription className="text-muted-foreground">Gerencie suas credenciais e monitore o acesso.</CardDescription>
                         </CardHeader>
                         <CardContent className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Button
                                     onClick={() => setIsPasswordModalOpen(true)}
                                     variant="outline"
-                                    className="h-24 flex flex-col items-center justify-center gap-2 border-dashed border-2 border-gray-200 hover:border-green-300 hover:bg-green-50/50 rounded-xl transition-all cursor-pointer"
+                                    className="h-24 flex flex-col items-center justify-center gap-2 border-dashed border-2 border-border hover:border-orange-300 hover:bg-orange-50/50 dark:hover:bg-orange-900/20 rounded-xl transition-all cursor-pointer bg-card text-foreground"
                                 >
-                                    <div className="p-2 bg-orange-100 rounded-full text-orange-600"><KeyRound className="h-6 w-6" /></div>
-                                    <span className="font-semibold text-gray-700">Alterar Senha</span>
+                                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-full text-orange-600 dark:text-orange-400"><KeyRound className="h-6 w-6" /></div>
+                                    <span className="font-semibold text-muted-foreground group-hover:text-foreground">Alterar Senha</span>
                                 </Button>
 
                                 <Button
                                     onClick={() => setIsActivityModalOpen(true)}
                                     variant="outline"
-                                    className="h-24 flex flex-col items-center justify-center gap-2 border-dashed border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 rounded-xl transition-all cursor-pointer"
+                                    className="h-24 flex flex-col items-center justify-center gap-2 border-dashed border-2 border-border hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 rounded-xl transition-all cursor-pointer bg-card text-foreground"
                                 >
-                                    <div className="p-2 bg-blue-100 rounded-full text-blue-600"><History className="h-6 w-6" /></div>
-                                    <span className="font-semibold text-gray-700">Histórico de Ações</span>
+                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400"><History className="h-6 w-6" /></div>
+                                    <span className="font-semibold text-muted-foreground group-hover:text-foreground">Histórico de Ações</span>
                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="rounded-2xl border-gray-100 shadow-sm bg-gradient-to-br from-white to-gray-50/50">
+                    <Card className="rounded-2xl border-border shadow-sm bg-card">
                         <CardHeader>
-                            <CardTitle className="text-lg font-bold text-gray-900">Sobre sua conta</CardTitle>
+                            <CardTitle className="text-lg font-bold text-foreground">Sobre sua conta</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex gap-4 items-start">
                                 <div className="h-2 w-2 mt-2 rounded-full bg-green-500 flex-shrink-0"></div>
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900">Status Ativo</h4>
-                                    <p className="text-sm text-gray-500 mt-1">Sua conta está totalmente operacional e você tem acesso a todos os recursos permitidos para o cargo de <strong>{user.cargo}</strong>.</p>
+                                    <h4 className="text-sm font-semibold text-foreground">Status Ativo</h4>
+                                    <p className="text-sm text-muted-foreground mt-1">Sua conta está totalmente operacional e você tem acesso a todos os recursos permitidos para o cargo de <strong>{user.cargo}</strong>.</p>
                                 </div>
                             </div>
                             <div className="flex gap-4 items-start">
                                 <div className="h-2 w-2 mt-2 rounded-full bg-blue-500 flex-shrink-0"></div>
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900">Última Atualização</h4>
-                                    <p className="text-sm text-gray-500 mt-1">Mantenha seus dados de contato sempre atualizados para receber notificações importantes do sistema EcoFlow.</p>
+                                    <h4 className="text-sm font-semibold text-foreground">Última Atualização</h4>
+                                    <p className="text-sm text-muted-foreground mt-1">Mantenha seus dados de contato sempre atualizados para receber notificações importantes do sistema EcoFlow.</p>
                                 </div>
                             </div>
                         </CardContent>

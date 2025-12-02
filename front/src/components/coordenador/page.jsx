@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: src/components/coordenador/page.jsx
+// =================================================================================
+
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 
@@ -7,31 +11,38 @@ import DoughnutChart from "@/components/coordenador/DoughnutChart";
 import Layout from "../dashboard/layout/Layout";
 
 // =======================================================
-// CORREÇÃO DE CORES NO COMPONENTE StatsCards
+// STATS CARDS (Corrigido para Dark Mode)
 // =======================================================
 const StatsCards = ({ stats }) => (
   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
     {stats.map(stat => (
-      // Usamos 'bg-card' e 'text-card-foreground' para consistência com Shadcn/UI
-      <div key={stat.id} className="p-6 bg-card text-card-foreground border rounded-lg shadow-sm flex flex-col justify-between">
+      <div 
+        key={stat.id} 
+        // bg-card: adapta o fundo (branco no light, verde escuro no dark)
+        // border-border: usa a cor da borda do tema
+        className="p-6 bg-card text-card-foreground border border-border rounded-xl shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
+      >
         <div className="flex justify-between items-start">
-          {/* Título do card (ex: "Lixeiras monitoradas") */}
+          {/* text-muted-foreground: Cinza suave em ambos os modos */}
           <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-          {/* Variação percentual */}
-          <p className={`text-sm font-semibold ${stat.delta > 0 ? 'text-green-500' : 'text-red-500'}`}>
+          
+          {/* Ajuste de cores para o Delta: 500 no light, 400 no dark para melhor leitura */}
+          <p className={`text-sm font-semibold ${
+            stat.delta > 0 
+              ? 'text-green-600 dark:text-green-400' 
+              : 'text-red-600 dark:text-red-400'
+          }`}>
             {stat.delta > 0 ? '+' : ''}{stat.delta}%
           </p>
         </div>
         <div className="mt-2">
-          {/* Valor principal */}
-          <p className="text-3xl font-bold">{stat.value}</p>
+          {/* text-foreground: Preto no light, Branco no dark */}
+          <p className="text-3xl font-bold text-foreground">{stat.value}</p>
         </div>
       </div>
     ))}
   </div>
 );
-// =======================================================
-
 
 export default async function CoordenadorPage() {
   const cookieStore = cookies();
@@ -47,7 +58,7 @@ export default async function CoordenadorPage() {
     }
   }
 
-  // Dados fictícios (adicionamos o '%' nos deltas para consistência)
+  // Dados fictícios
   const stats = [
     { id: 1, title: "Lixeiras monitoradas", value: 124, delta: 6 },
     { id: 2, title: "Coletas (hoje)", value: 37, delta: 12 },
@@ -68,17 +79,19 @@ export default async function CoordenadorPage() {
 
   return (
     <Layout>
-
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+        {/* Adicionei 'bg-background' aqui para garantir o fundo correto na área principal */}
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-background min-h-full">
           <div className="flex items-center">
-            <h1 className="font-semibold text-lg md:text-2xl">Dashboard do Coordenador</h1>
+            {/* text-foreground para o título */}
+            <h1 className="font-semibold text-lg md:text-2xl text-foreground">Dashboard do Coordenador</h1>
           </div>
           
           <StatsCards stats={stats} />
 
-          <div className="p-6 bg-white border rounded-lg shadow">
-            <h3 className="text-lg font-semibold">Visão geral</h3>
-            <p className="text-sm text-gray-500">Resumo das últimas 24-48 horas — dados fictícios para visualização.</p>
+          {/* Container dos gráficos atualizado */}
+          <div className="p-6 bg-card border border-border rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-foreground">Visão geral</h3>
+            <p className="text-sm text-muted-foreground">Resumo das últimas 24-48 horas — dados fictícios para visualização.</p>
 
             <div className="mt-4">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[360px]">

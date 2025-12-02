@@ -20,18 +20,18 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] rounded-2xl p-0 gap-0 border border-gray-100 shadow-2xl overflow-hidden">
-        <DialogHeader className="p-6 pb-4 bg-white border-b border-gray-50">
+      <DialogContent className="sm:max-w-[600px] rounded-2xl p-0 gap-0 border border-border bg-card shadow-2xl overflow-hidden">
+        <DialogHeader className="p-6 pb-4 bg-card border-b border-border">
             <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                         <Megaphone className="h-5 w-5" />
                     </div>
                     <div>
-                        <DialogTitle className="text-xl font-bold text-gray-900 leading-tight">
+                        <DialogTitle className="text-xl font-bold text-foreground leading-tight">
                             {comunicado.titulo}
                         </DialogTitle>
-                        <DialogDescription className="text-gray-500 mt-1 flex items-center gap-2 text-xs">
+                        <DialogDescription className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
                             <span className="flex items-center gap-1">
                                 <User className="h-3 w-3" /> {comunicado.autor_nome}
                             </span>
@@ -41,7 +41,7 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
                                 {new Date(isEdited ? comunicado.data_edicao : comunicado.data_publicacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                             </span>
                             {isEdited && (
-                                <Badge variant="outline" className="ml-2 text-[10px] h-5 px-1.5 border-orange-200 text-orange-600 bg-orange-50">
+                                <Badge variant="outline" className="ml-2 text-[10px] h-5 px-1.5 border-orange-200 text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800">
                                     Editado
                                 </Badge>
                             )}
@@ -51,17 +51,17 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
             </div>
         </DialogHeader>
         
-        <div className="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/30">
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words">
+        <div className="p-6 max-h-[60vh] overflow-y-auto bg-muted/20">
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-line break-words">
             {comunicado.conteudo}
           </p>
         </div>
 
-        <DialogFooter className="p-4 bg-white border-t border-gray-50 sm:justify-between items-center">
-             <span className="text-xs text-gray-400 italic hidden sm:block">
+        <DialogFooter className="p-4 bg-card border-t border-border sm:justify-between items-center">
+             <span className="text-xs text-muted-foreground italic hidden sm:block">
                 EcoFlow - Comunicação Interna
              </span>
-             <Button onClick={() => onOpenChange(false)} className="rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20">
+             <Button onClick={() => onOpenChange(false)} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
                 Fechar
              </Button>
         </DialogFooter>
@@ -175,17 +175,17 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
   if (!apiUrl || loading) {
       return (
           <div className="flex flex-col items-center justify-center py-10 space-y-3">
-              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-              <p className="text-sm text-gray-500 font-medium">Atualizando mural...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground font-medium">Atualizando mural...</p>
           </div>
       );
   }
 
   if (error) {
     return (
-        <div className="rounded-xl border border-red-100 bg-red-50/50 p-6 text-center">
-            <p className="text-sm text-red-600 font-medium mb-2">{error}</p>
-            <Button variant="outline" size="sm" onClick={fetchData} className="border-red-200 text-red-700 hover:bg-red-50">
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-6 text-center">
+            <p className="text-sm text-destructive font-medium mb-2">{error}</p>
+            <Button variant="outline" size="sm" onClick={fetchData} className="border-destructive/20 text-destructive hover:bg-destructive/10">
                 Tentar novamente
             </Button>
         </div>
@@ -194,19 +194,19 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
 
   if (todosComunicados.length === 0) {
       return (
-          <div className="rounded-xl border border-dashed border-gray-200 p-8 text-center flex flex-col items-center">
-              <div className="h-12 w-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                  <Megaphone className="h-6 w-6 text-gray-400" />
+          <div className="rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center">
+              <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                  <Megaphone className="h-6 w-6 text-muted-foreground" />
               </div>
-              <p className="text-gray-900 font-medium">Nenhum comunicado</p>
-              <p className="text-sm text-gray-500">O mural está vazio no momento.</p>
+              <p className="text-foreground font-medium">Nenhum comunicado</p>
+              <p className="text-sm text-muted-foreground">O mural está vazio no momento.</p>
           </div>
       );
   }
 
   return (
     <>
-      <div className="space-y-4 overflow-y-auto h-[calc(100vh-14rem)] pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent pb-4">
+      <div className="space-y-4 overflow-y-auto h-[calc(100vh-14rem)] pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pb-4">
         {comunicadosVisiveis.map((comunicado) => {
           const { texto: conteudoTruncado } = truncarTexto(comunicado.conteudo, 150);
           const isNew = unseenIds.has(comunicado.id);
@@ -217,15 +217,15 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
             <Card 
                 key={comunicado.id} 
                 className={cn(
-                    "group relative overflow-hidden rounded-xl border transition-all duration-300",
+                    "group relative overflow-hidden rounded-xl border transition-all duration-300 bg-card",
                     isNew 
-                        ? "border-l-[4px] border-l-green-500 border-y-green-100 border-r-green-100 bg-green-50/10 shadow-md shadow-green-100/50" 
-                        : "border-gray-100 hover:border-green-200 hover:shadow-md hover:-translate-y-0.5"
+                        ? "border-l-[4px] border-l-primary border-y-primary/20 border-r-primary/20 bg-primary/5 shadow-md shadow-primary/10" 
+                        : "border-border hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5"
                 )}
             >
               <CardHeader className="flex flex-row items-start gap-4 p-5 pb-2">
-                <Avatar className={cn("h-11 w-11 border-2", isNew ? "border-green-200" : "border-gray-100")}>
-                    <AvatarFallback className={cn("text-sm font-bold", isNew ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600")}>
+                <Avatar className={cn("h-11 w-11 border-2", isNew ? "border-primary/30" : "border-border")}>
+                    <AvatarFallback className={cn("text-sm font-bold", isNew ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>
                         {comunicado.autor_nome.charAt(0)}
                     </AvatarFallback>
                 </Avatar>
@@ -234,7 +234,7 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
                   <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         {isNew && (
-                            <Badge className="h-5 px-1.5 bg-blue-500 hover:bg-green-600 text-white border-0 text-[10px] font-bold shadow-sm">
+                            <Badge className="h-5 px-1.5 bg-blue-500 hover:bg-blue-600 text-white border-0 text-[10px] font-bold shadow-sm">
                                 NOVO
                             </Badge>
                         )}
@@ -243,34 +243,34 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
                                 EDITADO
                             </Badge>
                         )}
-                        <span className="text-xs font-medium text-green-700/80 flex items-center gap-1">
+                        <span className="text-xs font-medium text-primary/80 flex items-center gap-1">
                             {comunicado.autor_nome}
                         </span>
                       </div>
-                      <span className="text-[10px] text-gray-400 flex items-center gap-1 whitespace-nowrap">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 whitespace-nowrap">
                           <Clock className="h-3 w-3" />
                           {new Date(isEdited ? comunicado.data_edicao : comunicado.data_publicacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       </span>
                   </div>
                   
-                  <CardTitle className="text-base font-bold text-gray-900 leading-tight mb-0.5 line-clamp-1">
+                  <CardTitle className="text-base font-bold text-foreground leading-tight mb-0.5 line-clamp-1">
                       {comunicado.titulo}
                   </CardTitle>
                 </div>
               </CardHeader>
               
               <CardContent className="p-5 pt-2">
-                <p className="text-sm text-gray-500 whitespace-pre-line break-words leading-relaxed mb-3">
+                <p className="text-sm text-muted-foreground whitespace-pre-line break-words leading-relaxed mb-3">
                     {conteudoTruncado}
                 </p>
                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-muted-foreground">
                         {isEdited ? 'Editado recentemente' : 'Publicado no mural'}
                     </span>
                     <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="h-8 px-3 text-xs font-semibold text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all cursor-pointer" 
+                        className="h-8 px-3 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/10 rounded-lg group-hover:bg-card group-hover:shadow-sm transition-all cursor-pointer" 
                         onClick={() => handleExibirCompleto(comunicado)}
                     >
                         Ler completo
@@ -286,12 +286,12 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
             <Button 
                 variant="outline" 
                 onClick={() => setLimiteExibicao(todosComunicados.length)} 
-                className="relative rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-gray-600 hover:text-green-700 hover:border-green-200 transition-all shadow-sm h-10 px-6 text-xs uppercase tracking-wide font-semibold"
+                className="relative rounded-xl border-border bg-card hover:bg-muted text-muted-foreground hover:text-primary hover:border-primary/30 transition-all shadow-sm h-10 px-6 text-xs uppercase tracking-wide font-semibold"
             >
               <ChevronDown className="mr-2 h-3 w-3" />
               Carregar mais comunicados
               {unseenHiddenCount > 0 && (
-                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-md border-2 border-white">
+                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-md border-2 border-card">
                   {unseenHiddenCount}
                 </span>
               )}

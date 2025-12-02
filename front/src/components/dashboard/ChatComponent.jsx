@@ -15,9 +15,6 @@ import { Send, UserSearch } from "lucide-react";
 import { useUnreadCount } from "@/app/context/UnreadCountContext";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-// ----------------------------------------------------------------------------------------------------
-// COMPONENTE
-// ----------------------------------------------------------------------------------------------------
 export function ChatComponent({ user, token }) {
   const apiUrl = useApiUrl();
   const meuUserId = user?.id;
@@ -39,9 +36,6 @@ export function ChatComponent({ user, token }) {
     selectedUserRef.current = selectedUser;
   }, [selectedUser]);
 
-  // ----------------------------------------------------------------------------------------------------
-  // SOCKET
-  // ----------------------------------------------------------------------------------------------------
   useEffect(() => {
     if (!socket) return;
 
@@ -80,9 +74,6 @@ export function ChatComponent({ user, token }) {
     return () => socket.off("new_message", handleNewMessage);
   }, [socket, meuUserId, fetchTotalMsgUnread]);
 
-  // ----------------------------------------------------------------------------------------------------
-  // CARREGAR USUÁRIOS E CONTADORES
-  // ----------------------------------------------------------------------------------------------------
   useEffect(() => {
     if (!meuUserId || !apiUrl || !token) return;
 
@@ -117,9 +108,6 @@ export function ChatComponent({ user, token }) {
     initializeChat();
   }, [meuUserId, apiUrl, token]);
 
-  // ----------------------------------------------------------------------------------------------------
-  // HISTÓRICO AO SELECIONAR
-  // ----------------------------------------------------------------------------------------------------
   useEffect(() => {
     if (!selectedUser || !meuUserId || !apiUrl || !token) return;
 
@@ -150,9 +138,6 @@ export function ChatComponent({ user, token }) {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ----------------------------------------------------------------------------------------------------
-  // MARCAR COMO LIDA
-  // ----------------------------------------------------------------------------------------------------
   const markMessagesAsRead = async (remetenteId) => {
     if (!apiUrl || !meuUserId || !token) return;
 
@@ -177,9 +162,6 @@ export function ChatComponent({ user, token }) {
     }
   };
 
-  // ----------------------------------------------------------------------------------------------------
-  // ENVIAR MENSAGEM
-  // ----------------------------------------------------------------------------------------------------
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!replyText.trim() || !selectedUser || !socket) return;
@@ -203,18 +185,15 @@ export function ChatComponent({ user, token }) {
     setReplyText("");
   };
 
-  // ----------------------------------------------------------------------------------------------------
-  // RENDER
-  // ----------------------------------------------------------------------------------------------------
   const filteredUsers = users.filter(u =>
     u.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
+      <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-muted-foreground">
         <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-primary rounded-full" />
+          <div className="animate-spin h-8 w-8 border-2 border-muted border-t-primary rounded-full" />
           Carregando conversas...
         </div>
       </div>
@@ -224,35 +203,33 @@ export function ChatComponent({ user, token }) {
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] md:grid md:grid-cols-3 gap-4">
 
-      {/* -------------------------------------------------------------- */}
-      {/* CONTATOS (LEFT PANEL)                                         */}
-      {/* -------------------------------------------------------------- */}
+      {/* CONTATOS (LEFT PANEL) */}
       <Card
         className={cn(
-          "flex flex-col overflow-hidden rounded-2xl border border-gray-200 shadow-md bg-white transition-all",
+          "flex flex-col overflow-hidden rounded-2xl border shadow-md bg-card transition-all",
           "md:col-span-1",
           selectedUser ? "hidden md:flex" : "flex"
         )}
       >
-        <CardHeader className="border-b border-gray-300 pb-4 bg-white">
-          <CardTitle className="text-lg font-semibold text-gray-900">
+        <CardHeader className="border-b border-border pb-4 bg-card">
+          <CardTitle className="text-lg font-semibold text-foreground">
             Contatos
           </CardTitle>
 
           <div className="relative mt-3">
-            <UserSearch className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <UserSearch className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Pesquisar..."
-              className="pl-9 rounded-lg border-gray-300"
+              className="pl-9 rounded-lg border-input bg-background focus:ring-primary/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-y-auto p-0">
+        <CardContent className="flex-1 overflow-y-auto p-0 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           {filteredUsers.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-muted-foreground">
               Nenhum contato encontrado
             </div>
           ) : (
@@ -264,26 +241,26 @@ export function ChatComponent({ user, token }) {
                   key={u.id}
                   onClick={() => setSelectedUser(u)}
                   className={cn(
-                    "w-full px-4 py-3 border-b border-gray-300 text-left flex items-center justify-between",
-                    "hover:bg-gray-100 active:bg-gray-200 cursor-pointer transition-all duration-150",
+                    "w-full px-4 py-3 border-b border-border text-left flex items-center justify-between",
+                    "hover:bg-muted/50 active:bg-muted cursor-pointer transition-all duration-150",
                     selectedUser?.id === u.id &&
-                    "bg-gray-100 shadow-inner"
+                    "bg-muted/50 shadow-inner"
                   )}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-sm">{u.nome[0]}</AvatarFallback>
+                        <AvatarFallback className="text-sm bg-muted text-foreground">{u.nome[0]}</AvatarFallback>
                       </Avatar>
 
                       <div>
-                        <p className="font-medium text-gray-900">{u.nome}</p>
-                        <p className="text-xs text-gray-500 capitalize">{u.cargo}</p>
+                        <p className="font-medium text-foreground">{u.nome}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{u.cargo}</p>
                       </div>
                     </div>
 
                     {unread > 0 && (
-                      <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                      <span className="bg-destructive text-destructive-foreground text-xs font-semibold rounded-full px-2 py-0.5">
                         {unread > 99 ? "99+" : unread}
                       </span>
                     )}
@@ -295,12 +272,10 @@ export function ChatComponent({ user, token }) {
         </CardContent>
       </Card>
 
-      {/* -------------------------------------------------------------- */}
-      {/* CHAT AREA (RIGHT PANEL)                                       */}
-      {/* -------------------------------------------------------------- */}
+      {/* CHAT AREA (RIGHT PANEL) */}
       <Card
         className={cn(
-          "flex flex-col overflow-hidden rounded-2xl border border-gray-200 shadow-md bg-white transition-all",
+          "flex flex-col overflow-hidden rounded-2xl border shadow-md bg-card transition-all",
           "md:col-span-2",
           selectedUser ? "flex" : "hidden md:flex"
         )}
@@ -308,30 +283,32 @@ export function ChatComponent({ user, token }) {
         {selectedUser ? (
           <>
             {/* MOBILE BACK BUTTON */}
-            <div className="md:hidden border-b border-gray-300 p-3 flex items-center gap-3 bg-white">
+            <div className="md:hidden border-b border-border p-3 flex items-center gap-3 bg-card">
               <button
                 onClick={() => setSelectedUser(null)}
                 className="text-primary font-medium"
               >
                 ← Voltar
               </button>
-              <span className="font-semibold">{selectedUser.nome}</span>
+              <span className="font-semibold text-foreground">{selectedUser.nome}</span>
             </div>
 
-            <CardHeader className="hidden md:flex flex-row items-center gap-4 border-b border-gray-200 py-4 bg-white">
+            <CardHeader className="hidden md:flex flex-row items-center gap-4 border-b border-border py-4 bg-card">
               <Avatar className="h-10 w-10">
-                <AvatarFallback>{selectedUser.nome[0]}</AvatarFallback>
+                <AvatarFallback className="bg-muted text-foreground">{selectedUser.nome[0]}</AvatarFallback>
               </Avatar>
 
               <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">{selectedUser.nome}</CardTitle>
-                <p className="text-sm text-gray-500 capitalize">{selectedUser.cargo}</p>
+                <CardTitle className="text-lg font-semibold text-foreground">{selectedUser.nome}</CardTitle>
+                <p className="text-sm text-muted-foreground capitalize">{selectedUser.cargo}</p>
               </div>
             </CardHeader>
 
-            <CardContent className="flex-1 overflow-y-auto px-5 py-4 space-y-4 bg-gray-100">
+            {/* AQUI ESTÁ A CORREÇÃO DO FUNDO */}
+            {/* 'bg-gray-50' no modo claro (neutro) e 'dark:bg-muted/20' no modo escuro */}
+            <CardContent className="flex-1 overflow-y-auto px-5 py-4 space-y-4 bg-gray-50 dark:bg-muted/20 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               {messages.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-gray-500">
+                <div className="flex h-full items-center justify-center text-muted-foreground">
                   <div className="text-center">
                     <p>Nenhuma mensagem ainda</p>
                     <p className="text-sm">Envie a primeira mensagem</p>
@@ -351,7 +328,7 @@ export function ChatComponent({ user, token }) {
                     >
                       {!isMe && (
                         <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">
+                          <AvatarFallback className="text-xs bg-muted text-muted-foreground">
                             {selectedUser.nome[0]}
                           </AvatarFallback>
                         </Avatar>
@@ -359,17 +336,17 @@ export function ChatComponent({ user, token }) {
 
                       <div
                         className={cn(
-                          "max-w-[90%] sm:max-w-md px-4 py-3 rounded-2xl shadow-md",
+                          "max-w-[90%] sm:max-w-md px-4 py-3 rounded-2xl shadow-sm",
                           isMe
-                            ? "bg-emerald-600 text-white"
-                            : "bg-white border border-gray-200 text-gray-900"
+                            ? "bg-primary text-primary-foreground" // Verde (EcoFlow) no envio
+                            : "bg-card border border-border text-foreground" // Branco/Cinza no recebimento
                         )}
                       >
                         <p className="text-sm break-words">{msg.conteudo}</p>
                         <p
                           className={cn(
-                            "text-[11px] mt-1",
-                            isMe ? "text-white/80" : "text-gray-400"
+                            "text-[10px] mt-1 text-right",
+                            isMe ? "text-primary-foreground/80" : "text-muted-foreground"
                           )}
                         >
                           {new Date(msg.data_envio).toLocaleTimeString([], {
@@ -381,7 +358,7 @@ export function ChatComponent({ user, token }) {
 
                       {isMe && (
                         <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">{user.nome?.[0] || "U"}</AvatarFallback>
+                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">{user.nome?.[0] || "U"}</AvatarFallback>
                         </Avatar>
                       )}
                     </div>
@@ -392,10 +369,10 @@ export function ChatComponent({ user, token }) {
               <div ref={messageEndRef} />
             </CardContent>
 
-            <CardFooter className="p-4 border-t border-gray-200 bg-white">
+            <CardFooter className="p-4 border-t border-border bg-card">
               <form onSubmit={handleSendMessage} className="flex items-center gap-3 w-full">
                 <Textarea
-                  className="min-h-[42px] resize-none rounded-lg border-gray-300 bg-white"
+                  className="min-h-[42px] resize-none rounded-lg border-input bg-background text-foreground focus:ring-primary/20"
                   placeholder={`Mensagem para ${selectedUser.nome}...`}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
@@ -411,7 +388,7 @@ export function ChatComponent({ user, token }) {
                   type="submit"
                   size="icon"
                   disabled={!replyText.trim()}
-                  className="h-10 w-10 rounded-lg shadow-sm"
+                  className="h-10 w-10 rounded-lg shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -419,9 +396,9 @@ export function ChatComponent({ user, token }) {
             </CardFooter>
           </>
         ) : (
-          <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-500 p-8">
+          <div className="hidden md:flex flex-1 flex-col items-center justify-center text-muted-foreground p-8">
             <UserSearch className="h-12 w-12 opacity-40 mb-4" />
-            <h3 className="font-semibold text-lg">Selecione um contato</h3>
+            <h3 className="font-semibold text-lg text-foreground">Selecione um contato</h3>
             <p className="text-sm mt-1">
               Clique em alguém na lista ao lado para iniciar uma conversa.
             </p>
@@ -430,5 +407,4 @@ export function ChatComponent({ user, token }) {
       </Card>
     </div>
   );
-
 }

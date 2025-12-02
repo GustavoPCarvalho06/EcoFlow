@@ -19,8 +19,8 @@ import { PlusCircle, Pencil, Trash2, Megaphone, User, CalendarDays, Clock, Chevr
 import { useApiUrl } from "../../app/context/ApiContext"; 
 import { cn } from "@/lib/utils";
 
-const inputStyles = "rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-200";
-const primaryButtonStyles = "rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 font-medium transition-all hover:-translate-y-0.5";
+const inputStyles = "rounded-xl bg-muted/50 border-input text-foreground focus:bg-background focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-200 placeholder:text-muted-foreground";
+const primaryButtonStyles = "rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 font-medium transition-all hover:-translate-y-0.5";
 
 
 function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
@@ -28,17 +28,17 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   const isEdited = !!comunicado.data_edicao;
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] rounded-2xl p-0 gap-0 border border-gray-100 shadow-2xl overflow-hidden">
-        <DialogHeader className="p-6 pb-4 bg-white border-b border-gray-50">
+      <DialogContent className="sm:max-w-[600px] rounded-2xl p-0 gap-0 border border-border bg-card shadow-2xl overflow-hidden">
+        <DialogHeader className="p-6 pb-4 bg-card border-b border-border">
             <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Megaphone className="h-5 w-5" />
                 </div>
                 <div>
-                    <DialogTitle className="text-xl font-bold text-gray-900 leading-tight">
+                    <DialogTitle className="text-xl font-bold text-foreground leading-tight">
                         {comunicado.titulo}
                     </DialogTitle>
-                    <DialogDescription className="text-gray-500 mt-1 flex items-center gap-2 text-xs">
+                    <DialogDescription className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
                         <span className="flex items-center gap-1"><User className="h-3 w-3" /> {comunicado.autor_nome}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1">
@@ -49,10 +49,10 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
                 </div>
             </div>
         </DialogHeader>
-        <div className="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/30">
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words">{comunicado.conteudo}</p>
+        <div className="p-6 max-h-[60vh] overflow-y-auto bg-muted/20">
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-line break-words">{comunicado.conteudo}</p>
         </div>
-        <DialogFooter className="p-4 bg-white border-t border-gray-50">
+        <DialogFooter className="p-4 bg-card border-t border-border">
             <Button onClick={() => onOpenChange(false)} className={primaryButtonStyles}>Fechar</Button>
         </DialogFooter>
       </DialogContent>
@@ -68,18 +68,18 @@ function ComunicadoForm({ onSubmit, initialData = null, onClose }) {
     
     return (
       <form onSubmit={handleSubmit} className="flex flex-col h-full">
-        <div className="p-6 space-y-5 bg-white">
+        <div className="p-6 space-y-5 bg-card">
             <div className="space-y-2">
-                <Label htmlFor="titulo" className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Título do Comunicado</Label>
+                <Label htmlFor="titulo" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Título do Comunicado</Label>
                 <Input id="titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} required className={`h-11 ${inputStyles}`} placeholder="Ex: Manutenção programada..." />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="conteudo" className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Conteúdo</Label>
+                <Label htmlFor="conteudo" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Conteúdo</Label>
                 <Textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} required rows={6} className={`resize-none ${inputStyles}`} placeholder="Digite os detalhes do comunicado aqui..." />
             </div>
         </div>
-        <DialogFooter className="p-4 bg-gray-50 border-t border-gray-100 mt-auto">
-            <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl hover:bg-white hover:text-red-600 text-gray-600">Cancelar</Button>
+        <DialogFooter className="p-4 bg-muted/20 border-t border-border mt-auto">
+            <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl hover:bg-muted text-muted-foreground hover:text-destructive">Cancelar</Button>
             <Button type="submit" className={primaryButtonStyles}>
                 {initialData ? 'Salvar Alterações' : 'Publicar Comunicado'}
             </Button>
@@ -220,16 +220,16 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
     if (!apiUrl || loading) {
         return (
             <div className="flex flex-col items-center justify-center py-10 space-y-3">
-                <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                <p className="text-sm text-gray-500 font-medium">Carregando...</p>
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground font-medium">Carregando...</p>
             </div>
         );
     }
     
     if (error) {
         return (
-            <div className="rounded-xl border border-red-100 bg-red-50/50 p-6 text-center">
-                <p className="text-sm text-red-600 font-medium">{error}</p>
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-6 text-center">
+                <p className="text-sm text-destructive font-medium">{error}</p>
             </div>
         );
     }
@@ -246,15 +246,15 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
             )}
             
             {todosComunicados.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-200 p-8 text-center flex flex-col items-center bg-gray-50/30">
-                    <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center mb-3 border border-gray-100 shadow-sm">
-                        <Megaphone className="h-6 w-6 text-gray-400" />
+                <div className="rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center bg-muted/20">
+                    <div className="h-12 w-12 bg-card rounded-full flex items-center justify-center mb-3 border border-border shadow-sm">
+                        <Megaphone className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <p className="text-gray-900 font-medium">Mural vazio</p>
-                    <p className="text-sm text-gray-500">Nenhum comunicado publicado ainda.</p>
+                    <p className="text-foreground font-medium">Mural vazio</p>
+                    <p className="text-sm text-muted-foreground">Nenhum comunicado publicado ainda.</p>
                 </div>
             ) : (
-                <div className="space-y-4 overflow-y-auto h-[calc(100vh-16rem)] pr-2 scrollbar-thin scrollbar-thumb-gray-200 pb-4">
+                <div className="space-y-4 overflow-y-auto h-[calc(100vh-16rem)] pr-2 scrollbar-thin scrollbar-thumb-muted pb-4">
                     {comunicadosVisiveis.map((comunicado) => {
                         const { texto: conteudoTruncado } = truncarTexto(comunicado.conteudo, 200);
                         const isNew = unseenIds.has(comunicado.id);
@@ -265,15 +265,15 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
                             <Card 
                                 key={comunicado.id} 
                                 className={cn(
-                                    "group relative overflow-hidden rounded-xl border transition-all duration-300",
+                                    "group relative overflow-hidden rounded-xl border transition-all duration-300 bg-card",
                                     isNew 
-                                        ? "border-l-[4px] border-l-green-500 border-y-green-100 border-r-green-100 bg-green-50/10 shadow-md shadow-green-100/50" 
-                                        : "border-gray-100 hover:border-green-200 hover:shadow-md hover:-translate-y-0.5"
+                                        ? "border-l-[4px] border-l-primary border-y-primary/20 border-r-primary/20 bg-primary/5 shadow-md shadow-primary/10" 
+                                        : "border-border hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5"
                                 )}
                             >
                                 <CardHeader className="flex flex-row items-start gap-4 p-5 pb-2">
-                                    <Avatar className={cn("h-11 w-11 border-2", isNew ? "border-green-200" : "border-gray-100")}>
-                                        <AvatarFallback className={cn("text-sm font-bold", isNew ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600")}>
+                                    <Avatar className={cn("h-11 w-11 border-2", isNew ? "border-primary/30" : "border-border")}>
+                                        <AvatarFallback className={cn("text-sm font-bold", isNew ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>
                                             {comunicado.autor_nome.charAt(0)}
                                         </AvatarFallback>
                                     </Avatar>
@@ -283,43 +283,43 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
                                             <div className="flex items-center gap-2">
                                                 {isNew && <Badge className="h-5 px-1.5 bg-green-500 hover:bg-green-600 text-white border-0 text-[10px] font-bold">NOVO</Badge>}
                                                 {isEditedAndUnseen && <Badge className="h-5 px-1.5 bg-orange-500 hover:bg-orange-600 text-white border-0 text-[10px] font-bold">EDITADO</Badge>}
-                                                <span className="text-xs font-medium text-green-700/80">{comunicado.autor_nome}</span>
+                                                <span className="text-xs font-medium text-primary/80">{comunicado.autor_nome}</span>
                                             </div>
-                                            <span className="text-[10px] text-gray-400 flex items-center gap-1 whitespace-nowrap">
+                                            <span className="text-[10px] text-muted-foreground flex items-center gap-1 whitespace-nowrap">
                                                 <Clock className="h-3 w-3" />
                                                 {new Date(isEdited ? comunicado.data_edicao : comunicado.data_publicacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                                             </span>
                                         </div>
-                                        <CardTitle className="text-base font-bold text-gray-900 leading-tight mb-0.5">{comunicado.titulo}</CardTitle>
+                                        <CardTitle className="text-base font-bold text-foreground leading-tight mb-0.5">{comunicado.titulo}</CardTitle>
                                     </div>
                                 </CardHeader>
                                 
                                 <CardContent className="p-5 pt-2">
-                                    <p className="text-sm text-gray-500 whitespace-pre-line break-words leading-relaxed">{conteudoTruncado}</p>
-                                    <Button variant="link" className="p-0 h-auto mt-2 text-xs font-semibold text-green-600" onClick={() => handleExibirCompleto(comunicado)}>Exibir mais...</Button>
+                                    <p className="text-sm text-muted-foreground whitespace-pre-line break-words leading-relaxed">{conteudoTruncado}</p>
+                                    <Button variant="link" className="p-0 h-auto mt-2 text-xs font-semibold text-primary" onClick={() => handleExibirCompleto(comunicado)}>Exibir mais...</Button>
                                 </CardContent>
                                 
                                 {canManage && (
                                     <CardFooter className="p-4 pt-0 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        <Button variant="ghost" size="sm" onClick={() => handleOpenForm(comunicado)} className="h-8 rounded-lg text-gray-500 hover:text-green-600 hover:bg-green-50">
+                                        <Button variant="ghost" size="sm" onClick={() => handleOpenForm(comunicado)} className="h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10">
                                             <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
                                         </Button>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="sm" className="h-8 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50">
+                                                <Button variant="ghost" size="sm" className="h-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                                                     <Trash2 className="mr-2 h-3.5 w-3.5" /> Excluir
                                                 </Button>
                                             </AlertDialogTrigger>
-                                            <AlertDialogContent className="rounded-2xl border-gray-100 shadow-xl">
+                                            <AlertDialogContent className="rounded-2xl border-border bg-card shadow-xl">
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle className="text-gray-900">Excluir Comunicado?</AlertDialogTitle>
-                                                    <AlertDialogDescription className="text-gray-500">
+                                                    <AlertDialogTitle className="text-foreground">Excluir Comunicado?</AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-muted-foreground">
                                                         Esta ação removerá o comunicado permanentemente do mural de todos os usuários.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel className="rounded-xl border-gray-200">Cancelar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDelete(comunicado.id)} className="rounded-xl bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 border-none">Sim, excluir</AlertDialogAction>
+                                                    <AlertDialogCancel className="rounded-xl border-border bg-card text-foreground hover:bg-muted">Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(comunicado.id)} className="rounded-xl bg-destructive hover:bg-destructive/90 shadow-lg shadow-destructive/20 border-none">Sim, excluir</AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>
@@ -334,12 +334,12 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
                         <Button 
                             variant="outline" 
                             onClick={() => setLimiteExibicao(todosComunicados.length)} 
-                            className="relative rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-gray-600 hover:text-green-700 hover:border-green-200 transition-all shadow-sm h-10 px-6 text-xs uppercase tracking-wide font-semibold"
+                            className="relative rounded-xl border-border bg-card hover:bg-muted text-muted-foreground hover:text-primary hover:border-primary/30 transition-all shadow-sm h-10 px-6 text-xs uppercase tracking-wide font-semibold"
                         >
                           <ChevronDown className="mr-2 h-3 w-3" />
                           Ver todos os comunicados
                           {unseenHiddenCount > 0 && (
-                            <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-md border-2 border-white">
+                            <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-md border-2 border-card">
                               {unseenHiddenCount}
                             </span>
                           )}
@@ -350,11 +350,11 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
             )}
             
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-                <DialogContent className="sm:max-w-[550px] rounded-2xl p-0 gap-0 border border-gray-100 shadow-2xl overflow-hidden">
-                    <DialogHeader className="p-6 pb-4 bg-white border-b border-gray-50">
-                        <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                            <div className="p-2 bg-green-50 rounded-lg">
-                                {editingComunicado ? <Pencil className="h-5 w-5 text-green-600" /> : <PlusCircle className="h-5 w-5 text-green-600" />}
+                <DialogContent className="sm:max-w-[550px] rounded-2xl p-0 gap-0 border border-border bg-card shadow-2xl overflow-hidden">
+                    <DialogHeader className="p-6 pb-4 bg-card border-b border-border">
+                        <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                {editingComunicado ? <Pencil className="h-5 w-5 text-primary" /> : <PlusCircle className="h-5 w-5 text-primary" />}
                             </div>
                             {editingComunicado ? 'Editar Comunicado' : 'Novo Comunicado'}
                         </DialogTitle>

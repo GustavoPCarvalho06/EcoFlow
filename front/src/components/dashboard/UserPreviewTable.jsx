@@ -1,3 +1,5 @@
+// src/components/dashboard/UserPreviewTable.jsx
+
 "use client";
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -7,33 +9,35 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 
-// O componente agora recebe uma lista de 'users' como prop
 export function UserPreviewTable({ users }) {
   return (
-    <Card className="rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+    // bg-card adapta automaticamente
+    <Card className="rounded-xl border shadow-sm overflow-hidden flex flex-col h-full bg-card">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-bold text-gray-900">Usuários Recentes</CardTitle>
-        <CardDescription className="text-gray-500">
+        <CardTitle className="text-lg font-bold text-foreground">Usuários Recentes</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Uma pré-visualização dos últimos usuários cadastrados no sistema.
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-0 flex-1">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent border-gray-100">
-              <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nome</TableHead>
-              <TableHead className="hidden md:table-cell text-xs font-semibold text-gray-400 uppercase tracking-wider">Cargo</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</TableHead>
+            <TableRow className="hover:bg-transparent border-border">
+              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nome</TableHead>
+              <TableHead className="hidden md:table-cell text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cargo</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* Verificamos se há usuários para exibir */}
             {users && users.length > 0 ? (
-              // Mapeamos a lista de usuários recebida via props
               users.map((user) => (
-                <TableRow key={user.id} className="hover:bg-gray-50/80 border-gray-50 transition-colors duration-200">
-                  <TableCell className="font-medium text-gray-700 py-3">{user.nome}</TableCell>
-                  <TableCell className="hidden md:table-cell text-gray-500 py-3">
+                <TableRow 
+                    key={user.id} 
+                    // Removemos bg-gray-50 e usamos muted/50 para o hover funcionar nos dois modos
+                    className="hover:bg-muted/50 border-border transition-colors duration-200"
+                >
+                  <TableCell className="font-medium text-foreground py-3">{user.nome}</TableCell>
+                  <TableCell className="hidden md:table-cell text-muted-foreground py-3">
                     {user.cargo ? user.cargo.charAt(0).toUpperCase() + user.cargo.slice(1) : '-'}
                   </TableCell>
                   <TableCell className="py-3">
@@ -41,8 +45,8 @@ export function UserPreviewTable({ users }) {
                         variant="secondary"
                         className={`rounded-md px-2.5 py-0.5 text-xs font-semibold shadow-none border-0 ${
                             user.statusConta === 'ativo' 
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400' 
+                                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                         }`}
                     >
                       {user.statusConta === 'ativo' ? 'Ativo' : 'Desligado'}
@@ -51,9 +55,8 @@ export function UserPreviewTable({ users }) {
                 </TableRow>
               ))
             ) : (
-              // Mensagem exibida se não houver usuários
               <TableRow>
-                <TableCell colSpan="3" className="text-center text-gray-400 py-8">
+                <TableCell colSpan="3" className="text-center text-muted-foreground py-8">
                   Nenhum usuário encontrado.
                 </TableCell>
               </TableRow>
@@ -62,9 +65,8 @@ export function UserPreviewTable({ users }) {
         </Table>
       </CardContent>
       
-      <CardFooter className="flex justify-center border-t border-gray-100 p-0">
-        {/* MUDANÇA 3: Classes corrigidas para um botão largo e alto */}
-        <Button asChild variant="ghost" className="w-full h-14 rounded-none text-gray-400 hover:text-green-600 hover:bg-gray-50 transition-all duration-300 cursor-pointer" aria-label="Ver todos os usuários">
+      <CardFooter className="flex justify-center border-t border-border p-0">
+        <Button asChild variant="ghost" className="w-full h-14 rounded-none text-muted-foreground hover:text-green-600 hover:bg-muted/50 transition-all duration-300 cursor-pointer" aria-label="Ver todos os usuários">
           <Link href="/usuarios" className="flex items-center gap-2">
             <span className="text-sm font-medium">Ver todos</span>
             <Menu className="h-4 w-4" />
