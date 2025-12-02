@@ -28,11 +28,12 @@ import Layout from "@/components/dashboard/layout/Layout";
 export default async function MapaPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get("token");
+  const tokenValue = tokenCookie?.value; // Get the string value
 
   let user = null;
-  if (tokenCookie?.value) {
+  if (tokenValue) {
     try {
-      user = jwt.decode(tokenCookie.value);
+      user = jwt.decode(tokenValue);
     } catch {
       console.error("Erro ao decodificar o token");
     }
@@ -42,9 +43,11 @@ export default async function MapaPage() {
     <Layout>
       {/* bg-background garante o fundo escuro correto */}
       <main className="flex flex-1 flex-col p-4 md:p-6 overflow-hidden bg-background h-full">
+      
 
         <div className="flex flex-col gap-3 mb-4">
           <h1 className="font-semibold text-lg md:text-2xl text-foreground">Mapa de Coleta</h1>
+       
 
           <Popover>
             <PopoverTrigger asChild>
@@ -60,7 +63,6 @@ export default async function MapaPage() {
               side="right"
               className="w-[200px] p-2 rounded-md border border-border shadow-lg bg-popover text-popover-foreground"
             >
-
               {/* Criar */}
               <Dialog>
                 <DialogTrigger asChild>
@@ -74,14 +76,18 @@ export default async function MapaPage() {
                 <DialogContent className="!max-w-5xl w-[90vw] h-[700px] flex flex-col gap-4 bg-card border-border">
                   <DialogHeader className="text-center">
                     <DialogTitle className="text-xl font-semibold text-foreground">
+                
                       Criar Novo Ponto de Coleta
                     </DialogTitle>
                   </DialogHeader>
 
                   <p className="text-center text-muted-foreground">
+                  
                     Clique no mapa para selecionar o local do novo ponto.
                   </p>
-                  <MapBoxCriarWrapper />
+                  <div className="flex-1 min-h-0 relative">
+                    <MapBoxCriarWrapper />
+                  </div>
                 </DialogContent>
               </Dialog>
 
@@ -97,29 +103,29 @@ export default async function MapaPage() {
                 <DialogContent className="max-w-3xl bg-card border-border">
                   <DialogHeader>
                     <DialogTitle className="text-foreground">Gerenciar Pontos Existentes</DialogTitle>
+                
                   </DialogHeader>
 
                   <div className="py-6 text-muted-foreground">
                     <MapBoxManejarWrapper token={tokenCookie?.value}/>
+                  
                   </div>
                 </DialogContent>
               </Dialog>
-
             </PopoverContent>
           </Popover>
         </div>
 
         {/* Container do Mapa com borda adaptável */}
         <div className="flex-1 rounded-lg border border-border overflow-hidden shadow-sm">
+       
           <MapboxMap
             latitude={-23.647222}
             longitude={-46.557282}
             zoom={14}
           />
         </div>
-
       </main>
-
     </Layout>
   );
 }
