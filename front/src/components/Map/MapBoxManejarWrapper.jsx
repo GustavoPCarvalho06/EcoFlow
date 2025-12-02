@@ -2,7 +2,7 @@
 
 import { useApiUrl } from "@/app/context/ApiContext";
 import { useEffect, useState } from "react";
-
+import Link from "next/link";
 import {
   Card,
   CardHeader,
@@ -11,7 +11,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-
 import {
   Table,
   TableHeader,
@@ -20,11 +19,10 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Map, Trash2, MapPin } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 async function getLixoData(apiUrl, token) {
   if (!token) return [];
@@ -59,43 +57,56 @@ export default function MapBoxManejarWrapper({ token }) {
   }, [apiUrl, token]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sensores de Lixo</CardTitle>
-        <CardDescription>
-          Status atualizado dos sensores monitorados pelo sistema.
-        </CardDescription>
+    <Card className="rounded-xl border border-gray-100 shadow-sm overflow-hidden bg-white flex flex-col h-full">
+      <CardHeader className="border-b border-gray-50 p-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
+            <Trash2 className="h-5 w-5" />
+          </div>
+          <div>
+            <CardTitle className="text-lg font-bold text-gray-900">Sensores de Lixo</CardTitle>
+            <CardDescription className="text-gray-500">
+              Status atualizado dos sensores monitorados.
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
 
-      <CardContent className="pb-0">
+      <CardContent className="p-0 flex-1">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead className="hidden md:table-cell">Endereço</TableHead>
-              <TableHead>Status</TableHead>
+          <TableHeader className="bg-gray-50/50">
+            <TableRow className="border-gray-100 hover:bg-transparent">
+              <TableHead className="w-[80px] pl-6 h-10 text-xs font-semibold text-gray-400 uppercase tracking-wide">ID</TableHead>
+              <TableHead className="hidden md:table-cell h-10 text-xs font-semibold text-gray-400 uppercase tracking-wide">Endereço</TableHead>
+              <TableHead className="pr-6 h-10 text-xs font-semibold text-gray-400 uppercase tracking-wide text-right">Status</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {lixo && lixo.length > 0 ? (
               lixo.map((item) => (
-                <TableRow key={item.ID}>
-                  <TableCell className="font-medium">{item.ID}</TableCell>
-
-                  <TableCell className="hidden md:table-cell">
-                    {item.Endereco ?? "—"}
+                <TableRow key={item.ID} className="border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <TableCell className="pl-6 font-mono text-xs font-medium text-gray-600">
+                    #{item.ID}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-3 w-3 text-gray-400" />
+                      {item.Endereco ?? "Localização não informada"}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="pr-6 text-right">
                     <Badge
-                      className={
+                      className={cn(
+                        "shadow-none border font-medium px-2 py-0.5",
                         item.Stats === "Cheia"
-                          ? "bg-red-600 text-white"
+                          ? "bg-red-50 text-red-700 border-red-200"
                           : item.Stats === "Quase Cheia"
-                          ? "bg-yellow-600 text-white"
-                          : "bg-green-600 text-white"
-                      }
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-green-50 text-green-700 border-green-200"
+                      )}
                     >
                       {item.Stats}
                     </Badge>
@@ -104,7 +115,7 @@ export default function MapBoxManejarWrapper({ token }) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan="3" className="text-center">
+                <TableCell colSpan="3" className="h-32 text-center text-gray-400 text-sm">
                   Nenhum sensor encontrado.
                 </TableCell>
               </TableRow>
@@ -113,16 +124,12 @@ export default function MapBoxManejarWrapper({ token }) {
         </Table>
       </CardContent>
 
-      <CardFooter className="flex justify-center border-t p-0 h-7">
+      <CardFooter className="p-0 border-t border-gray-100 bg-gray-50/30">
         <Button
           asChild
-          variant="outline"
-          className="w-full h-13 border-0 border-t"
-          aria-label="Ver sensores no mapa"
+          variant="ghost"
+          className="w-full h-12 rounded-none text-gray-600 hover:text-green-700 hover:bg-white transition-all text-sm font-medium cursor-pointer"
         >
-          <Link href="/mapa">
-            <Menu className="h-8 w-8" />
-          </Link>
         </Button>
       </CardFooter>
     </Card>
