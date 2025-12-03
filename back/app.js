@@ -23,6 +23,7 @@ import comunicados from "./routes/comunicadoRotas.js"
 import recuperacao from "./routes/recuperacaoRotas.js";
 import authRoutes from "./routes/authRotas.js";
 import logs from "./routes/logRotas.js"; 
+import dashboard from "./routes/dashboard.js";
 
 import sensor from "./routes/statusSensorRotas.js"
 import userStatus from "./routes/statusUserRotas.js"
@@ -151,6 +152,7 @@ app.use('/auth', authRoutes);
 app.use('/logs', logs);
 
 // Suas Views (Rotas de Status)
+app.use('/dashboard', dashboard); 
 app.use('/statusSensor', sensor);
 app.use('/userStatus', userStatus);
 app.use('/msgStatus', msgStatus);

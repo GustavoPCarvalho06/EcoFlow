@@ -19,7 +19,7 @@ export default function DoughnutChart({ data }) {
       {
         data: data.values,
         // Cores vibrantes que funcionam bem nos dois modos
-        backgroundColor: ["#f97316", "#3b82f6", "#10b981", "#ec4899"],
+        backgroundColor: ["#10b981", "#f59e0b", "#ef4444"], 
         borderWidth: 0, // Remove borda branca padrão para ficar mais clean
         hoverOffset: 10
       }
