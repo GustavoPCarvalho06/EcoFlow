@@ -1,6 +1,6 @@
 // src/app/dashboard/cordenador/pontos/page.jsx
 import React from "react";
-import Layout from "../Layout/Layout";
+import Layout from "@/components/dashboard/layout/Layout";
 
 export default function PontosPage() {
   return (
