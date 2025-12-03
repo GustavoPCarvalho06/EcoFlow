@@ -4,20 +4,41 @@
 
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
+import os from 'os'; // Importando para detectar o IP da rede automaticamente
 
 import BarChart from "@/components/coordenador/BarChart";
 import DoughnutChart from "@/components/coordenador/DoughnutChart";
 import Layout from "../dashboard/layout/Layout";
 
+// --- Função para descobrir o IP do Backend dinamicamente (Mesma lógica do servidor) ---
+const getBaseUrl = () => {
+  // Se estiver rodando no servidor (build ou start), tenta achar o IP da rede
+  try {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]) {
+        // Pega o IPv4 que não seja interno (não seja 127.0.0.1)
+        if (iface.family === 'IPv4' && !iface.internal) {
+          return `http://${iface.address}:3001`;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao detectar IP no server component:", error);
+  }
+  // Se falhar, usa localhost
+  return 'http://localhost:3001';
+};
+
 // --- Função para buscar dados do Backend ---
 async function getDashboardData(token) {
   if (!token) return null;
 
+  const baseUrl = getBaseUrl(); // Pega a URL correta (IP ou Localhost)
+  
   try {
-    // Ajuste a URL se necessário (ex: http://localhost:3001)
-    // Estamos usando a URL interna do servidor ou localhost
-    const res = await fetch('http://localhost:3001/dashboard/coordenador', {
-      cache: 'no-store', // Garante dados frescos
+    const res = await fetch(`${baseUrl}/dashboard/coordenador`, {
+      cache: 'no-store', // Dados sempre frescos
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -25,12 +46,14 @@ async function getDashboardData(token) {
     });
 
     if (!res.ok) {
-      throw new Error("Falha ao buscar dados do dashboard");
+      // Se der erro (ex: backend off), não quebra a página, retorna nulo
+      console.error(`Falha no fetch: ${res.status} ${res.statusText}`);
+      return null;
     }
 
     return await res.json();
   } catch (error) {
-    console.error(error);
+    console.error("Erro de conexão com o dashboard:", error.message);
     return null;
   }
 }
@@ -48,7 +71,6 @@ const StatsCards = ({ stats }) => (
         <div className="flex justify-between items-start">
           <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
           
-          {/* Lógica simples para cor do ícone ou delta (opcional) */}
           <p className={`text-sm font-semibold ${
             stat.isCritical ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
           }`}>
@@ -81,11 +103,10 @@ export default async function CoordenadorPage() {
   // 1. Busca os dados reais
   const data = await getDashboardData(token);
 
-  // Valores padrão caso a API falhe ou retorne vazio
+  // Valores padrão (ZERADOS) caso a API falhe ou retorne vazio
   const cardsData = data?.cards || { totalLixeiras: 0, totalColetores: 0, lixeirasCheias: 0, eficiencia: 0 };
   const graphData = data?.graficos || { vazias: 0, quaseCheias: 0, cheias: 0 };
 
-  // 2. Configura os Cards conforme seu pedido
   const stats = [
     { 
       id: 1, 
@@ -95,7 +116,7 @@ export default async function CoordenadorPage() {
     },
     { 
       id: 2, 
-      title: "Total de Coletores", // Alterado de "Coletas (hoje)"
+      title: "Total de Coletores", 
       value: cardsData.totalColetores, 
       icon: "👷" 
     },
@@ -103,7 +124,7 @@ export default async function CoordenadorPage() {
       id: 3, 
       title: "Alertas Críticos (Cheias)", 
       value: cardsData.lixeirasCheias, 
-      isCritical: true, // Para ficar vermelho
+      isCritical: true, 
       icon: "⚠️" 
     },
     { 
@@ -114,19 +135,12 @@ export default async function CoordenadorPage() {
     }
   ];
 
-  // 3. Configura o Gráfico de Barras
-  // Pedido: "mostra as coletas dos mes mostrando o total de lixeiras vazias com o total de lixeiras meio cheias e cheias"
-  // Como não temos histórico mensal complexo ainda, vamos mostrar o balanço atual "Coletadas vs Pendentes"
   const barData = {
     labels: ["Status Geral do Sistema"],
-    // Dataset 1: Lixeiras Vazias (Representa o que já foi coletado/está limpo)
     coletas: [graphData.vazias], 
-    // Dataset 2: Lixeiras Cheias + Quase Cheias (Representa demanda de trabalho/alertas)
     alertas: [graphData.cheias + graphData.quaseCheias] 
   };
 
-  // 4. Configura o Gráfico de Doughnut (Rosca)
-  // Pedido: "quantos tem de vazil de meio cheia e de cheia"
   const doughData = {
     labels: ["Vazias", "Quase Cheias", "Cheias"],
     values: [graphData.vazias, graphData.quaseCheias, graphData.cheias]
@@ -139,7 +153,6 @@ export default async function CoordenadorPage() {
             <h1 className="font-semibold text-lg md:text-2xl text-foreground">Dashboard do Coordenador</h1>
           </div>
           
-          {/* Renderiza os cards atualizados */}
           <StatsCards stats={stats} />
 
           <div className="p-6 bg-card border border-border rounded-xl shadow-sm">
@@ -150,17 +163,12 @@ export default async function CoordenadorPage() {
 
             <div className="mt-4">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[360px]">
-                
-                {/* Gráfico de Barras: Comparativo Vazias vs (Cheias + Quase Cheias) */}
                 <div className="lg:col-span-2 h-full">
                   <BarChart data={barData} />
                 </div>
-
-                {/* Gráfico de Rosca: Distribuição detalhada */}
                 <div className="lg:col-span-1 h-full">
                   <DoughnutChart data={doughData} />
                 </div>
-
               </div>
             </div>
           </div>
