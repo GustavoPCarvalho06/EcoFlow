@@ -100,13 +100,13 @@ export default async function MapaPage() {
                   </button>
                 </DialogTrigger>
 
-                <DialogContent className="max-w-3xl bg-card border-border">
+                <DialogContent className=" w-max-w-3xl bg-card border-border">
                   <DialogHeader>
                     <DialogTitle className="text-foreground">Gerenciar Pontos Existentes</DialogTitle>
                 
                   </DialogHeader>
 
-                  <div className="py-6 text-muted-foreground">
+                  <div className=" overflow-hidden py-6 text-muted-foreground">
                     <MapBoxManejarWrapper token={tokenCookie?.value}/>
                   
                   </div>
