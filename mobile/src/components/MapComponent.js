@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Picker } from "react-native";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
-import { filtrarPontos, routeToLatLngArray } from "../shared/mapLogic";
+import { filtrarPontos, routeToLatLngArray } from "../components/mapLogic";
 
 const usuario = { latitude: -23.64434, longitude: -46.559689 };
 
