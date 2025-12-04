@@ -1,5 +1,3 @@
-// back/config/database.js (VERSÃO CORRETA E COMPLETA)
-
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 
@@ -101,7 +99,7 @@ const createLixoDB = async (table, data) => {
       .map((v) => (typeof v === "string" && !v.startsWith("ST_GeomFromText") ? `'${v}'` : v))
       .join(", ");
     const sql = `INSERT INTO ${table} (${keys}) VALUES (${values})`;
-    console.log("🧩 SQL gerado:", sql);
+    
     const [result] = await connection.query(sql);
     return result;
   } catch (err) {
@@ -112,5 +110,4 @@ const createLixoDB = async (table, data) => {
   }
 };
 
-// [AQUI ESTÁ A CORREÇÃO] Garantimos que 'pool' está sendo exportado.
 export { create, readAll, read, update, deleteRecord, compare, createLixoDB, pool };

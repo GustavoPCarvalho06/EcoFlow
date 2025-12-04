@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/loginForm/index.jsx
-// =================================================================================
-
 "use client";
 
 import Image from "next/image";
@@ -75,20 +71,18 @@ export function LoginForm({ className, ...props }) {
         }
     };
 
-    // Classe CSS para limpar o azul do autofill e controlar as cores
-    // 1. [&:-webkit-autofill]:shadow-... -> Força a cor de fundo interna para cobrir o azul do navegador
-    // 2. focus:bg-gray-100 -> Cinza claro ao clicar
+
     const inputClasses = "pl-10 h-12 rounded-xl transition-all duration-200 placeholder:text-gray-400 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 " +
-        // Cores padrão (Branco e Texto Escuro)
+       
         "bg-white dark:bg-white text-gray-900 dark:text-gray-900 " +
-        // Cor ao Focar (Cinza Claro)
+       
         "focus:bg-gray-100 dark:focus:bg-gray-100 " +
-        // TRUQUE PARA REMOVER O AZUL DO AUTOFILL:
-        // Quando o navegador preenche, forçamos o fundo branco.
+       
+        
         "[&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#ffffff] " +
-        // Quando o navegador preenche E o usuário clica, forçamos o cinza claro (#f3f4f6 é o gray-100)
+       
         "[&:-webkit-autofill]:focus:shadow-[inset_0_0_0px_1000px_#f3f4f6] " +
-        // Força a cor do texto no autofill para preto
+       
         "[&:-webkit-autofill]:-webkit-text-fill-color-[#111827]";
 
     return (

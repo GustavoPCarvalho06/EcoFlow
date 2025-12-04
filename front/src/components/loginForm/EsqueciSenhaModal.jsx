@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/loginForm/EsqueciSenhaModal.jsx
-// =================================================================================
-
 "use client";
 
 import { useState } from "react";
@@ -11,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-// Função para formatar o CPF enquanto digita
+
 const formatCPF = (cpf) => {
     if (!cpf) return "";
     const cleanCpf = cpf.replace(/\D/g, '').slice(0, 11);
@@ -23,7 +19,7 @@ const formatCPF = (cpf) => {
 
 export function EsqueciSenhaModal({ isOpen, onOpenChange }) {
     const apiUrl = useApiUrl();
-    const [step, setStep] = useState('cpf'); // 'cpf', 'codigo', 'senha'
+    const [step, setStep] = useState('cpf'); 
     const [cpf, setCpf] = useState('');
     const [codigo, setCodigo] = useState('');
     const [novaSenha, setNovaSenha] = useState('');
@@ -110,7 +106,7 @@ export function EsqueciSenhaModal({ isOpen, onOpenChange }) {
 
             setSuccess(data.mensagem);
             setTimeout(() => {
-                onOpenChange(false); // Fecha o modal após sucesso
+                onOpenChange(false); 
                 resetState();
             }, 3000);
         } catch (err) {

@@ -1,8 +1,5 @@
-// models/ComunicadoModel.js (VERSÃO ATUALIZADA)
-
 import { read, create, update, deleteRecord ,pool} from "../config/database.js";
 
-// Função para buscar todos os comunicados (já existe)
 const getAllComunicados = async () => {
     try {
         const sql = `
@@ -20,10 +17,9 @@ const getAllComunicados = async () => {
     }
 }
 
-// [NOVO] Função para criar um novo comunicado
 const createComunicado = async (data) => {
     try {
-        // A função 'create' genérica do seu database.js fará o trabalho pesado
+       
         return await create("comunicados", data);
     } catch (err) {
         console.error("Erro no model ao criar comunicado: ", err);
@@ -34,7 +30,7 @@ const createComunicado = async (data) => {
 
 const updateComunicado = async (id, data) => {
     try {
-        // [MODIFICADO] Adicionamos a data_edicao a cada atualização
+      
         const dataToUpdate = {
             ...data,
             data_edicao: new Date()
@@ -43,7 +39,6 @@ const updateComunicado = async (id, data) => {
     } catch (err) { throw err; }
 }
 
-// [NOVO] Função para deletar um comunicado
 const deleteComunicado = async (id) => {
     try {
         return await deleteRecord("comunicados", `id = ${id}`);
@@ -78,7 +73,7 @@ const markAllAsSeen = async (usuarioId) => {
         if (unseen.length === 0) return 0;
         const values = unseen.map(id => `(${usuarioId}, ${id})`).join(', ');
         const sql_insert = `INSERT IGNORE INTO comunicados_vistos (usuario_id, comunicado_id) VALUES ${values}`;
-        const connection = await pool.getConnection(); // [CORREÇÃO] Usamos 'pool' importado
+        const connection = await pool.getConnection(); 
         try {
             const [result] = await connection.execute(sql_insert);
             return result.affectedRows;
@@ -90,15 +85,13 @@ const markAllAsSeen = async (usuarioId) => {
 
 const markOneAsSeen = async (usuarioId, comunicadoId) => {
     try {
-        // [MODIFICADO] Usamos 'ON DUPLICATE KEY UPDATE'
-        // Se o par (usuario_id, comunicado_id) já existir, ele ATUALIZA a data_visualizacao.
-        // Se não existir, ele INSERE uma nova linha.
+        
         const sql = `
             INSERT INTO comunicados_vistos (usuario_id, comunicado_id, data_visualizacao) 
             VALUES (?, ?, NOW())
             ON DUPLICATE KEY UPDATE data_visualizacao = NOW()
         `;
-        const connection = await pool.getConnection(); // Requer acesso ao 'pool'
+        const connection = await pool.getConnection(); 
         try {
             const [result] = await connection.execute(sql, [usuarioId, comunicadoId]);
             return result.affectedRows;
@@ -140,9 +133,9 @@ export {
     createComunicado, 
     updateComunicado, 
     deleteComunicado,
-    countUnseenComunicados, // [NOVO] Exporta a função de contagem
+    countUnseenComunicados, 
     markAllAsSeen,
-    markOneAsSeen,// [NOVO] Exporta a função de marcar como visto
+    markOneAsSeen,
     getUnseenComunicadoIds,
     getDetailedUnseenIds
 };

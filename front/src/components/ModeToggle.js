@@ -1,4 +1,3 @@
-// src/components/ModeToggle.jsx
 "use client"
 
 import * as React from "react"

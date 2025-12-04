@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: C:\Users\24250668\Documents\3md\teste\test_EcoFlow\EcoFlow\front\src\app\comunicados\page.jsx
-// =================================================================================
-
 import { ComunicadosComponenteCoordenador } from "@/components/dashboard/ComunicadosComponenteCoordenador";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
@@ -12,7 +8,6 @@ export default async function ComunicadosPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('token');
   
-  // Extrai a string do token para passar aos componentes
   const token = tokenCookie?.value;
 
   let user = null;
@@ -33,7 +28,7 @@ export default async function ComunicadosPage() {
             <div className="flex items-center mb-4">
               <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados (Coord)</h1>
             </div>
-            {/* PASSANDO O TOKEN AQUI */}
+          
             <ComunicadosComponenteCoordenador user={user} token={token} />
           </main>
         </Layout>
@@ -46,7 +41,7 @@ export default async function ComunicadosPage() {
             <div className="flex items-center mb-4">
               <h1 className="font-semibold text-lg md:text-2xl">Mural de Comunicados (Admin)</h1>
             </div>
-            {/* PASSANDO O TOKEN AQUI */}
+           
             <ComunicadosComponenteAdministrador user={user} token={token} />
           </main>
         </Layout>

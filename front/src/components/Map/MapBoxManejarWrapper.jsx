@@ -42,30 +42,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input"; 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Trash2, MapPin, Pencil, Loader2, RefreshCw } from "lucide-react";
+import { Trash2, MapPin, Pencil, Loader2, RefreshCw, Search } from "lucide-react"; 
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 export default function MapBoxManejarWrapper({ token }) {
   const apiUrl = useApiUrl();
   const [lixo, setLixo] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Estados para Edição
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Estados para Deleção
+ 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Função para buscar dados
+  
   const fetchData = useCallback(async () => {
     if (!token || !apiUrl) return;
     setLoading(true);
@@ -93,7 +95,13 @@ export default function MapBoxManejarWrapper({ token }) {
     fetchData();
   }, [fetchData]);
 
-  // --- Lógica de Atualização (PUT) ---
+
+  const filteredLixo = lixo.filter((item) => {
+    const endereco = item.Endereco ? item.Endereco.toLowerCase() : "";
+    const busca = searchTerm.toLowerCase();
+    return endereco.includes(busca);
+  });
+
   const handleOpenEdit = (item) => {
     setItemToEdit(item);
     setNewStatus(item.Stats);
@@ -129,7 +137,7 @@ export default function MapBoxManejarWrapper({ token }) {
     }
   };
 
-  // --- Lógica de Deleção (DELETE) ---
+  
   const handleOpenDelete = (item) => {
     setItemToDelete(item);
     setIsDeleteOpen(true);
@@ -165,15 +173,11 @@ export default function MapBoxManejarWrapper({ token }) {
 
   return (
     <>
-      {/* 
-         ALTERAÇÃO: 
-         1. Usei w-full para preencher o espaço disponível do Modal pai.
-         2. O CardHeader e CardContent ajustam-se automaticamente.
-      */}
       <Card className="rounded-xl border border-border shadow-sm flex flex-col h-full w-full bg-card">
-        <CardHeader className="border-b border-border p-6 flex flex-row items-center justify-between">
+
+        <CardHeader className="border-b border-border p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
               <Trash2 className="h-5 w-5" />
             </div>
             <div>
@@ -181,41 +185,41 @@ export default function MapBoxManejarWrapper({ token }) {
                 Sensores de Lixo
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                Gerencie os pontos de coleta monitorados.
+                Gerencie os pontos de coleta.
               </CardDescription>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={fetchData}
-            disabled={loading}
-            className="text-muted-foreground hover:text-primary"
-          >
-            <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
-          </Button>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar endereço..."
+                className="pl-9 bg-background"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchData}
+              disabled={loading}
+              className="text-muted-foreground hover:text-primary shrink-0"
+            >
+              <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
+            </Button>
+          </div>
         </CardHeader>
 
-        {/* 
-           ALTERAÇÃO: 
-           Adicionei 'overflow-x-auto' aqui. 
-           Se o Modal pai for pequeno, aparecerá uma barra de rolagem horizontal 
-           para você conseguir ver os botões de ação sem cortar.
-        */}
-        <CardContent className="p-0 flex-1 overflow-auto overflow-x-auto max-h-[600px]">
-          {/* 
-             ALTERAÇÃO: 
-             Adicionei 'min-w-[600px]' na Table.
-             Isso garante que a tabela sempre tenha largura suficiente para mostrar tudo,
-             forçando o scroll se necessário.
-          */}
-          <Table className="min-w-[600px]">
+        <CardContent className="p-0 flex-1 overflow-auto max-h-[600px]">
+          <Table className="min-w-[800px]">
             <TableHeader className="bg-muted/50 sticky top-0 z-10">
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="w-[60px] pl-6 text-xs font-semibold uppercase tracking-wide">
-                  ID
-                </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide">
+               
+                <TableHead className="pl-6 text-xs font-semibold uppercase tracking-wide">
                   Endereço
                 </TableHead>
                 <TableHead className="text-xs font-semibold uppercase tracking-wide text-center">
@@ -228,25 +232,18 @@ export default function MapBoxManejarWrapper({ token }) {
             </TableHeader>
 
             <TableBody>
-              {lixo && lixo.length > 0 ? (
-                lixo.map((item) => (
+              {filteredLixo && filteredLixo.length > 0 ? (
+                filteredLixo.map((item) => (
                   <TableRow
                     key={item.ID}
                     className="border-border hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell className="pl-6 font-mono text-xs font-medium text-foreground">
-                      #{item.ID}
-                    </TableCell>
-
-                    <TableCell className="text-sm text-muted-foreground">
+                    
+                    
+                    <TableCell className="pl-6 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-3 w-3 flex-shrink-0" />
-                        {/* 
-                           Manti o limite maior de texto. 
-                           Se o espaço for pequeno, o texto quebra ou trunca, 
-                           mas o scroll horizontal garante que não quebre o layout.
-                        */}
-                        <span className="truncate max-w-[300px]" title={item.Endereco}>
+                        <span className="truncate max-w-[450px]" title={item.Endereco}>
                           {item.Endereco ?? "Localização não informada"}
                         </span>
                       </div>
@@ -292,7 +289,7 @@ export default function MapBoxManejarWrapper({ token }) {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan="4"
+                    colSpan="3" 
                     className="h-32 text-center text-sm text-muted-foreground"
                   >
                     {loading ? "Carregando..." : "Nenhum sensor encontrado."}
@@ -304,16 +301,16 @@ export default function MapBoxManejarWrapper({ token }) {
         </CardContent>
       </Card>
 
-      {/* --- Modal de Edição (Status) --- */}
+
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[400px] bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Atualizar Sensor #{itemToEdit?.ID}</DialogTitle>
+           
+            <DialogTitle className="text-foreground">Atualizar Sensor</DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Altere o status atual do ponto de coleta.
             </DialogDescription>
           </DialogHeader>
-
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="status" className="text-foreground">Status do Lixo</Label>
@@ -329,13 +326,8 @@ export default function MapBoxManejarWrapper({ token }) {
               </Select>
             </div>
           </div>
-
           <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setIsEditOpen(false)}
-              className="hover:bg-muted text-muted-foreground"
-            >
+            <Button variant="ghost" onClick={() => setIsEditOpen(false)} className="hover:bg-muted text-muted-foreground">
               Cancelar
             </Button>
             <Button onClick={handleUpdate} disabled={isUpdating} className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -345,29 +337,19 @@ export default function MapBoxManejarWrapper({ token }) {
         </DialogContent>
       </Dialog>
 
-      {/* --- Modal de Confirmação de Exclusão --- */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground">Excluir Ponto de Coleta?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Você tem certeza que deseja remover o sensor{" "}
-              <span className="font-bold text-foreground">#{itemToDelete?.ID}</span>?
+              Você tem certeza que deseja remover este sensor?
               <br />
-              Local: {itemToDelete?.Endereco}
-              <br />
-              <span className="text-red-500 text-xs mt-2 block">
-                Essa ação não pode ser desfeita.
-              </span>
+              Local: <span className="font-bold text-foreground">{itemToDelete?.Endereco}</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-background text-foreground border-border hover:bg-muted">Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {isDeleting ? "Excluindo..." : "Sim, excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>

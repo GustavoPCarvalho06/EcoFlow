@@ -6,7 +6,7 @@ import { useApiUrl } from './ApiContext';
 
 const UnreadCountContext = createContext();
 
-// ADICIONADO: Recebemos 'token' nas props
+
 export function UnreadCountProvider({ children, user, token }) {
   const apiUrl = useApiUrl();
   const meuUserId = user?.id;
@@ -16,16 +16,16 @@ export function UnreadCountProvider({ children, user, token }) {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Função para buscar contagem de mensagens
+
   const fetchTotalMsgUnread = useCallback(async () => {
-    // ADICIONADO: Verifica se tem token
+
     if (!meuUserId || !apiUrl || !token) {
       setTotalMsgUnread(0);
       return;
     }
     try {
       const response = await fetch(`${apiUrl}/msg/unread-counts`, {
-        // ADICIONADO: Authorization header
+
         headers: { 
             'x-user-id': meuUserId.toString(),
             'Authorization': `Bearer ${token}` 
@@ -38,25 +38,25 @@ export function UnreadCountProvider({ children, user, token }) {
     } catch (error) {
       console.error("Erro ao buscar contagem de mensagens:", error);
     }
-  }, [meuUserId, apiUrl, token]); // ADICIONADO: dependência token
+  }, [meuUserId, apiUrl, token]); 
 
-  // Função para buscar contagem de comunicados
+
   const fetchTotalComunicadoUnread = useCallback(async () => {
-    // ADICIONADO: Verifica se tem token
+
     if (!meuUserId || !apiUrl || !token) {
       setTotalComunicadoUnread(0);
       return;
     }
     try {
       const response = await fetch(`${apiUrl}/comunicados/unseen-count`, {
-        // ADICIONADO: Authorization header
+
         headers: { 
             'x-user-id': meuUserId.toString(),
             'Authorization': `Bearer ${token}` 
         }
       });
       
-      // Se a sessão expirou, não joga erro no console, apenas ignora
+
       if (response.status === 401 || response.status === 403) return;
 
       if (!response.ok) throw new Error("Falha na busca de comunicados");
@@ -65,18 +65,15 @@ export function UnreadCountProvider({ children, user, token }) {
     } catch (error) {
       console.error("Erro ao buscar contagem de comunicados:", error);
     }
-  }, [meuUserId, apiUrl, token]); // ADICIONADO: dependência token
+  }, [meuUserId, apiUrl, token]); 
 
   const clearComunicadoCount = () => {
     setTotalComunicadoUnread(0);
   };
 
-  // Efeito principal para gerenciar o socket
   useEffect(() => {
     if (!meuUserId || !apiUrl) return;
 
-    // Conecta o socket (Socket.io geralmente não precisa do token na conexão inicial se não configurado, 
-    // mas as rotas HTTP precisam)
     const newSocket = io(apiUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -88,7 +85,7 @@ export function UnreadCountProvider({ children, user, token }) {
       setIsConnected(true);
       newSocket.emit('join', meuUserId);
       
-      // Busca contagens iniciais após conectar
+
       fetchTotalMsgUnread();
       fetchTotalComunicadoUnread();
     });

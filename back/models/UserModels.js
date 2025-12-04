@@ -2,9 +2,6 @@ import {read, readAll, deleteRecord, create, update} from "../config/database.js
 import { findUserByCpf } from "./loginModel.js";
 import { cpf as cpfValidator } from 'cpf-cnpj-validator'; 
 import bcrypt from "bcryptjs"; 
-// =======================================================
-// PASSO 1: Importe a nova biblioteca
-// =======================================================
 import cep from 'cep-promise';
 import crypto from 'crypto';
 
@@ -67,30 +64,25 @@ const readUserEmail = async (email) => {
 
 const createUser = async (data) => {
   try {
-    // 1. LIMPA OS DADOS DE ENTRADA
+
     const cleanCPF = data.cpf.replace(/\D/g, '');
     const cleanCEP = data.CEP.replace(/\D/g, ''); 
-     
-    // =======================================================
-    // PASSO 2: VALIDAÇÃO DE EXISTÊNCIA DO CEP
-    // =======================================================
+  
     try {
-        await cep(cleanCEP); // Tenta buscar o CEP. Se não encontrar, lança um erro.
+        await cep(cleanCEP); 
     } catch (error) {
-        // Se a biblioteca cep-promise der erro, significa que o CEP não foi encontrado.
+     
         const cepError = new Error("O CEP fornecido não foi encontrado ou é inválido.");
-        cepError.statusCode = 404; // Not Found
+        cepError.statusCode = 404; 
         throw cepError;
     }
 
-    // 3. VALIDA O CPF JÁ LIMPO
     if (!cpfValidator.isValid(cleanCPF)) {
       const error = new Error("O CPF fornecido é inválido. Por favor, insira um CPF real.");
       error.statusCode = 400;
       throw error;
     }
     
-    // 4. VERIFICA DUPLICIDADE COM O CPF LIMPO
     const existingUser = await findUserByCpf(cleanCPF);
     if (existingUser) {
       const error = new Error("Este CPF já está cadastrado. Por favor, insira um CPF válido.");
@@ -112,9 +104,9 @@ const createUser = async (data) => {
       sexo: data.sexo,
       estadoCivil: data.estadoCivil,
       CEP: cleanCEP,
-      statusConta: 'desligado', // <-- 4. SEMPRE CRIAR COMO 'desligado'
-      token_verificacao: token, // <-- 5. SALVE O TOKEN
-      expiracao_token_verificacao: expiracao // <-- 6. SALVE A EXPIRAÇÃO
+      statusConta: 'desligado',
+      token_verificacao: token, 
+      expiracao_token_verificacao: expiracao 
     };
 
 
@@ -122,7 +114,7 @@ const createUser = async (data) => {
     return { email: data.email, token: token };
 
   } catch (err) {
-    // Repassa o erro (seja de CEP, CPF ou outro) para o controller tratar.
+    
     throw err;
   }
 };
@@ -138,9 +130,7 @@ const updateUser = async (data, cpf) => {
     if (data.sexo) conteudo.sexo = data.sexo;
     if (data.estadoCivil) conteudo.estadoCivil = data.estadoCivil;
     
-    // =======================================================
-    // PASSO 3: VALIDAÇÃO DE CEP TAMBÉM NA ATUALIZAÇÃO
-    // =======================================================
+
     if (data.CEP) {
         const cleanCEP = data.CEP.replace(/\D/g, '');
         try {
@@ -165,7 +155,7 @@ const updateUser = async (data, cpf) => {
     return "Usuário atualizado com sucesso";
 
   } catch (err) {
-    // Repassa o erro para o controller
+   
     throw err;
   }
 };
@@ -306,7 +296,7 @@ const updatePasswordByCpf = async (cpf, newPassword) => {
 
 const verifyUserByToken = async (token) => {
     try {
-        // 1. Encontra o usuário pelo token
+    
         const sqlFind = "SELECT id, expiracao_token_verificacao FROM usuarios WHERE token_verificacao = ?";
         const [user] = await read(sqlFind, [token]);
 
@@ -314,12 +304,10 @@ const verifyUserByToken = async (token) => {
             throw new Error("Token de verificação inválido.");
         }
 
-        // 2. Verifica se o token expirou
         if (new Date(user.expiracao_token_verificacao) < new Date()) {
             throw new Error("Seu link de verificação expirou.");
         }
 
-        // 3. Ativa o usuário e limpa o token
         const dataUpdate = {
             statusConta: 'ativo',
             token_verificacao: null,
@@ -330,7 +318,7 @@ const verifyUserByToken = async (token) => {
         return true;
     } catch (err) {
         console.error("Erro no model ao verificar token:", err);
-        throw err; // Repassa o erro para o controller
+        throw err; 
     }
 };
 

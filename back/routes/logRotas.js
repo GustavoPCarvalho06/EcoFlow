@@ -4,7 +4,6 @@ import auth from "../middelewares/authMiddleware.js";
 
 const router = Router();
 
-// Só administradores e coordenadores devem ver logs
 router.get('/', auth, LogController.listarLogsController);
 
 export default router;

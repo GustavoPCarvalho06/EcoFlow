@@ -13,7 +13,7 @@ const enviarCodigoController = async (req, res) => {
         }
 
         const codigo = crypto.randomInt(100000, 999999).toString();
-        const expiracao = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos a partir de agora
+        const expiracao = new Date(Date.now() + 5 * 60 * 1000); 
 
         await saveRecoveryCode(cleanCpf, codigo, expiracao);
         await sendRecoveryEmail(user.email, codigo);

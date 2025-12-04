@@ -2,7 +2,6 @@ import { getLogsPaginated } from "../models/LogModel.js";
 
 const listarLogsController = async (req, res) => {
     try {
-        // [MODIFICADO] Adicionado usuario_id na desestruturação
         const { page, limit, search, acao, usuario_id } = req.query;
 
         const resultado = await getLogsPaginated({ 
@@ -10,7 +9,7 @@ const listarLogsController = async (req, res) => {
             limit: limit || 10,
             search: search || '',
             acao: acao || '',
-            target_user_id: usuario_id // [NOVO] Passamos para o model
+            target_user_id: usuario_id 
         });
 
         return res.status(200).json(resultado);

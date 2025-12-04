@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/dashboard/AdminStatsCards.jsx
-// =================================================================================
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, UserX, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,7 +9,7 @@ export function AdminStatsCards({ stats }) {
       value: stats?.totalUsers || 0,
       description: "Todas as contas do sistema",
       icon: Users,
-      // No modo dark, clareamos o texto do ícone e deixamos o fundo transparente
+      
       iconColor: "text-blue-600 dark:text-blue-400",
       iconBg: "bg-blue-50 dark:bg-blue-900/20",
       borderColor: "border-l-blue-500",
@@ -53,15 +49,15 @@ export function AdminStatsCards({ stats }) {
         <Card 
           key={index}
           className={cn(
-            // 'bg-card' puxa a cor exata definida no seu CSS (branco ou Deep Forest)
+            
             "rounded-xl border shadow-sm transition-all duration-300 bg-card",
             "hover:shadow-lg hover:-translate-y-1",
-            "border-l-[4px]", // Mantém a borda colorida lateral
+            "border-l-[4px]", 
             item.borderColor
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            {/* 'text-muted-foreground' deixa o título cinza suave nos dois modos */}
+            
             <CardTitle className="text-sm font-semibold text-muted-foreground">
               {item.title}
             </CardTitle>
@@ -70,7 +66,7 @@ export function AdminStatsCards({ stats }) {
             </div>
           </CardHeader>
           <CardContent>
-            {/* 'text-foreground' garante preto no claro e branco no escuro */}
+            
             <div className="text-3xl font-bold text-foreground mt-2">
               {item.value}
             </div>

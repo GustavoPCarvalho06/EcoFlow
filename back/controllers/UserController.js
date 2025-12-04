@@ -1,10 +1,6 @@
-// =================================================================================
-// Arquivo: back/controllers/UserController.js
-// =================================================================================
-
 import { readAllUser, readUser, createUser, updateUser, changeStatus, changeFuncao, findUsersPaginated } from "../models/UserModels.js"
 import { sendVerificationEmail } from '../config/mailer.js';
-import { registrarLog } from "../models/LogModel.js"; // Importando o model de Logs
+import { registrarLog } from "../models/LogModel.js"; 
 
 const createUserController = async (req, res) => {
   try {
@@ -14,16 +10,11 @@ const createUserController = async (req, res) => {
       return res.status(400).json({ mensagem: "Dados insuficientes para criar o usuário." });
     }
 
-    // Pega quem está realizando a ação (do middleware de auth)
     const adminResponsavel = req.user;
-
-    // 1. Chama a função UMA ÚNICA VEZ
     const { email, token } = await createUser(userData);
 
-    // 2. Envia o e-mail
     await sendVerificationEmail(email, token);
 
-    // --- [LOG] REGISTRA A CRIAÇÃO ---
     if (adminResponsavel) {
       await registrarLog({
         usuario_id: adminResponsavel.id,
@@ -34,9 +25,9 @@ const createUserController = async (req, res) => {
         ip: req.ip
       });
     }
-    // --------------------------------
+    
 
-    // 3. Retorna a resposta de sucesso
+    
     return res.status(201).json({ mensagem: "Usuário criado com sucesso. Um e-mail de verificação foi enviado." });
 
   } catch (err) {
@@ -90,29 +81,24 @@ const findUsersPaginatedController = async (req, res) => {
 
 const updateUserController = async (req, res) => {
   try {
-    // 1. Pega o CPF e os dados
+  
     const { cpf } = req.body;
     const userData = req.body;
     
-    // Pega quem está realizando a ação (do middleware de auth)
     const adminResponsavel = req.user;
 
     if (!cpf) {
       return res.status(400).json({ mensagem: "CPF do usuário não fornecido para atualização" });
     }
 
-    // Limpa o CPF
     const cleanCpf = cpf.replace(/\D/g, '');
 
-    // Passa o CPF limpo para a função de update
     await updateUser(userData, cleanCpf);
 
-    // --- [LOG] LÓGICA PARA DIFERENCIAR EDIÇÃO DE DESLIGAMENTO ---
     if (adminResponsavel) {
         let acaoLog = 'EDICAO_USUARIO';
         let detalhesLog = `Atualizou os dados do usuário CPF: ${cleanCpf}`;
 
-        // Se estiver mudando o status da conta
         if (userData.statusConta) {
             if (userData.statusConta === 'desligado') {
                 acaoLog = 'DESLIGAMENTO_USUARIO';
@@ -132,7 +118,7 @@ const updateUserController = async (req, res) => {
             ip: req.ip
         });
     }
-    // -----------------------------------------------------------
+  
 
     return res.status(200).json({ mensagem: "Usuário atualizado com sucesso" });
 

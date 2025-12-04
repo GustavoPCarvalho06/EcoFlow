@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
-import { useTheme } from "next-themes"; // Importante para detectar o tema
+import { useTheme } from "next-themes"; 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -18,8 +18,8 @@ export default function BarChart({ data }) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  // Cores dinâmicas baseadas no tema
-  const textColor = isDark ? "#e2e8f0" : "#64748b"; // muted-foreground (claro/escuro)
+
+  const textColor = isDark ? "#e2e8f0" : "#64748b"; 
   const gridColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
 
   const chartData = {
@@ -28,13 +28,13 @@ export default function BarChart({ data }) {
       {
         label: "Coletas",
         data: data.coletas,
-        backgroundColor: "#f59e0b", // Amber (Laranja/Amarelo)
+        backgroundColor: "#f59e0b", 
         borderRadius: 4,
       },
       {
         label: "Alertas",
         data: data.alertas,
-        backgroundColor: "#3b82f6", // Blue
+        backgroundColor: "#3b82f6", 
         borderRadius: 4,
       }
     ]
@@ -47,9 +47,9 @@ export default function BarChart({ data }) {
       legend: {
         position: "top",
         labels: {
-          color: textColor, // Cor do texto da legenda
+          color: textColor, 
           font: {
-            family: "'Plus Jakarta Sans', sans-serif", // Mesma fonte do site
+            family: "'Plus Jakarta Sans', sans-serif", 
             size: 12
           }
         }
@@ -69,18 +69,18 @@ export default function BarChart({ data }) {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { color: textColor }, // Cor dos números no eixo Y
-        grid: { color: gridColor }   // Cor das linhas de grade
+        ticks: { color: textColor }, 
+        grid: { color: gridColor }  
       },
       x: {
-        ticks: { color: textColor }, // Cor dos nomes no eixo X
-        grid: { display: false }     // Remove grade vertical para limpar o visual
+        ticks: { color: textColor }, 
+        grid: { display: false }     
       }
     }
   };
 
   return (
-    // Substituindo styles.chartCard por classes Tailwind
+    
     <div className="flex flex-col h-full w-full">
       <h3 className="text-sm font-semibold text-foreground mb-4">
         Coletas por Bairro (últimos 30 dias)

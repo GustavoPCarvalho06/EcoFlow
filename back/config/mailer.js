@@ -1,13 +1,12 @@
 import nodemailer from 'nodemailer';
 
-// IMPORTANTE: Coloque essas informações em variáveis de ambiente (.env) em um projeto real!
 const mailerConfig = {
     host: "smtp.gmail.com",
-    port: 465, // ou 587 para TLS
-    secure: true, // true para 465, false para outras portas
+    port: 465, 
+    secure: true, 
     auth: {
-        user: "ecoflowsuport@gmail.com", // O seu e-mail do Gmail
-        pass: "dfgs gfcl rhzw yooy" // A senha de app que você gerou
+        user: "ecoflowsuport@gmail.com", 
+        pass: "dfgs gfcl rhzw yooy" 
     }
 };
 
@@ -30,7 +29,7 @@ export const sendRecoveryEmail = async (to, code) => {
                 </div>
             `,
         });
-        console.log(`E-mail de recuperação enviado para ${to}`);
+        
         return true;
     } catch (error) {
         console.error("Erro ao enviar e-mail de recuperação:", error);
@@ -41,11 +40,11 @@ export const sendRecoveryEmail = async (to, code) => {
 
 export const sendVerificationEmail = async (to, token) => {
     try {
-        // IMPORTANTE: Troque 'localhost:3000' pelo domínio do seu site em produção
+       
         const verificationLink = `http://10.84.6.136:3000/verificar-conta?token=${token}`;
 
         await transporter.sendMail({
-            from: '"EcoFlow Suporte" <ecoflowsuport@gmail.com>', // Use seu e-mail de suporte
+            from: '"EcoFlow Suporte" <ecoflowsuport@gmail.com>', 
             to: to,
             subject: "Ative sua Conta EcoFlow",
             html: `
@@ -59,7 +58,7 @@ export const sendVerificationEmail = async (to, token) => {
                 </div>
             `,
         });
-        console.log(`E-mail de verificação enviado para ${to}`);
+        
         return true;
     } catch (error) {
         console.error("Erro ao enviar e-mail de verificação:", error);

@@ -1,10 +1,5 @@
-// =================================================================================
-// Arquivo: back/models/DashboardModel.js
-// =================================================================================
-
 import { read } from "../config/database.js";
 
-// Busca o total de lixeiras agrupadas por status
 const getLixeirasStats = async () => {
     try {
         const sql = `
@@ -20,7 +15,6 @@ const getLixeirasStats = async () => {
     }
 };
 
-// Busca o total de usuários que são coletores
 const getColetoresCount = async () => {
     try {
         const sql = `

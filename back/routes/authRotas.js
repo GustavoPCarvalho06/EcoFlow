@@ -1,4 +1,3 @@
-// Em back/routes/authRotas.js
 import { Router } from 'express';
 import authController from "../controllers/AuthController.js";
 

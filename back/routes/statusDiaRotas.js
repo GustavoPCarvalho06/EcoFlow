@@ -3,7 +3,6 @@ import dia from "../controllers/statusDiaController.js";
 
 const router = express.Router();
 
-// Rota de login
 router.get('/', dia.readAllUserController);
 
 router.post("/getFilter", /*auth , */ dia.readFilterstatusSensorRotasController)

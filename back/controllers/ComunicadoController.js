@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: back/controllers/ComunicadoController.js
-// =================================================================================
-
 import {
     getAllComunicados,
     createComunicado,
@@ -14,7 +10,6 @@ import {
     getDetailedUnseenIds
 } from "../models/ComunicadoModel.js";
 
-// Importação do sistema de logs
 import { registrarLog } from "../models/LogModel.js";
 
 const getAllComunicadosController = async (req, res) => {
@@ -31,20 +26,17 @@ const createComunicadoController = async (req, res) => {
     try {
         const { titulo, conteudo, autor_id } = req.body;
         
-        // Pega o usuário logado via token (middleware) para o Log
+       
         const usuarioLogado = req.user; 
 
         if (!titulo || !conteudo || !autor_id) return res.status(400).json({ mensagem: "Dados insuficientes." });
 
-        // 1. Cria o comunicado e pega o ID dele
         const newComunicadoId = await createComunicado({ titulo, conteudo, autor_id });
 
-        // 2. Marca imediatamente como visto pelo próprio autor
         if (newComunicadoId) {
             await markOneAsSeen(autor_id, newComunicadoId);
         }
 
-        // --- [LOG] REGISTRA A CRIAÇÃO ---
         if (usuarioLogado) {
             await registrarLog({
                 usuario_id: usuarioLogado.id,
@@ -55,9 +47,7 @@ const createComunicadoController = async (req, res) => {
                 ip: req.ip
             });
         }
-        // --------------------------------
-
-        // 3. Emite o evento global para todos os outros
+        
         req.io.emit('comunicados_atualizados');
 
         return res.status(201).json({ mensagem: "Comunicado criado com sucesso." });
@@ -73,19 +63,19 @@ const updateComunicadoController = async (req, res) => {
         const { titulo, conteudo } = req.body;
         const autor_id = req.headers['x-user-id']; 
         
-        // Pega o usuário logado via token para o Log
+        
         const usuarioLogado = req.user;
 
         if (!titulo && !conteudo) return res.status(400).json({ mensagem: "Pelo menos um campo é necessário." });
         if (!autor_id) return res.status(401).json({ mensagem: "Usuário não autenticado." });
 
-        // 1. Atualiza o comunicado
+       
         await updateComunicado(id, { titulo, conteudo });
 
-        // 2. Marca como visto/re-visto pelo editor
+        
         await markOneAsSeen(autor_id, id);
 
-        // --- [LOG] REGISTRA A ATUALIZAÇÃO ---
+        
         if (usuarioLogado) {
             await registrarLog({
                 usuario_id: usuarioLogado.id,
@@ -96,9 +86,7 @@ const updateComunicadoController = async (req, res) => {
                 ip: req.ip
             });
         }
-        // ------------------------------------
-
-        // 3. Emite o evento global
+       
         req.io.emit('comunicados_atualizados');
 
         return res.status(200).json({ mensagem: "Comunicado atualizado com sucesso." });
@@ -111,13 +99,11 @@ const updateComunicadoController = async (req, res) => {
 const deleteComunicadoController = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        // Pega o usuário logado via token para o Log
+      
         const usuarioLogado = req.user;
 
         await deleteComunicado(id);
 
-        // --- [LOG] REGISTRA A EXCLUSÃO ---
         if (usuarioLogado) {
             await registrarLog({
                 usuario_id: usuarioLogado.id,
@@ -128,9 +114,7 @@ const deleteComunicadoController = async (req, res) => {
                 ip: req.ip
             });
         }
-        // ---------------------------------
 
-        // Emite o mesmo evento após deletar
         req.io.emit('comunicados_atualizados');
 
         return res.status(200).json({ mensagem: "Comunicado deletado com sucesso." });

@@ -1,6 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/dashboard/ComunicadosComponenteAdministrador.jsx
-// =================================================================================
 "use client";
 
 import { useState, useEffect, useCallback } from "react";

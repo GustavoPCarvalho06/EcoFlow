@@ -1,6 +1,4 @@
-// =================================================================================
-// Arquivo: front/src/app/mapa/page.jsx
-// =================================================================================
+
 
 import MapboxMap from "@/components/Map/MapboxMap.jsx";
 import { cookies } from "next/headers";
@@ -8,20 +6,8 @@ import jwt from "jsonwebtoken";
 import MapBoxCriarWrapper from "@/components/Map/MapBoxCriarWrapper.jsx";
 import MapBoxManejarWrapper from "@/components/Map/MapBoxManejarWrapper.jsx";
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Menu, PlusCircle, Cog } from "lucide-react";
 import Layout from "@/components/dashboard/layout/Layout";
 
@@ -54,12 +40,9 @@ export default async function MapaPage() {
               </button>
             </PopoverTrigger>
 
-            <PopoverContent
-              align="start"
-              side="right"
-              className="w-[200px] p-2 rounded-md border border-border shadow-lg bg-popover text-popover-foreground"
-            >
-              {/* --- Modal de Criar Ponto --- */}
+            <PopoverContent align="start" side="right" className="w-[200px] p-2 rounded-md border border-border shadow-lg bg-popover text-popover-foreground">
+              
+             
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition cursor-pointer">
@@ -74,7 +57,6 @@ export default async function MapaPage() {
                       Criar Novo Ponto de Coleta
                     </DialogTitle>
                   </DialogHeader>
-
                   <p className="text-center text-muted-foreground">
                     Clique no mapa para selecionar o local do novo ponto.
                   </p>
@@ -84,7 +66,7 @@ export default async function MapaPage() {
                 </DialogContent>
               </Dialog>
 
-              {/* --- Modal de Manejar Pontos (Edição/Exclusão) --- */}
+             
               <Dialog className="w-full">
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition cursor-pointer">
@@ -93,14 +75,15 @@ export default async function MapaPage() {
                   </button>
                 </DialogTrigger>
 
-                {/* --- AQUI ESTÁ O AJUSTE DE TAMANHO --- */}
-                <DialogContent className="max-w-5xl w-full h-[80vh] flex flex-col gap-0 bg-card border-border p-0 overflow-hidden">
+               
+                <DialogContent className="!max-w-5xl sm:max-w-[900px] w-full h-[80vh] flex flex-col gap-0 bg-card border-border p-0 overflow-hidden">
                   
                   <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-foreground text-xl">Gerenciar Pontos Existentes</DialogTitle>
                   </DialogHeader>
 
                   <div className="flex-1 overflow-hidden p-6 pt-2">
+                  
                     <MapBoxManejarWrapper token={tokenValue}/>
                   </div>
 
@@ -111,11 +94,7 @@ export default async function MapaPage() {
         </div>
 
         <div className="flex-1 rounded-lg border border-border overflow-hidden shadow-sm">
-          <MapboxMap
-            latitude={-23.647222}
-            longitude={-46.557282}
-            zoom={14}
-          />
+          <MapboxMap latitude={-23.647222} longitude={-46.557282} zoom={14} />
         </div>
       </main>
     </Layout>

@@ -1,12 +1,9 @@
-// =================================================================================
-// Arquivo: src/app/mapa/page.jsx
-// =================================================================================
 
 import MapboxMap from "@/components/Map/MapboxMap.jsx";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import MapBoxCriarWrapper from "@/components/Map/MapBoxCriarWrapper.jsx";
-import MapBoxManejarWrapper from "@/components/Map/MapBoxManejarWrapper.jsx"; // Corrigi o import path se necessário
+import MapBoxManejarWrapper from "@/components/Map/MapBoxManejarWrapper.jsx";
 
 import {
   Popover,
@@ -28,7 +25,7 @@ import Layout from "@/components/dashboard/layout/Layout";
 export default async function MapaPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get("token");
-  const tokenValue = tokenCookie?.value; // Get the string value
+  const tokenValue = tokenCookie?.value; 
 
   let user = null;
   if (tokenValue) {
@@ -41,7 +38,7 @@ export default async function MapaPage() {
 
   return (
     <Layout>
-      {/* bg-background garante o fundo escuro correto */}
+      
       <main className="flex flex-1 flex-col p-4 md:p-6 overflow-hidden bg-background h-full">
       
 
@@ -57,13 +54,12 @@ export default async function MapaPage() {
               </button>
             </PopoverTrigger>
 
-            {/* bg-popover e text-popover-foreground adaptam o menu ao tema */}
             <PopoverContent
               align="start"
               side="right"
               className="w-[200px] p-2 rounded-md border border-border shadow-lg bg-popover text-popover-foreground"
             >
-              {/* Criar */}
+          
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition cursor-pointer">
@@ -72,7 +68,7 @@ export default async function MapaPage() {
                   </button>
                 </DialogTrigger>
 
-                {/* DialogContent ajustado para bg-card */}
+               
                 <DialogContent className="!max-w-5xl w-[90vw] h-[700px] flex flex-col gap-4 bg-card border-border">
                   <DialogHeader className="text-center">
                     <DialogTitle className="text-xl font-semibold text-foreground">
@@ -91,7 +87,7 @@ export default async function MapaPage() {
                 </DialogContent>
               </Dialog>
 
-              {/* Manejar */}
+             
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition cursor-pointer">
@@ -116,7 +112,7 @@ export default async function MapaPage() {
           </Popover>
         </div>
 
-        {/* Container do Mapa com borda adaptável */}
+        
         <div className="flex-1 rounded-lg border border-border overflow-hidden shadow-sm">
        
           <MapboxMap

@@ -1,5 +1,3 @@
-// Arquivo: src/components/dashboard/nav-user-coordenador.jsx
-
 "use client"
 
 import {
@@ -37,17 +35,15 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
-  // --- CORREÇÃO DO ERRO ---
-  // Verifica se o dado está direto em 'usuario.nome' ou aninhado em 'usuario.usuario.nome'
-  // Isso evita o erro "Cannot read properties of undefined"
+
   const nomeUser = usuario?.nome || usuario?.usuario?.nome || "Usuário";
   const cpfUser = usuario?.cpf || usuario?.usuario?.cpf || "";
   
-  // Pega a inicial de forma segura
+ 
   const inicial = nomeUser ? nomeUser.charAt(0).toUpperCase() : "U";
 
   const handleLogoutClick = async () => {
-    // Garante limpeza do localStorage também no cliente
+ 
     if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
     }

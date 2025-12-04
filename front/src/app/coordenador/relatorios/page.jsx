@@ -1,4 +1,3 @@
-// src/app/dashboard/cordenador/relatorios/page.jsx
 import React from "react";
 import Layout from "@/components/dashboard/layout/Layout";
 

@@ -1,16 +1,10 @@
-// =================================================================================
-// Arquivo: back/controllers/lixoController.js
-// =================================================================================
-
 import { createLixo, updateLixo, deleteLixo } from "../models/lixeiraModels.js";
-import { registrarLog } from "../models/LogModel.js"; // Importando o sistema de logs
+import { registrarLog } from "../models/LogModel.js";
 
-// Criar
 const createLixoController = async (req, res) => {
   try {
     const { statusLixo, localizacao, endereco } = req.body;
     
-    // Pega o usuário logado para o log
     const usuarioLogado = req.user;
 
     if (!statusLixo || !localizacao || localizacao.x === undefined || localizacao.y === undefined || !endereco) {
@@ -23,7 +17,6 @@ const createLixoController = async (req, res) => {
 
     await createLixo({ statusLixo, localizacao, endereco });
 
-    // --- [LOG] REGISTRA A CRIAÇÃO ---
     if (usuarioLogado) {
       await registrarLog({
         usuario_id: usuarioLogado.id,
@@ -34,7 +27,7 @@ const createLixoController = async (req, res) => {
         ip: req.ip
       });
     }
-    // --------------------------------
+    
 
     return res.status(200).json({ mensagem: "Lixeira criada com sucesso" });
 
@@ -43,12 +36,11 @@ const createLixoController = async (req, res) => {
   }
 };
 
-// Atualizar
+
 const updateLixoController = async (req, res) => {
   try {
     const { id, statusLixo } = req.body;
     
-    // Pega o usuário logado para o log
     const usuarioLogado = req.user;
 
     if (!id) {
@@ -57,7 +49,6 @@ const updateLixoController = async (req, res) => {
 
     const resultado = await updateLixo({ statusLixo }, id);
 
-    // --- [LOG] REGISTRA A ATUALIZAÇÃO ---
     if (usuarioLogado) {
       await registrarLog({
         usuario_id: usuarioLogado.id,
@@ -68,7 +59,7 @@ const updateLixoController = async (req, res) => {
         ip: req.ip
       });
     }
-    // ------------------------------------
+   
 
     return res.status(200).json({ mensagem: resultado });
   } catch (err) {
@@ -77,12 +68,10 @@ const updateLixoController = async (req, res) => {
   }
 };
 
-// Deletar
 const deleteLixoController = async (req, res) => {
   try {
     const { id } = req.body;
     
-    // Pega o usuário logado para o log
     const usuarioLogado = req.user;
 
     if (!id) {
@@ -91,7 +80,6 @@ const deleteLixoController = async (req, res) => {
 
     const resultado = await deleteLixo(id);
 
-    // --- [LOG] REGISTRA A EXCLUSÃO ---
     if (usuarioLogado) {
       await registrarLog({
         usuario_id: usuarioLogado.id,
@@ -102,7 +90,7 @@ const deleteLixoController = async (req, res) => {
         ip: req.ip
       });
     }
-    // ---------------------------------
+    
 
     return res.status(200).json({ mensagem: "Lixeira deletada com sucesso", resultado });
   } catch (err) {

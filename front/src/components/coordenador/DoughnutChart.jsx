@@ -10,7 +10,7 @@ export default function DoughnutChart({ data }) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  // Cor do texto da legenda
+
   const textColor = isDark ? "#e2e8f0" : "#64748b";
 
   const chartData = {
@@ -18,9 +18,8 @@ export default function DoughnutChart({ data }) {
     datasets: [
       {
         data: data.values,
-        // Cores vibrantes que funcionam bem nos dois modos
         backgroundColor: ["#10b981", "#f59e0b", "#ef4444"], 
-        borderWidth: 0, // Remove borda branca padrão para ficar mais clean
+        borderWidth: 0,
         hoverOffset: 10
       }
     ]
@@ -33,13 +32,13 @@ export default function DoughnutChart({ data }) {
       legend: {
         position: "bottom",
         labels: {
-          color: textColor, // Cor adaptativa
+          color: textColor, 
           padding: 20,
           font: {
             family: "'Plus Jakarta Sans', sans-serif",
             size: 12
           },
-          usePointStyle: true, // Bolinhas em vez de quadrados na legenda
+          usePointStyle: true,
         }
       },
       tooltip: {
@@ -52,21 +51,20 @@ export default function DoughnutChart({ data }) {
         cornerRadius: 8,
       }
     },
-    cutout: "75%", // Deixa o gráfico mais fino e elegante
+    cutout: "75%",
   };
 
   return (
-    // Substituindo styles.chartCard por classes Tailwind
+
     <div className="flex flex-col h-full w-full">
       <h3 className="text-sm font-semibold text-foreground mb-4">
         Composição de Resíduos
       </h3>
       <div className="flex-1 w-full min-h-0 flex items-center justify-center relative">
         <Doughnut data={chartData} options={options} />
-        
-        {/* Opcional: Texto no meio do Donut */}
+
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
-           {/* Você pode colocar um total ou ícone aqui se quiser */}
+       
         </div>
       </div>
     </div>

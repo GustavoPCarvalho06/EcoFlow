@@ -1,6 +1,5 @@
 import { read, readAll, deleteRecord, create, update ,createLixoDB} from "../config/database.js";
 
-// Deletar
 const deleteLixo = async (id) => {
   try {
     const usuario = await deleteRecord("SistemaSensor", `id_Sensor = '${id}'`);
@@ -14,7 +13,6 @@ const deleteLixo = async (id) => {
   }
 };
 
-// Criar c/point
 const createLixo = async (data) => {
   try {
     const { statusLixo, localizacao, endereco } = data;
@@ -23,17 +21,14 @@ const createLixo = async (data) => {
       throw new Error("Campos statusLixo, localizacao e endereço são obrigatórios");
     }
 
-    // Cria o POINT no formato SQL
     const point = `ST_GeomFromText('POINT(${localizacao.x} ${localizacao.y})')`;
 
-    // Objeto com dados
     const dataUsuario = {
       statusLixo,
       localizacao: point,
       endereco,
     };
 
-    // Envia o comando de criação
     await createLixoDB("SistemaSensor", dataUsuario, true);
     return "Lixeira criada com sucesso";
   } catch (err) {
@@ -42,7 +37,6 @@ const createLixo = async (data) => {
   }
 };
 
-// Update
 const updateLixo = async (data, id) => {
   try {
     const conteudo = {

@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/dashboard/ChatComponent.jsx
-// =================================================================================
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -203,7 +199,7 @@ export function ChatComponent({ user, token }) {
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] md:grid md:grid-cols-3 gap-4">
 
-      {/* CONTATOS (LEFT PANEL) */}
+     
       <Card
         className={cn(
           "flex flex-col overflow-hidden rounded-2xl border shadow-md bg-card transition-all",
@@ -272,7 +268,7 @@ export function ChatComponent({ user, token }) {
         </CardContent>
       </Card>
 
-      {/* CHAT AREA (RIGHT PANEL) */}
+   
       <Card
         className={cn(
           "flex flex-col overflow-hidden rounded-2xl border shadow-md bg-card transition-all",
@@ -282,7 +278,7 @@ export function ChatComponent({ user, token }) {
       >
         {selectedUser ? (
           <>
-            {/* MOBILE BACK BUTTON */}
+           
             <div className="md:hidden border-b border-border p-3 flex items-center gap-3 bg-card">
               <button
                 onClick={() => setSelectedUser(null)}
@@ -304,8 +300,7 @@ export function ChatComponent({ user, token }) {
               </div>
             </CardHeader>
 
-            {/* AQUI ESTÁ A CORREÇÃO DO FUNDO */}
-            {/* 'bg-gray-50' no modo claro (neutro) e 'dark:bg-muted/20' no modo escuro */}
+            
             <CardContent className="flex-1 overflow-y-auto px-5 py-4 space-y-4 bg-gray-50 dark:bg-muted/20 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               {messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -338,8 +333,8 @@ export function ChatComponent({ user, token }) {
                         className={cn(
                           "max-w-[90%] sm:max-w-md px-4 py-3 rounded-2xl shadow-sm",
                           isMe
-                            ? "bg-primary text-primary-foreground" // Verde (EcoFlow) no envio
-                            : "bg-card border border-border text-foreground" // Branco/Cinza no recebimento
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-card border border-border text-foreground"
                         )}
                       >
                         <p className="text-sm break-words">{msg.conteudo}</p>

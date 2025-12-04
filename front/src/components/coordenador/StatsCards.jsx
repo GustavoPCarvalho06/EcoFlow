@@ -1,4 +1,3 @@
-// src/app/dashboard/cordenador/components/StatsCards.jsx
 "use client";
 import React from "react";
 import styles from "./StatsCards.module.css";

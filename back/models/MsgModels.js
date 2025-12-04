@@ -33,15 +33,12 @@ const readAllMsg = async (id) => {
     }
 }
 
-// models/MsgModels.js
 
 const readMsg = async (id) => {
     try {
-        // Agora passamos a query SQL completa e os parâmetros em um array
         const sql = "SELECT * FROM mensagens_suporte WHERE id = ?";
         const usuario = await read(sql, [id]); 
         
-        // A 'read' retorna um array, então pegamos o primeiro elemento
         return usuario.length > 0 ? usuario[0] : null; 
 
     } catch (err) {
@@ -67,17 +64,15 @@ const readMsgEmail = async (email) => {
 
 const createMsg = async (data) => {
   try {
-    // 1. LIMPA O CPF: Remove todos os caracteres que não são dígitos.
+
     const cleanCPF = data.cpf.replace(/\D/g, '');
 
-    // 2. VALIDA O CPF JÁ LIMPO
     if (!cpfValidator.isValid(cleanCPF)) {
       const error = new Error("O CPF fornecido é inválido. Por favor, insira um CPF real.");
       error.statusCode = 400;
       throw error;
     }
     
-    // 3. VERIFICA DUPLICIDADE COM O CPF LIMPO
     const existingUser = await findUserByCpf(cleanCPF);
     if (existingUser) {
       const error = new Error("Este CPF já está cadastrado. Por favor, insira um CPF válido.");
@@ -89,7 +84,7 @@ const createMsg = async (data) => {
 
     const dataUsuario = {
       nome: data.nome,
-      cpf: cleanCPF, // 4. SALVA O CPF LIMPO NO BANCO DE DADOS
+      cpf: cleanCPF, 
       senha: senhaHash,
       cargo: data.cargo,
       statusConta: 'ativo'
@@ -105,23 +100,19 @@ const createMsg = async (data) => {
 
 const updateMsg = async (data, cpf) => {
   try {
-    // 1. COMEÇAMOS COM UM OBJETO VAZIO
+    
     const conteudo = {};
 
-    // 2. ADICIONAMOS AS PROPRIEDADES CONDICIONALMENTE
-    // Se 'data.nome' existir, adicionamos ao objeto.
+   
     if (data.nome) conteudo.nome = data.nome;
     if (data.cpf) conteudo.cpf = data.cpf;
     if (data.cargo) conteudo.cargo = data.cargo;
     if (data.statusConta) conteudo.statusConta = data.statusConta;
 
-    // A lógica da senha permanece a mesma
     if (data.senha) {
       conteudo.senha = await bcrypt.hash(data.senha, 10);
     }
 
-    // 3. VERIFICAMOS SE HÁ ALGO PARA ATUALIZAR
-    // Se o objeto 'conteudo' estiver vazio, não há nada a fazer.
     if (Object.keys(conteudo).length === 0) {
       return "Nenhum dado fornecido para atualização.";
     }
@@ -142,15 +133,12 @@ const findMsgPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy = '
     let queryParams = [];
 
     if (filters.search) {
-      // --- INÍCIO DA ALTERAÇÃO ---
-      // 1. Limpa o termo de busca, removendo pontos, traços, etc.
+     
       const searchTerm = filters.search.replace(/\D/g, '');
 
-      // 2. A busca por CPF agora usa o termo limpo.
-      //    A busca por nome continua usando o termo original.
       whereClauses.push(`(nome LIKE ? OR cpf LIKE ?)`);
-      queryParams.push(`%${filters.search}%`, `%${searchTerm}%`); // AQUI ESTÁ A MUDANÇA
-      // --- FIM DA ALTERAÇÃO ---
+      queryParams.push(`%${filters.search}%`, `%${searchTerm}%`); 
+      
     }
     if (filters.cargo) {
       whereClauses.push(`cargo = ?`);
@@ -164,7 +152,6 @@ const findMsgPaginated = async ({ filters = {}, page = 1, limit = 10, sortBy = '
     const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
     const offset = (page - 1) * limit;
 
-    // O resto da função continua igual...
     const dataQuery = `
       SELECT id, nome, cpf, cargo, statusConta 
       FROM usuarios 

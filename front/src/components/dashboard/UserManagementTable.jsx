@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/dashboard/UserManagementTable.jsx
-// =================================================================================
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -19,7 +15,7 @@ import { PlusCircle, Pencil, Search, PowerOff, Power, ChevronLeft, ChevronRight 
 import { useApiUrl } from "@/app/context/ApiContext";
 import { cn } from "@/lib/utils";
 
-// --- Funções auxiliares ---
+
 const formatCPF = (cpf) => {
   if (!cpf) return "";
   const cleanCpf = cpf.replace(/\D/g, '').slice(0, 11);
@@ -69,7 +65,7 @@ export function UserManagementTable() {
 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  // --- 1. FUNÇÃO DE FETCH AUTENTICADO ---
+
   const authFetch = useCallback(async (url, options = {}) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
@@ -96,7 +92,7 @@ export function UserManagementTable() {
     return response;
   }, [router]);
 
-  // --- 2. BUSCAR USUÁRIOS ---
+
   const fetchUsers = useCallback(async () => {
     if (!apiUrl) {
       setIsLoading(false);
@@ -171,7 +167,7 @@ export function UserManagementTable() {
     setEditCep(formatCEP(e.target.value));
   };
 
-  // --- 3. CHAMADAS DE API GENÉRICAS (PUT/DELETE) ---
+
   const handleApiCall = async (endpoint, method, body, successCallback) => {
     if (!apiUrl) {
       setError("Conexão com o servidor não estabelecida. Tente novamente.");
@@ -197,7 +193,7 @@ export function UserManagementTable() {
     }
   };
 
-  // --- 4. CRIAR USUÁRIO (POST) ---
+  
   const handleCreateUser = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -274,7 +270,7 @@ export function UserManagementTable() {
     setIsReactivateAlertOpen(false);
   };
   
-  // Estilos corrigidos para usar variáveis do tema
+  
   const inputStyles = "h-11 rounded-xl bg-muted/50 border-input focus:bg-background focus:border-primary focus:ring-primary/20 transition-all duration-200 text-foreground";
   const selectTriggerStyles = "h-11 rounded-xl bg-muted/50 border-input focus:ring-primary/20 text-foreground";
 

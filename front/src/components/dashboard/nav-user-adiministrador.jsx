@@ -34,7 +34,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
-  // Função segura para acessar as propriedades do usuário
+
   const getUserName = () => {
     return usuario?.usuario?.nome || usuario?.nome || "Usuário"
   }
@@ -49,11 +49,11 @@ export function NavUser({
   }
 
   const handleLogoutClick = async () => {
-      // 1. Limpa o token do cliente
+     
       if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
       }
-      // 2. Chama a server action que limpa o cookie
+      
       await logout();
   };
 

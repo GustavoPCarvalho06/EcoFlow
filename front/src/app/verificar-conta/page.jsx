@@ -1,4 +1,3 @@
-// Em app/verificar-conta/page.jsx
 "use client";
 
 import { useEffect, useState, Suspense } from 'react';
@@ -11,7 +10,7 @@ function VerificationComponent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
-    const [status, setStatus] = useState('verificando'); // 'verificando', 'sucesso', 'erro'
+    const [status, setStatus] = useState('verificando'); 
     const [message, setMessage] = useState('Verificando sua conta, por favor aguarde...');
 
     useEffect(() => {
@@ -77,8 +76,7 @@ function VerificationComponent() {
     );
 }
 
-// O Suspense é necessário porque useSearchParams só pode ser usado em Client Components
-// que são filhos de um <Suspense> boundary.
+
 export default function VerificationPage() {
     return (
         <Suspense fallback={<div>Carregando...</div>}>

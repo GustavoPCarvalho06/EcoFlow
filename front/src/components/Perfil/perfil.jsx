@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/Perfil/perfil.jsx
-// =================================================================================
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -29,7 +25,7 @@ const formatCEP = (cep) => {
     return String(cep).replace(/\D/g, '').replace(/(\d{5})(\d{1,3})/, '$1-$2');
 };
 
-// Estilos de Input atualizados para o tema
+
 const inputStyles = "h-11 rounded-xl bg-muted/50 border-input text-foreground focus:bg-background focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-200 text-sm placeholder:text-muted-foreground";
 const selectTriggerStyles = "h-11 rounded-xl bg-muted/50 border-input text-foreground focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 text-sm";
 const primaryButtonStyles = "h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 font-medium transition-all hover:-translate-y-0.5 active:translate-y-0";

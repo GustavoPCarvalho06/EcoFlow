@@ -1,11 +1,9 @@
-// Arquivo: src/app/layout.js
-
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import os from 'os';
 import { cookies } from 'next/headers';
 
-// Importação do ThemeProvider para o Dark Mode
+
 import { ThemeProvider } from "@/components/theme-provider";
 
 import { ApiProvider } from './context/ApiContext';
@@ -34,7 +32,7 @@ const getApiUrlFromServer = () => {
       for (const iface of interfaces[name]) {
         if (iface.family === 'IPv4' && !iface.internal) {
           detectedUrl = `http://${iface.address}:3001`;
-          console.log(`[Next.js Server] Layout renderizado no servidor. API primária: ${detectedUrl}`);
+          
           return detectedUrl;
         }
       }
@@ -42,7 +40,7 @@ const getApiUrlFromServer = () => {
   } catch (error) {
     console.error("[Next.js Server] Erro ao detectar IP:", error);
   }
-  console.log("[Next.js Server] IP da rede não detectado. Usando localhost como padrão.");
+  
   return detectedUrl;
 };
 
@@ -62,11 +60,11 @@ export default function RootLayout({ children }) {
   }
 
   return (
-    // Adicionado suppressHydrationWarning para evitar erros de hidratação do next-themes
+   
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         
-        {/* Envolvendo a aplicação com o ThemeProvider */}
+
         <ThemeProvider
             attribute="class"
             defaultTheme="system"

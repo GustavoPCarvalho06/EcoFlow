@@ -10,9 +10,8 @@ const login = async (req, res) => {
     const { cpf, senha } = req.body;
     const ip = req.ip || req.connection.remoteAddress;
 
-    // Busca o usuário pelo CPF direto (sem base64)
     const user = await findUserByCpf(cpf);
-    console.log("Usuário encontrado:", user);
+    
 
 
     if (!user) {
@@ -25,13 +24,11 @@ const login = async (req, res) => {
         .json({ erro: "Sua conta está desativada. Contate o suporte." });
     }
 
-    // Verifica a senha
     const senhaValida = await bcrypt.compare(senha, user.senha);
     if (!senhaValida) {
       return res.status(401).json({ erro: "Senha inválida." });
     }
 
-    // Gera o token JWT
     const token = jwt.sign(
       {
         id: user.id,
@@ -47,12 +44,11 @@ const login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Define o cookie do token de autenticação
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 3600000, // 1 hora
+      maxAge: 3600000, 
     });
 
 
@@ -65,7 +61,6 @@ const login = async (req, res) => {
         ip: ip
     });
 
-    // Retorna resposta de sucesso
     return res.status(200).json({
       message: "Login realizado com sucesso!",
       user: {

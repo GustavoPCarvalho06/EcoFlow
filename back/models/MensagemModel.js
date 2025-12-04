@@ -1,13 +1,9 @@
-// models/MensagemModel.js
-
 import { create, read, pool  } from "../config/database.js";
 
-// Função para criar uma nova mensagem e retorná-la
 const createMensagem = async (data) => {
   try {
     const id = await create("mensagens", data);
     
-    // Após inserir, buscamos a mensagem completa para retornar ao cliente
     const sql = `
       SELECT m.*, u_remetente.nome AS remetente_nome 
       FROM mensagens m
@@ -23,7 +19,6 @@ const createMensagem = async (data) => {
   }
 };
 
-// Função para buscar o histórico de uma conversa entre dois usuários
 const getConversa = async (usuario1Id, usuario2Id) => {
     try {
         const sql = `
@@ -44,7 +39,6 @@ const getConversa = async (usuario1Id, usuario2Id) => {
     }
 }
 
-// [NOVO] Função para buscar a contagem de mensagens não lidas para um usuário
 const getUnreadCountsForUser = async (destinatarioId) => {
   try {
     const sql = `
@@ -55,7 +49,6 @@ const getUnreadCountsForUser = async (destinatarioId) => {
     `;
     const results = await read(sql, [destinatarioId]);
     
-    // Transforma o array de resultados em um objeto { remetente_id: count }
     const counts = results.reduce((acc, row) => {
       acc[row.remetente_id] = row.count;
       return acc;
@@ -68,7 +61,6 @@ const getUnreadCountsForUser = async (destinatarioId) => {
   }
 }
 
-// [NOVO] Função para marcar mensagens como lidas
 const markMessagesAsRead = async (destinatarioId, remetenteId) => {
   try {
     const sql = `
@@ -76,8 +68,7 @@ const markMessagesAsRead = async (destinatarioId, remetenteId) => {
       SET status_leitura = 1 
       WHERE destinatario_id = ? AND remetente_id = ? AND status_leitura = 0
     `;
-    // Note que aqui não usamos a função 'update' genérica porque a cláusula WHERE é mais complexa
-     const connection = await pool.getConnection(); // Precisamos de acesso direto à conexão para o execute
+     const connection = await pool.getConnection(); 
     try {
         const [result] = await connection.execute(sql, [destinatarioId, remetenteId]);
         return result.affectedRows;

@@ -1,4 +1,3 @@
-/* ===== CONTAINER PRINCIPAL ===== */
 .container {
   position: relative;
   display: flex;
@@ -9,11 +8,11 @@
   text-align: center;
   overflow: hidden;
 
-  /* Fundo moderno */
+ 
   background: linear-gradient(135deg, #f8f8f8 0%, #c7fecb 40%, #e0e7ff 100%);
 }
 
-/* ===== CARD GLASS ===== */
+
 .content {
   position: relative;
   background: rgba(255, 255, 255, 0.35);
@@ -27,7 +26,7 @@
   max-width: 520px;
 }
 
-/* ===== TÍTULOS E TEXTOS ===== */
+
 .errorCode {
   font-size: 5rem;
   font-weight: 700;
@@ -49,7 +48,7 @@
   font-size: 16px;
 }
 
-/* ===== IMAGEM CENTRAL ===== */
+
 .image {
   width: 220px;
   height: auto;
@@ -57,7 +56,7 @@
   animation: float 3s ease-in-out infinite;
 }
 
-/* ===== BOTÃO ===== */
+
 .button {
   background-color: #000;
   color: white;
@@ -72,23 +71,23 @@
   background-color: #16a34a;
 }
 
-/* ===== NÍVEL DECORATIVO — ICONES ===== */
+
 .icon {
   position: absolute;
   width: 60px;
-  opacity: 0.22; /* mais forte como você pediu */
+  opacity: 0.22;
   animation: float 6s infinite ease-in-out;
   pointer-events: none;
 }
 
-/* Posições dos ícones */
+
 .icon1 { top: 18%; left: 22%; animation-delay: 0s; }
 .icon2 { bottom: 15%; right: 18%; animation-delay: 1.5s; }
 .icon3 { top: 30%; right: 30%; animation-delay: 3s; }
 .icon4 { bottom: 22%; left: 28%; animation-delay: 2s; }
 .icon5 { top: 50%; left: 50%; animation-delay: 4s; }
 
-/* ===== ANIMAÇÕES ===== */
+
 @keyframes float {
   0% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-25px) rotate(8deg); }
@@ -100,7 +99,7 @@
   to { opacity: 1; transform: translateY(0px); }
 }
 
-/* ===== DARK MODE (se estiver usando) ===== */
+
 :root.dark .title,
 :root.dark .subtitle {
   color: #eaeaea;
@@ -114,7 +113,7 @@
   background: #27ae60;
 }
 
-/* ===== MOBILE ===== */
+
 @media (max-width: 600px) {
   .icon {
     width: 40px;
@@ -130,10 +129,10 @@
   }
 }
 
-/* ===== EFEITO DE CASCATA ===== */
+
 .fall {
   position: absolute;
-  top: -80px; /* começa fora da tela */
+  top: -80px; 
   font-size: 40px;
   opacity: 0.22;
   animation: fallAnimation linear infinite;
@@ -141,7 +140,7 @@
   z-index: 1;
 }
 
-/* ===== ANIMAÇÃO DE QUEDA ===== */
+
 @keyframes fallAnimation {
   0% {
     transform: translateY(-100px) translateX(0);
@@ -151,12 +150,12 @@
     opacity: 0.30;
   }
   100% {
-    transform: translateY(120vh) translateX(20px); /* cair para baixo com leve drift */
+    transform: translateY(120vh) translateX(20px); 
     opacity: 0;
   }
 }
 
-/* ===== VARIAÇÕES DAS POSIÇÕES E DELAYS ===== */
+
 .fall1 { left: 15%; animation-duration: 6s; animation-delay: 0s; }
 .fall2 { left: 25%; animation-duration: 7s; animation-delay: 1s; }
 .fall3 { left: 35%; animation-duration: 5.5s; animation-delay: 2s; }
@@ -165,7 +164,7 @@
 .fall6 { left: 75%; animation-duration: 5.8s; animation-delay: 2.8s; }
 .fall7 { left: 85%; animation-duration: 6.2s; animation-delay: 0.8s; }
 
-/* MOBILE */
+
 @media (max-width: 600px) {
   .fall { font-size: 30px; opacity: 0.25; }
 }

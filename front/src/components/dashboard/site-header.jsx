@@ -1,11 +1,9 @@
-// src/components/dashboard/site-header.jsx
-
 'use client'
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { logout } from "@/hooks/logout"
-import { ModeToggle } from "@/components/ModeToggle" // <--- IMPORTAR O BOTÃO
+import { ModeToggle } from "@/components/ModeToggle" 
 
 export function SiteHeader({ usuario }) {
   const handleLogout = async () => {
@@ -21,10 +19,10 @@ export function SiteHeader({ usuario }) {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
 
-        {/* Div que empurra o conteúdo para a direita */}
+        
         <div className="ml-auto flex items-center gap-2">
             
-            {/* --- AQUI ESTÁ O BOTÃO --- */}
+          
             <ModeToggle />
             
         </div>

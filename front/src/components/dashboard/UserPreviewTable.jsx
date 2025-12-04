@@ -1,5 +1,3 @@
-// src/components/dashboard/UserPreviewTable.jsx
-
 "use client";
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -11,7 +9,7 @@ import { Menu } from "lucide-react";
 
 export function UserPreviewTable({ users }) {
   return (
-    // bg-card adapta automaticamente
+
     <Card className="rounded-xl border shadow-sm overflow-hidden flex flex-col h-full bg-card">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg font-bold text-foreground">Usuários Recentes</CardTitle>
@@ -33,7 +31,7 @@ export function UserPreviewTable({ users }) {
               users.map((user) => (
                 <TableRow 
                     key={user.id} 
-                    // Removemos bg-gray-50 e usamos muted/50 para o hover funcionar nos dois modos
+                   
                     className="hover:bg-muted/50 border-border transition-colors duration-200"
                 >
                   <TableCell className="font-medium text-foreground py-3">{user.nome}</TableCell>

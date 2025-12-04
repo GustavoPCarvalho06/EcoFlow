@@ -1,7 +1,3 @@
-// =================================================================================
-// Arquivo: src/components/dashboard/LogsTable.jsx
-// =================================================================================
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,20 +24,20 @@ import {
 export function LogsTable({ token }) {
     const apiUrl = useApiUrl();
     
-    // Controle de hidratação
+   
     const [isMounted, setIsMounted] = useState(false);
 
-    // Estados de dados
+    
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     
-    // Estados de filtros
+ 
     const [search, setSearch] = useState("");
     const [acaoFilter, setAcaoFilter] = useState("todos");
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     
-    // Estados de paginação
+    
     const [totalPages, setTotalPages] = useState(1);
     const [totalRecords, setTotalRecords] = useState(0);
 
@@ -82,7 +78,6 @@ export function LogsTable({ token }) {
         }
     };
 
-    // Debounce na busca
     useEffect(() => {
         if (isMounted) {
             const timer = setTimeout(() => {
@@ -93,30 +88,30 @@ export function LogsTable({ token }) {
         }
     }, [search, acaoFilter, isMounted]);
 
-    // Atualiza ao mudar página ou limite
+  
     useEffect(() => {
         if (isMounted) {
             fetchLogs();
         }
     }, [page, limit, isMounted]);
 
-    // --- ÍCONES ADAPTADOS PARA DARK MODE ---
+  
     const getIcon = (acao, cargo) => {
-        // Cargo IoT: Roxo
+        
         if (cargo === 'IoT') return <Cpu className="h-4 w-4 text-purple-600 dark:text-purple-400" />;
 
         if (!acao) return <Activity className="h-4 w-4 text-muted-foreground" />;
         const key = acao.toUpperCase();
         
-        // Login: Azul
+        
         if (key.includes('LOGIN')) return <LogIn className="h-4 w-4 text-blue-500 dark:text-blue-400" />;
-        // Criar: Verde
+       
         if (key.includes('CRIA') || key.includes('ADD')) return <UserPlus className="h-4 w-4 text-green-500 dark:text-green-400" />;
-        // Editar: Laranja
+        
         if (key.includes('EDI') || key.includes('UPD') || key.includes('FUNCAO')) return <Edit className="h-4 w-4 text-orange-500 dark:text-orange-400" />;
-        // Deletar: Vermelho
+        
         if (key.includes('DEL') || key.includes('REM') || key.includes('EXCLU') || key.includes('DESLIG')) return <Trash className="h-4 w-4 text-destructive dark:text-red-400" />;
-        // Ativar: Esmeralda
+       
         if (key.includes('ATIV')) return <CheckCircle className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />;
         
         return <Activity className="h-4 w-4 text-muted-foreground" />;
@@ -151,12 +146,11 @@ export function LogsTable({ token }) {
     return (
         <div className="space-y-4 w-full">
             
-            {/* --- BARRA DE FILTROS --- */}
-            {/* bg-muted/20 dá um contraste leve tanto no claro (cinza) quanto no escuro (verde muito escuro) */}
+            
             <div className="flex flex-col xl:flex-row gap-4 justify-between items-end xl:items-center bg-muted/20 p-4 rounded-lg border border-border">
                 
                 <div className="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
-                    {/* Busca */}
+                    
                     <div className="relative w-full md:w-72">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input 
@@ -167,7 +161,7 @@ export function LogsTable({ token }) {
                         />
                     </div>
 
-                    {/* Filtro de Ação */}
+                   
                     <div className="w-full md:w-48">
                         <Select value={acaoFilter} onValueChange={setAcaoFilter}>
                             <SelectTrigger className="bg-background border-input text-foreground">
@@ -184,7 +178,7 @@ export function LogsTable({ token }) {
                         </Select>
                     </div>
 
-                    {/* Limite */}
+                    
                     <div className="w-full md:w-32 flex items-center gap-2">
                         <Select 
                             value={limit.toString()} 
@@ -211,7 +205,7 @@ export function LogsTable({ token }) {
                 </div>
             </div>
 
-            {/* --- TABELA RESPONSIVA --- */}
+        
             <div className="rounded-md border border-border bg-card">
                 <div className="w-full overflow-x-auto max-w-[85vw] md:max-w-full mx-auto">
                     <Table className="min-w-[800px]">
@@ -290,7 +284,7 @@ export function LogsTable({ token }) {
                 </div>
             </div>
 
-            {/* --- PAGINAÇÃO --- */}
+           
             <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-muted-foreground pl-2 hidden sm:inline-block">
                     Exibindo {logs.length} de {totalRecords}

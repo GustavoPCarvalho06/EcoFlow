@@ -54,7 +54,7 @@ export default function MapboxMap({ onMapClick }) {
           antialias: true,
         });
 
-        /* marcador pro modal quando clica onde for criar */
+        
         if (onMapClick) {
           map.on("click", (e) => {
             const { lng, lat } = e.lngLat;
@@ -86,7 +86,7 @@ export default function MapboxMap({ onMapClick }) {
           return;
         }
 
-        // marcador do usuario
+        
         const UsuarioMarker = document.createElement("div");
         UsuarioMarker.className = "marker";
         UsuarioMarker.style.backgroundImage = "url('https://i.imgur.com/MK4NUzI.png')";
