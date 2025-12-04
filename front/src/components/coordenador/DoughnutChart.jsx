@@ -52,7 +52,7 @@ export default function DoughnutChart({ data }) {
         cornerRadius: 8,
       }
     },
-    cutout: "75%", // Deixa o gráfico mais fino e elegante
+    cutout: "55%",
   };
 
   return (
@@ -71,4 +71,4 @@ export default function DoughnutChart({ data }) {
       </div>
     </div>
   );
-}
+} 
