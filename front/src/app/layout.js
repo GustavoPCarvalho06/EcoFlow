@@ -34,7 +34,6 @@ const getApiUrlFromServer = () => {
       for (const iface of interfaces[name]) {
         if (iface.family === 'IPv4' && !iface.internal) {
           detectedUrl = `http://${iface.address}:3001`;
-          console.log(`[Next.js Server] Layout renderizado no servidor. API primária: ${detectedUrl}`);
           return detectedUrl;
         }
       }
