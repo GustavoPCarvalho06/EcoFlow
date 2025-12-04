@@ -16,6 +16,15 @@ export default function MapboxMap({ onMapClick }) {
   const [mounted, setMounted] = useState(false);
   const [rotaInfo, setRotaInfo] = useState(null);
 
+  const refreshPoints = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/statusSensor`);
+    const data = await response.json();
+    setPontos(data);
+  } catch {}
+};
+
+
   const apiUrl = useApiUrl();
 
   const usuario = { x: -46.559689, y: -23.64434 };
@@ -85,7 +94,6 @@ export default function MapboxMap({ onMapClick }) {
           setError("Conectando ao servidor... Por favor, tente novamente em um instante.");
           return;
         }
-
         // marcador do usuario
         const UsuarioMarker = document.createElement("div");
         UsuarioMarker.className = "marker";

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-export default function MapBoxPainelCriar({ coords, setCoords }) {
+export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
     const [loadingRua, setLoadingRua] = useState(false);
     const [status, setStatus] = useState("Vazia");
     const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
@@ -76,6 +76,8 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
             }
 
             setMensagem({ tipo: "sucesso", texto: "Criado com sucesso!" });
+            onCreate();
+
 
         } catch (err) {
             console.error("Erro ao enviar:", err);
@@ -86,14 +88,12 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
     };
 
     return (
-        // bg-card e border-border garantem a adaptação ao tema (Branco ou Deep Forest)
         <div className="w-[280px] rounded-xl border border-border shadow-lg p-5 flex flex-col items-center gap-4 bg-card text-foreground transition-colors duration-300">
 
             <h3 className="text-center text-lg font-bold tracking-tight">
                 Novo Ponto
             </h3>
 
-            {/* Mensagem de Feedback */}
             {mensagem.texto && (
                 <div
                     className={`text-xs font-bold text-center px-3 py-1 rounded-full ${

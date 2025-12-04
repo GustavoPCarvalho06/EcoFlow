@@ -18,7 +18,7 @@ export default function MapBoxCriarWrapper() {
             </div>
 
             <div className="flex items-center justify-center">
-                <MapBoxPainelCriar coords={coords} setCoords={setCoords} />
+                <MapBoxPainelCriar coords={coords} setCoords={setCoords} onCreate={refreshPoints} />
             </div>
 
         </div>
