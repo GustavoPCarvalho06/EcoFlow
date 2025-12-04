@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { PlusCircle, Loader2, Search } from "lucide-react";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-export default function MapBoxPainelCriar({ coords, setCoords }) {
+export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
     const [loadingRua, setLoadingRua] = useState(false);
     const [status, setStatus] = useState("Vazia");
     const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
@@ -152,7 +152,6 @@ export default function MapBoxPainelCriar({ coords, setCoords }) {
                 Novo Ponto
             </h3>
 
-            
             {mensagem.texto && (
                 <div
                     className={`text-xs font-bold text-center px-3 py-1 rounded-full ${

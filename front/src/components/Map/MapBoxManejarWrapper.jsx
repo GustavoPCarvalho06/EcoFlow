@@ -1,13 +1,15 @@
 "use client";
 
 import { useApiUrl } from "@/app/context/ApiContext";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -92,6 +94,9 @@ export default function MapBoxManejarWrapper({ token }) {
   }, [apiUrl, token]);
 
   useEffect(() => {
+    async function fetchData() {
+      setLixo(await getLixoData(apiUrl, token));
+    }
     fetchData();
   }, [fetchData]);
 
@@ -295,11 +300,17 @@ export default function MapBoxManejarWrapper({ token }) {
                     {loading ? "Carregando..." : "Nenhum sensor encontrado."}
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="3" className="h-32 text-center text-sm">
+                  Nenhum sensor encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
 
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>

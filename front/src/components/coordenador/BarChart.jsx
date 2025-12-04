@@ -18,7 +18,6 @@ export default function BarChart({ data }) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-
   const textColor = isDark ? "#e2e8f0" : "#64748b"; 
   const gridColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
 
@@ -28,13 +27,13 @@ export default function BarChart({ data }) {
       {
         label: "Coletas",
         data: data.coletas,
-        backgroundColor: "#f59e0b", 
+        backgroundColor: "#f59e0b",
         borderRadius: 4,
       },
       {
         label: "Alertas",
         data: data.alertas,
-        backgroundColor: "#3b82f6", 
+        backgroundColor: "#3b82f6",
         borderRadius: 4,
       }
     ]
@@ -47,9 +46,9 @@ export default function BarChart({ data }) {
       legend: {
         position: "top",
         labels: {
-          color: textColor, 
+          color: textColor,
           font: {
-            family: "'Plus Jakarta Sans', sans-serif", 
+            family: "'Plus Jakarta Sans', sans-serif",
             size: 12
           }
         }
@@ -69,23 +68,25 @@ export default function BarChart({ data }) {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { color: textColor }, 
-        grid: { color: gridColor }  
+        ticks: { color: textColor },
+        grid: { color: gridColor }
       },
       x: {
-        ticks: { color: textColor }, 
-        grid: { display: false }     
+        ticks: { color: textColor },
+        grid: { display: false }
       }
     }
   };
 
   return (
-    
-    <div className="flex flex-col h-full w-full">
-      <h3 className="text-sm font-semibold text-foreground mb-4">
+    <div className="flex flex-col h-full w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
+      {/* Header */}
+      <h3 className="text-base font-semibold text-foreground mb-4">
         Coletas por Bairro (últimos 30 dias)
       </h3>
-      <div className="flex-1 w-full min-h-0">
+
+      {/* Chart Container */}
+      <div className="flex-1 w-full min-h-0 relative">
         <Bar data={chartData} options={options} />
       </div>
     </div>

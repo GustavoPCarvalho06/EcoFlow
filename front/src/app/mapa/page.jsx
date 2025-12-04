@@ -14,12 +14,11 @@ import Layout from "@/components/dashboard/layout/Layout";
 export default async function MapaPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get("token");
-  const tokenValue = tokenCookie?.value;
 
   let user = null;
-  if (tokenValue) {
+  if (tokenCookie?.value) {
     try {
-      user = jwt.decode(tokenValue);
+      user = jwt.decode(tokenCookie.value);
     } catch {
       console.error("Erro ao decodificar o token");
     }

@@ -16,6 +16,15 @@ export default function MapboxMap({ onMapClick }) {
   const [mounted, setMounted] = useState(false);
   const [rotaInfo, setRotaInfo] = useState(null);
 
+  const refreshPoints = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/statusSensor`);
+    const data = await response.json();
+    setPontos(data);
+  } catch {}
+};
+
+
   const apiUrl = useApiUrl();
 
   const usuario = { x: -46.559689, y: -23.64434 };

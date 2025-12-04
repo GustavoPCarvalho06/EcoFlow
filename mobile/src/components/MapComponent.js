@@ -1,3 +1,4 @@
+// mobile/src/components/MapComponent.js
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
@@ -94,7 +95,6 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
         }}
         showsUserLocation={true}
       >
-
         <Marker coordinate={usuario} title="Você está aqui" pinColor="blue" />
 
         {pontosFiltrados.map(p => {
