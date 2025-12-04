@@ -1,19 +1,17 @@
-// mobile/src/components/MapComponent.js
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, Platform, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
 import { filtrarPontos, routeToLatLngArray } from "../components/mapLogic";
 
 const usuario = { latitude: -23.64434, longitude: -46.559689 };
 
-export default function MapComponent({ apiUrl, mapboxToken, onCreatePoint }) {
+export default function MapComponent({ apiUrl, mapboxToken }) {
   const [pontos, setPontos] = useState([]);
   const [filtro, setFiltro] = useState("-");
   const [routeCoords, setRouteCoords] = useState([]);
   const mapRef = useRef(null);
 
-  // fetch pontos
   useEffect(() => {
     (async () => {
       try {
@@ -28,7 +26,6 @@ export default function MapComponent({ apiUrl, mapboxToken, onCreatePoint }) {
 
   const pontosFiltrados = filtro === "-" ? [] : filtrarPontos(pontos, filtro);
 
-  // calculate route using Mapbox optimized trips or directions
   async function calcularRota() {
     if (!mapboxToken) {
       console.warn("Mapbox token missing");
@@ -39,51 +36,48 @@ export default function MapComponent({ apiUrl, mapboxToken, onCreatePoint }) {
       return;
     }
 
-    // coords: [lng,lat] pairs: start is usuario then pontos
-    const coords = [ [usuario.longitude, usuario.latitude], 
+    const coords = [
+      [usuario.longitude, usuario.latitude],
       ...pontosFiltrados.map(p => [p.Coordenadas.x, p.Coordenadas.y])
     ];
 
-    const optimizedUrl = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coords.map(c=>c.join(',')).join(';')}?geometries=geojson&overview=full&roundtrip=false&source=first&access_token=${mapboxToken}`;
+    const optimizedUrl = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coords
+      .map(c => c.join(","))
+      .join(";")}?geometries=geojson&overview=full&roundtrip=false&source=first&access_token=${mapboxToken}`;
 
     try {
-      let resp = await fetch(optimizedUrl);
-      let json = await resp.json();
+      const resp = await fetch(optimizedUrl);
+      const json = await resp.json();
 
       if (!json.trips || !json.trips.length) {
-        // fallback to directions (non-optimized)
-        const dirUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coords.map(c=>c.join(',')).join(';')}?geometries=geojson&overview=full&access_token=${mapboxToken}`;
-        resp = await fetch(dirUrl);
-        json = await resp.json();
-      }
-
-      const geometry = json.trips?.[0]?.geometry || json.routes?.[0]?.geometry;
-      if (!geometry) {
-        console.warn("No route geometry returned");
+        console.warn("Mapbox optimized-trips did not return a route");
+        setRouteCoords([]);
         return;
       }
+
+      const geometry = json.trips[0].geometry;
       const latLngArray = routeToLatLngArray(geometry);
       setRouteCoords(latLngArray);
 
-      // fit to coordinates
       if (mapRef.current && latLngArray.length) {
-        const { latitude, longitude } = latLngArray[Math.floor(latLngArray.length / 2)] || usuario;
-        mapRef.current.animateToRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1
-        }, 800);
+        const mid = latLngArray[Math.floor(latLngArray.length / 2)];
+        mapRef.current.animateToRegion(
+          {
+            latitude: mid.latitude,
+            longitude: mid.longitude,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          },
+          800
+        );
       }
     } catch (err) {
       console.error("Erro ao calcular rota:", err);
     }
   }
 
-  // call calcularRota whenever filtro changes
   useEffect(() => {
     calcularRota();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtro, pontos]);
 
   return (
@@ -91,42 +85,47 @@ export default function MapComponent({ apiUrl, mapboxToken, onCreatePoint }) {
       <MapView
         ref={mapRef}
         style={styles.map}
-        provider={PROVIDER_GOOGLE} // remove this if you want Apple maps on iOS
+        provider={PROVIDER_GOOGLE}
         initialRegion={{
           latitude: usuario.latitude,
           longitude: usuario.longitude,
           latitudeDelta: 0.03,
           longitudeDelta: 0.03,
         }}
-        onPress={(e) => {
-          const { coordinate } = e.nativeEvent;
-          if (onCreatePoint) onCreatePoint(coordinate);
-        }}
         showsUserLocation={true}
       >
-        {/* user marker */}
-        <Marker
-          coordinate={usuario}
-          title="Você está aqui"
-          pinColor="blue"
-        />
 
-        {/* sensor markers */}
+        <Marker coordinate={usuario} title="Você está aqui" pinColor="blue" />
+
         {pontosFiltrados.map(p => {
           const lat = p.Coordenadas.y ?? p.y;
           const lng = p.Coordenadas.x ?? p.x;
-          const color = p.Stats === "Vazia" ? "green" : p.Stats === "Quase Cheia" ? "orange" : "red";
+          const color =
+            p.Stats === "Vazia"
+              ? "green"
+              : p.Stats === "Quase Cheia"
+              ? "orange"
+              : "red";
+
           return (
-            <Marker
-              key={p.ID}
-              coordinate={{ latitude: lat, longitude: lng }}
-              pinColor={color}
-            >
+            <Marker key={p.ID} coordinate={{ latitude: lat, longitude: lng }} pinColor={color}>
               <Callout>
                 <View style={{ width: 220 }}>
                   <Text style={{ fontWeight: "700" }}>🗑️ Sensor {p.ID}</Text>
                   <Text numberOfLines={2}>{p.Endereco}</Text>
-                  <View style={{ marginTop: 6, padding: 6, borderRadius: 6, backgroundColor: p.Stats === "Vazia" ? "#d4f8d4" : p.Stats === "Quase Cheia" ? "#ffe9b3" : "#ffcdcd" }}>
+                  <View
+                    style={{
+                      marginTop: 6,
+                      padding: 6,
+                      borderRadius: 6,
+                      backgroundColor:
+                        p.Stats === "Vazia"
+                          ? "#d4f8d4"
+                          : p.Stats === "Quase Cheia"
+                          ? "#ffe9b3"
+                          : "#ffcdcd",
+                    }}
+                  >
                     <Text style={{ fontWeight: "700" }}>Status: {p.Stats}</Text>
                     <Text>Lat: {lat.toFixed(6)}</Text>
                     <Text>Lng: {lng.toFixed(6)}</Text>
@@ -137,21 +136,15 @@ export default function MapComponent({ apiUrl, mapboxToken, onCreatePoint }) {
           );
         })}
 
-        {/* route as polyline */}
         {routeCoords.length > 0 && (
-          <Polyline
-            coordinates={routeCoords}
-            strokeWidth={5}
-            lineJoin="round"
-          />
+          <Polyline coordinates={routeCoords} strokeWidth={5} lineJoin="round" />
         )}
       </MapView>
 
-      {/* Floating filter control */}
       <View style={styles.filterContainer}>
         <Picker
           selectedValue={filtro}
-          onValueChange={(value) => setFiltro(value)}
+          onValueChange={value => setFiltro(value)}
           style={styles.picker}
           itemStyle={{ height: 44 }}
         >
@@ -180,10 +173,10 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowRadius: 6,
-    overflow: "hidden"
+    overflow: "hidden",
   },
   picker: {
     width: Platform.OS === "ios" ? 220 : 200,
-    height: 44
-  }
+    height: 44,
+  },
 });
