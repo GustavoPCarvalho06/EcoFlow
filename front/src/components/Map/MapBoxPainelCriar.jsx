@@ -2,27 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; 
 import { PlusCircle, Loader2, Search } from "lucide-react";
 import { useApiUrl } from "@/app/context/ApiContext";
 
-export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
+export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }) {
     const [loadingRua, setLoadingRua] = useState(false);
     const [status, setStatus] = useState("Vazia");
     const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-   
     const [cepInput, setCepInput] = useState("");
     const [loadingCep, setLoadingCep] = useState(false);
 
     const apiUrl = useApiUrl();
 
-    
     useEffect(() => {
         if (!coords.lat || !coords.lng) return;
 
-       
         if (coords.rua && !loadingRua) return;
 
         const fetchStreetName = async () => {
@@ -56,7 +52,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
         setMensagem({ tipo: "", texto: "" });
 
         try {
-            
             const viaCepRes = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
             const viaCepData = await viaCepRes.json();
 
@@ -66,10 +61,8 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
                 return;
             }
 
-            
             const enderecoCompleto = `${viaCepData.logradouro}, ${viaCepData.bairro}, ${viaCepData.localidade} - ${viaCepData.uf}, Brasil`;
 
-            
             const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(enderecoCompleto)}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&limit=1`;
             
             const mapboxRes = await fetch(mapboxUrl);
@@ -79,7 +72,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
                 const [lng, lat] = mapboxData.features[0].center;
                 const nomeFormatado = mapboxData.features[0].place_name;
 
-                
                 setCoords({
                     lat: lat,
                     lng: lng,
@@ -108,6 +100,11 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
             return;
         }
 
+        if (!token) {
+            setMensagem({ tipo: "erro", texto: "Erro de autenticação. Recarregue a página." });
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -115,6 +112,7 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` 
                 },
                 body: JSON.stringify({
                     statusLixo: status,
@@ -130,12 +128,13 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
 
             if (!res.ok) {
                 console.error("Erro ao criar:", data);
-                setMensagem({ tipo: "erro", texto: "Erro ao criar ponto." });
+                setMensagem({ tipo: "erro", texto: data.mensagem || "Erro ao criar ponto." });
                 return;
             }
 
             setMensagem({ tipo: "sucesso", texto: "Criado com sucesso!" });
             
+            if (onCreate) onCreate();
 
         } catch (err) {
             console.error("Erro ao enviar:", err);
@@ -166,7 +165,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
 
             <div className="w-full space-y-3">
                 
-                
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Buscar por CEP</label>
                     <div className="flex gap-2">
@@ -191,7 +189,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
 
                 <div className="h-px bg-border my-1" />
 
-                
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Latitude</label>
                     <input 
@@ -202,7 +199,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
                     />
                 </div>
 
-                
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Longitude</label>
                     <input 
@@ -213,7 +209,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
                     />
                 </div>
 
-               
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase flex justify-between">
                         Endereço Automático
@@ -229,7 +224,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate }) {
                     />
                 </div>
 
-               
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Status Inicial</label>
                     <select

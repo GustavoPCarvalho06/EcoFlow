@@ -3,8 +3,12 @@ import { useState } from "react";
 import MapboxMap from "./MapboxMap";
 import MapBoxPainelCriar from "./MapBoxPainelCriar";
 
-export default function MapBoxCriarWrapper() {
+export default function MapBoxCriarWrapper({ token }) {
     const [coords, setCoords] = useState({ lat: "", lng: "", rua: "" });
+
+    const handleSuccess = () => {
+        
+    };
 
     return (
         <div className="flex flex-1 gap-6">
@@ -18,7 +22,13 @@ export default function MapBoxCriarWrapper() {
             </div>
 
             <div className="flex items-center justify-center">
-                <MapBoxPainelCriar coords={coords} setCoords={setCoords} onCreate={refreshPoints} />
+               
+                <MapBoxPainelCriar 
+                    coords={coords} 
+                    setCoords={setCoords} 
+                    onCreate={handleSuccess}
+                    token={token} 
+                />
             </div>
 
         </div>

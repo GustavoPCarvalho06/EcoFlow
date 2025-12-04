@@ -1,5 +1,3 @@
-
-
 import MapboxMap from "@/components/Map/MapboxMap.jsx";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
@@ -14,11 +12,12 @@ import Layout from "@/components/dashboard/layout/Layout";
 export default async function MapaPage() {
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get("token");
+  const tokenValue = tokenCookie?.value;
 
   let user = null;
-  if (tokenCookie?.value) {
+  if (tokenValue) {
     try {
-      user = jwt.decode(tokenCookie.value);
+      user = jwt.decode(tokenValue);
     } catch {
       console.error("Erro ao decodificar o token");
     }
@@ -27,7 +26,7 @@ export default async function MapaPage() {
   return (
     <Layout>
       <main className="flex flex-1 flex-col p-4 md:p-6 overflow-hidden bg-background h-full">
-        
+
         <div className="flex flex-col gap-3 mb-4">
           <h1 className="font-semibold text-lg md:text-2xl text-foreground">Mapa de Coleta</h1>
 
@@ -40,8 +39,7 @@ export default async function MapaPage() {
             </PopoverTrigger>
 
             <PopoverContent align="start" side="right" className="w-[200px] p-2 rounded-md border border-border shadow-lg bg-popover text-popover-foreground">
-              
-             
+
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition cursor-pointer">
@@ -60,12 +58,11 @@ export default async function MapaPage() {
                     Clique no mapa para selecionar o local do novo ponto.
                   </p>
                   <div className="flex-1 min-h-0 relative">
-                    <MapBoxCriarWrapper />
+                   
+                    <MapBoxCriarWrapper token={tokenValue} />
                   </div>
                 </DialogContent>
               </Dialog>
-
-             
               <Dialog className="w-full">
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition cursor-pointer">
@@ -74,16 +71,15 @@ export default async function MapaPage() {
                   </button>
                 </DialogTrigger>
 
-               
                 <DialogContent className="!max-w-5xl sm:max-w-[900px] w-full h-[80vh] flex flex-col gap-0 bg-card border-border p-0 overflow-hidden">
-                  
+
                   <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-foreground text-xl">Gerenciar Pontos Existentes</DialogTitle>
                   </DialogHeader>
 
                   <div className="flex-1 overflow-hidden p-6 pt-2">
-                  
-                    <MapBoxManejarWrapper token={tokenValue}/>
+
+                    <MapBoxManejarWrapper token={tokenValue} />
                   </div>
 
                 </DialogContent>

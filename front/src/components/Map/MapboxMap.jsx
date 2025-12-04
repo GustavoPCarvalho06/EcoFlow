@@ -385,7 +385,7 @@ export default function MapboxMap({ onMapClick }) {
           fontWeight: 600,
         }}
       >
-        <span>Rota:</span>
+        <span className="text-black">Rota:</span>
         <select
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}

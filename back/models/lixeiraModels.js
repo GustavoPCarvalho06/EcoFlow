@@ -2,13 +2,22 @@ import { read, readAll, deleteRecord, create, update ,createLixoDB} from "../con
 
 const deleteLixo = async (id) => {
   try {
-    const usuario = await deleteRecord("SistemaSensor", `id_Sensor = '${id}'`);
-    if (!usuario) {
-      return "Erro ao consultar";
+
+    try {
+        await deleteRecord("historico_sensores", `id_sensor = '${id}'`);
+    } catch (e) {
+ 
+        console.log("Aviso: Tentativa de limpar histórico retornou:", e.message);
     }
-    return usuario;
+
+    const resultado = await deleteRecord("SistemaSensor", `id_Sensor = '${id}'`);
+    
+    if (!resultado) {
+      return "Erro ao consultar ou sensor não encontrado";
+    }
+    return resultado;
   } catch (err) {
-    console.error("Erro ao consultar a Lixeira no sistema:", err);
+    console.error("Erro ao deletar a Lixeira no sistema:", err);
     throw err;
   }
 };

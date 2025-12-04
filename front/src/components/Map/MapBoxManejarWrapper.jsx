@@ -1,15 +1,13 @@
 "use client";
 
 import { useApiUrl } from "@/app/context/ApiContext";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -51,25 +49,26 @@ import { Label } from "@/components/ui/label";
 import { Trash2, MapPin, Pencil, Loader2, RefreshCw, Search } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 
-export default function MapBoxManejarWrapper({ token }) {
+export default function MapBoxManejarWrapper({ token, onUpdate }) {
   const apiUrl = useApiUrl();
   const [lixo, setLixo] = useState([]);
   const [loading, setLoading] = useState(false);
   
-  
+  // Filtros
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Estados de Edição
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
- 
+  // Estados de Exclusão
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  
+  // Função para buscar dados
   const fetchData = useCallback(async () => {
     if (!token || !apiUrl) return;
     setLoading(true);
@@ -94,28 +93,34 @@ export default function MapBoxManejarWrapper({ token }) {
   }, [apiUrl, token]);
 
   useEffect(() => {
-    async function fetchData() {
-      setLixo(await getLixoData(apiUrl, token));
-    }
     fetchData();
   }, [fetchData]);
 
 
   const filteredLixo = lixo.filter((item) => {
-    const endereco = item.Endereco ? item.Endereco.toLowerCase() : "";
+    const endereco = item.Endereco || item.endereco || "";
     const busca = searchTerm.toLowerCase();
-    return endereco.includes(busca);
+    return endereco.toLowerCase().includes(busca);
   });
 
+  // --- Handlers de Edição ---
   const handleOpenEdit = (item) => {
     setItemToEdit(item);
-    setNewStatus(item.Stats);
+    setNewStatus(item.Stats || item.statusLixo || "Vazia");
     setIsEditOpen(true);
   };
 
   const handleUpdate = async () => {
     if (!itemToEdit || !newStatus) return;
     setIsUpdating(true);
+
+    const idToUpdate = itemToEdit.ID || itemToEdit.id || itemToEdit.id_Sensor;
+
+    if (!idToUpdate) {
+        alert("Erro: ID do item não encontrado.");
+        setIsUpdating(false);
+        return;
+    }
 
     try {
       const response = await fetch(`${apiUrl}/lixo`, {
@@ -125,7 +130,7 @@ export default function MapBoxManejarWrapper({ token }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          id: itemToEdit.ID,
+          id: idToUpdate,
           statusLixo: newStatus,
         }),
       });
@@ -134,6 +139,10 @@ export default function MapBoxManejarWrapper({ token }) {
 
       await fetchData();
       setIsEditOpen(false);
+      
+      // Atualiza o mapa principal
+      if (onUpdate) onUpdate();
+
     } catch (error) {
       console.error("Erro ao atualizar:", error);
       alert("Erro ao atualizar status.");
@@ -142,7 +151,7 @@ export default function MapBoxManejarWrapper({ token }) {
     }
   };
 
-  
+  // --- Handlers de Exclusão ---
   const handleOpenDelete = (item) => {
     setItemToDelete(item);
     setIsDeleteOpen(true);
@@ -152,6 +161,14 @@ export default function MapBoxManejarWrapper({ token }) {
     if (!itemToDelete) return;
     setIsDeleting(true);
 
+    const idToDelete = itemToDelete.ID || itemToDelete.id || itemToDelete.id_Sensor;
+
+    if (!idToDelete) {
+        alert("Erro crítico: ID não encontrado.");
+        setIsDeleting(false);
+        return;
+    }
+
     try {
       const response = await fetch(`${apiUrl}/lixo`, {
         method: "DELETE",
@@ -160,17 +177,25 @@ export default function MapBoxManejarWrapper({ token }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          id: itemToDelete.ID,
+          id: idToDelete,
         }),
       });
 
-      if (!response.ok) throw new Error("Falha ao deletar");
+      if (!response.ok) {
+        const errData = await response.json();
+        console.error("Erro backend:", errData);
+        throw new Error(errData.mensagem || "Falha ao deletar");
+      }
 
       await fetchData();
       setIsDeleteOpen(false);
+
+      // Atualiza o mapa principal
+      if (onUpdate) onUpdate();
+
     } catch (error) {
       console.error("Erro ao deletar:", error);
-      alert("Erro ao deletar ponto.");
+      alert(`Erro: ${error.message}`);
     } finally {
       setIsDeleting(false);
     }
@@ -238,59 +263,63 @@ export default function MapBoxManejarWrapper({ token }) {
 
             <TableBody>
               {filteredLixo && filteredLixo.length > 0 ? (
-                filteredLixo.map((item) => (
-                  <TableRow
-                    key={item.ID}
-                    className="border-border hover:bg-muted/50 transition-colors"
-                  >
-                    
-                    
-                    <TableCell className="pl-6 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-3 w-3 flex-shrink-0" />
-                        <span className="truncate max-w-[450px]" title={item.Endereco}>
-                          {item.Endereco ?? "Localização não informada"}
-                        </span>
-                      </div>
-                    </TableCell>
+                filteredLixo.map((item, index) => {
+                  const displayId = item.ID || item.id || item.id_Sensor || index;
+                  const displayEndereco = item.Endereco || item.endereco || "Localização não informada";
+                  const displayStatus = item.Stats || item.statusLixo || "Desconhecido";
 
-                    <TableCell className="text-center">
-                      <Badge
-                        className={cn(
-                          "shadow-none border font-medium px-2 py-0.5 whitespace-nowrap",
-                          item.Stats === "Cheia"
-                            ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400"
-                            : item.Stats === "Quase Cheia"
-                            ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
-                            : "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400"
-                        )}
-                      >
-                        {item.Stats}
-                      </Badge>
-                    </TableCell>
+                  return (
+                    <TableRow
+                      key={displayId}
+                      className="border-border hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell className="pl-6 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate max-w-[450px]" title={displayEndereco}>
+                            {displayEndereco}
+                          </span>
+                        </div>
+                      </TableCell>
 
-                    <TableCell className="pr-6 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenEdit(item)}
-                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                      <TableCell className="text-center">
+                        <Badge
+                          className={cn(
+                            "shadow-none border font-medium px-2 py-0.5 whitespace-nowrap",
+                            displayStatus === "Cheia"
+                              ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400"
+                              : displayStatus === "Quase Cheia"
+                              ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400"
+                          )}
                         >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenDelete(item)}
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                          {displayStatus}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="pr-6 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenEdit(item)}
+                            className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenDelete(item)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell
@@ -300,23 +329,15 @@ export default function MapBoxManejarWrapper({ token }) {
                     {loading ? "Carregando..." : "Nenhum sensor encontrado."}
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan="3" className="h-32 text-center text-sm">
-                  Nenhum sensor encontrado.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[400px] bg-card border-border">
           <DialogHeader>
-           
             <DialogTitle className="text-foreground">Atualizar Sensor</DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Altere o status atual do ponto de coleta.
@@ -355,7 +376,9 @@ export default function MapBoxManejarWrapper({ token }) {
             <AlertDialogDescription className="text-muted-foreground">
               Você tem certeza que deseja remover este sensor?
               <br />
-              Local: <span className="font-bold text-foreground">{itemToDelete?.Endereco}</span>
+              Local: <span className="font-bold text-foreground">
+                {itemToDelete?.Endereco || itemToDelete?.endereco || "Local desconhecido"}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
