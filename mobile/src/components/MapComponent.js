@@ -1,6 +1,7 @@
 // mobile/src/components/MapComponent.js
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Picker } from "react-native";
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
 import { filtrarPontos, routeToLatLngArray } from "../components/mapLogic";
 
