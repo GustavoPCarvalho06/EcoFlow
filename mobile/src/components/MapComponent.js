@@ -9,10 +9,11 @@ const usuario = { latitude: -23.64434, longitude: -46.559689 };
 
 export default function MapComponent({ apiUrl, mapboxToken }) {
   const [pontos, setPontos] = useState([]);
-  const [filtro, setFiltro] = useState("-");
+  const [filtro, setFiltro] = useState("-"); 
   const [routeCoords, setRouteCoords] = useState([]);
   const mapRef = useRef(null);
 
+  // Fetch sensor points
   useEffect(() => {
     (async () => {
       try {
@@ -25,13 +26,16 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
     })();
   }, [apiUrl]);
 
-  const pontosFiltrados = filtro === "-" ? [] : filtrarPontos(pontos, filtro);
+  // Fix: use all points when filter is "-"
+  const pontosFiltrados = filtro === "-" ? pontos : filtrarPontos(pontos, filtro);
 
+  // Calculate route using Mapbox
   async function calcularRota() {
     if (!mapboxToken) {
       console.warn("Mapbox token missing");
       return;
     }
+
     if (pontosFiltrados.length === 0) {
       setRouteCoords([]);
       return;
@@ -39,7 +43,10 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
 
     const coords = [
       [usuario.longitude, usuario.latitude],
-      ...pontosFiltrados.map(p => [p.Coordenadas.x, p.Coordenadas.y])
+      ...pontosFiltrados.map(p => [
+        p.Coordenadas?.x ?? p.x,
+        p.Coordenadas?.y ?? p.y
+      ])
     ];
 
     const optimizedUrl = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coords
@@ -49,6 +56,7 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
     try {
       const resp = await fetch(optimizedUrl);
       const json = await resp.json();
+      console.log("Mapbox response:", json); // Debugging
 
       if (!json.trips || !json.trips.length) {
         console.warn("Mapbox optimized-trips did not return a route");
@@ -77,6 +85,7 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
     }
   }
 
+  // Recalculate route whenever points or filter changes
   useEffect(() => {
     calcularRota();
   }, [filtro, pontos]);
@@ -98,8 +107,8 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
         <Marker coordinate={usuario} title="Você está aqui" pinColor="blue" />
 
         {pontosFiltrados.map(p => {
-          const lat = p.Coordenadas.y ?? p.y;
-          const lng = p.Coordenadas.x ?? p.x;
+          const lat = p.Coordenadas?.y ?? p.y;
+          const lng = p.Coordenadas?.x ?? p.x;
           const color =
             p.Stats === "Vazia"
               ? "green"
