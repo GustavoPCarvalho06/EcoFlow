@@ -176,71 +176,139 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 
 
 INSERT INTO usuarios (nome, sexo, cpf, estadoCivil, senha, CEP, email, cargo, statusConta) VALUES
-('Miguel', 'masculino', '00000000000', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '12345001', 'miguel@example.com', 'administrador', 'ativo'),
-('Lalau', 'masculino', '49256740810', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '23456002', 'lalau@example.com', 'coordenador', 'ativo'),
-('Gustavo', 'masculino', '00000000002', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '34567003', 'gustavo@example.com', 'coordenador', 'ativo'),
-('Carla Dias', 'feminino', '10000000003', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '45678004', 'carla.dias@example.com', 'coletor', 'desligado'),
-('Daniel Farias', 'masculino', '10000000004', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '56789005', 'daniel.farias@example.com', 'coletor', 'ativo'),
-('Elisa Gomes', 'feminino', '10000000005', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '67890006', 'elisa.gomes@example.com', 'coordenador', 'ativo'),
-('Fábio Rocha', 'masculino', '10000000006', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '78901007', 'fabio.rocha@example.com', 'coletor', 'ativo'),
-('Gabriela Lima', 'feminino', '10000000007', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '89012008', 'gabriela.lima@example.com', 'coletor', 'desligado'),
-('Henrique Martins', 'masculino', '10000000008', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '90123009', 'henrique.martins@example.com', 'coordenador', 'ativo'),
-('Isabela Nogueira', 'feminino', '10000000009', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '11223010', 'isabela.nogueira@example.com', 'coletor', 'ativo'),
-('João Pereira', 'masculino', '10000000010', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '22334011', 'joao.pereira@example.com', 'coletor', 'ativo'),
-('Larissa Barbosa', 'feminino', '10000000011', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '33445012', 'larissa.barbosa@example.com', 'coordenador', 'desligado'),
-('Marcos Ribeiro', 'masculino', '10000000012', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '44556013', 'marcos.ribeiro@example.com', 'coletor', 'ativo'),
-('Natália Sousa', 'feminino', '10000000013', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '55667014', 'natalia.sousa@example.com', 'coletor', 'ativo'),
-('Otávio Azevedo', 'masculino', '10000000014', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '66778015', 'otavio.azevedo@example.com', 'coordenador', 'ativo'),
-('Patrícia Ferreira', 'feminino', '10000000015', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '77889016', 'patricia.ferreira@example.com', 'coletor', 'desligado'),
-('Quintino Barros', 'masculino', '10000000016', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '88990017', 'quintino.barros@example.com', 'coletor', 'ativo'),
-('Renata Cardoso', 'feminino', '10000000017', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '99001018', 'renata.cardoso@example.com', 'coordenador', 'ativo'),
-('Sérgio Tavares', 'masculino', '10000000018', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '10112019', 'sergio.tavares@example.com', 'coletor', 'ativo'),
-('Tatiane Vasconcelos', 'feminino', '10000000019', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '21223020', 'tatiane.vasconcelos@example.com', 'coletor', 'ativo'),
-('Ulisses Brandão', 'masculino', '10000000020', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '32334021', 'ulisses.brandao@example.com', 'coordenador', 'desligado'),
-('Vanessa Moraes', 'feminino', '10000000021', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '43445022', 'vanessa.moraes@example.com', 'coletor', 'ativo'),
-('Wagner Pinto', 'masculino', '10000000022', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54556023', 'wagner.pinto@example.com', 'coletor', 'ativo'),
-('Ximena Freitas', 'feminino', '10000000023', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '65667024', 'ximena.freitas@example.com', 'coordenador', 'ativo'),
-('Yasmin Correia', 'feminino', '10000000024', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '76778025', 'yasmin.correia@example.com', 'coletor', 'ativo'),
-('Zeca Drummond', 'masculino', '10000000025', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '87889026', 'zeca.drummond@example.com', 'coletor', 'desligado'),
-('Alice Salgado', 'feminino', '10000000026', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '98990027', 'alice.salgado@example.com', 'coordenador', 'ativo'),
-('Bernardo Campos', 'masculino', '10000000027', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '11001028', 'bernardo.campos@example.com', 'coletor', 'ativo'),
-('Clara Siqueira', 'feminino', '10000000028', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '22112029', 'clara.siqueira@example.com', 'coletor', 'ativo'),
-('Davi Queiroz', 'masculino', '10000000029', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '33223030', 'davi.queiroz@example.com', 'coordenador', 'desligado'),
-('Esther Neves', 'feminino', '10000000030', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '44334031', 'esther.neves@example.com', 'coletor', 'ativo'),
-('Felipe Viana', 'masculino', '10000000031', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '55445032', 'felipe.viana@example.com', 'coletor', 'ativo'),
-('Giovanna Justo', 'feminino', '10000000032', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '66556033', 'giovanna.justo@example.com', 'coordenador', 'ativo'),
-('Heitor Xavier', 'masculino', '10000000033', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '77667034', 'heitor.xavier@example.com', 'coletor', 'desligado'),
-('Íris Zanetti', 'feminino', '10000000034', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '88778035', 'iris.zanetti@example.com', 'coletor', 'ativo'),
-('Júlio Pires', 'masculino', '10000000035', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '99889036', 'julio.pires@example.com', 'coordenador', 'ativo'),
-('Lorena Ramos', 'feminino', '10000000036', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '10990037', 'lorena.ramos@example.com', 'coletor', 'ativo'),
-('Murilo Castilho', 'masculino', '10000000037', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '21001038', 'murilo.castilho@example.com', 'coletor', 'ativo'),
-('Nicole Dantas', 'feminino', '10000000038', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '32112039', 'nicole.dantas@example.com', 'coordenador', 'desligado'),
-('Otávio Guerra', 'masculino', '10000000039', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '43223040', 'otavio.guerra@example.com', 'coletor', 'ativo'),
-('Pietra Juncos', 'feminino', '10000000040', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54334041', 'pietra.juncos@example.com', 'coletor', 'ativo'),
-('Rafael Lemos', 'masculino', '10000000041', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '65445042', 'rafael.lemos@example.com', 'coordenador', 'ativo'),
-('Sofia Arantes', 'feminino', '10000000042', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '76556043', 'sofia.arantes@example.com', 'coletor', 'desligado'),
-('Théo Borges', 'masculino', '10000000043', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '87667044', 'theo.borges@example.com', 'coletor', 'ativo'),
-('Valentina Chaves', 'feminino', '10000000044', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '98778045', 'valentina.chaves@example.com', 'coordenador', 'ativo'),
-('Arthur da Mata', 'masculino', '10000000045', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '10889046', 'arthur.da.mata@example.com', 'coletor', 'ativo'),
-('Beatriz Esteves', 'feminino', '10000000046', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '21990047', 'beatriz.esteves@example.com', 'coletor', 'ativo'),
-('Caio Fortes', 'masculino', '10000000047', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '32001048', 'caio.fortes@example.com', 'coordenador', 'desligado'),
-('Helena Guedes', 'feminino', '10000000048', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '43112049', 'helena.guedes@example.com', 'coletor', 'ativo'),
-('Isadora Ibarra', 'feminino', '10000000049', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54223050', 'isadora.ibarra@example.com', 'coletor', 'ativo'),
-('Leonardo Jardim', 'masculino', '10000000050', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '65334051', 'leonardo.jardim@example.com', 'coordenador', 'ativo'),
-('Manuela Lobato', 'feminino', '10000000051', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '76445052', 'manuela.lobato@example.com', 'coletor', 'desligado'),
-('Noah Menezes', 'outros', '10000000052', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '87556053', 'noah.menezes@example.com', 'coletor', 'ativo'),
-('Olívia Novais', 'feminino', '10000000053', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '98667054', 'olivia.novais@example.com', 'coordenador', 'ativo'),
-('Pedro Otero', 'masculino', '10000000054', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '10778055', 'pedro.otero@example.com', 'coletor', 'ativo'),
-('Rafaela Padilha', 'feminino', '10000000055', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '21889056', 'rafaela.padilha@example.com', 'coletor', 'ativo'),
-('Samuel Quintanilha', 'masculino', '10000000056', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '32990057', 'samuel.quintanilha@example.com', 'coordenador', 'desligado'),
-('Vitória Rangel', 'feminino', '10000000057', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '43001058', 'vitoria.rangel@example.com', 'coletor', 'ativo'),
-('Benício Sales', 'masculino', '10000000058', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54112059', 'benicio.sales@example.com', 'coletor', 'ativo'),
-('Catarina Telles', 'feminino', '10000000059', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '65223060', 'catarina.telles@example.com', 'coordenador', 'ativo'),
-('Davi Uchoa', 'masculino', '10000000060', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '76334061', 'davi.uchoa@example.com', 'coletor', 'desligado'),
-('Emanuelly Valente', 'feminino', '10000000061', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '87445062', 'emanuelly.valente@example.com', 'coletor', 'ativo'),
-('Francisco Wallner', 'masculino', '10000000062', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '98556063', 'francisco.wallner@example.com', 'coordenador', 'ativo'),
-('Vinícius Peixoto', 'masculino', '10000000100', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '10667064', 'vinicius.peixoto@example.com', 'coletor', 'ativo');
+('Miguel', 'masculino', '61323253017', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '69301410', 'miguel@example.com', 'administrador', 'ativo'),
+('Lalau', 'masculino', '53060275041', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '58011063', 'lalau@example.com', 'coordenador', 'ativo'),
+('Gustavo', 'masculino', '73785650086', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54525420', 'gustavo@example.com', 'coordenador', 'ativo'),
+('Carla Dias', 'feminino', '10000000003', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '01310940', 'carla.dias@example.com', 'coletor', 'desligado'),
+('Daniel Farias', 'masculino', '10000000004', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '20040002', 'daniel.farias@example.com', 'coletor', 'ativo'),
+('Elisa Gomes', 'feminino', '10000000005', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '30130010', 'elisa.gomes@example.com', 'coordenador', 'ativo'),
+('Fábio Rocha', 'masculino', '10000000006', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '40020010', 'fabio.rocha@example.com', 'coletor', 'ativo'),
+('Gabriela Lima', 'feminino', '10000000007', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '80020000', 'gabriela.lima@example.com', 'coletor', 'desligado'),
+('Henrique Martins', 'masculino', '10000000008', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '90035073', 'henrique.martins@example.com', 'coordenador', 'ativo'),
+('Isabela Nogueira', 'feminino', '10000000009', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '70040906', 'isabela.nogueira@example.com', 'coletor', 'ativo'),
+('João Pereira', 'masculino', '10000000010', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '60165121', 'joao.pereira@example.com', 'coletor', 'ativo'),
+('Larissa Barbosa', 'feminino', '10000000011', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '69010003', 'larissa.barbosa@example.com', 'coordenador', 'desligado'),
+('Marcos Ribeiro', 'masculino', '10000000012', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '29010004', 'marcos.ribeiro@example.com', 'coletor', 'ativo'),
+('Natália Sousa', 'feminino', '10000000013', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '74003010', 'natalia.sousa@example.com', 'coletor', 'ativo'),
+('Otávio Azevedo', 'masculino', '10000000014', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '66010020', 'otavio.azevedo@example.com', 'coordenador', 'ativo'),
+('Patrícia Ferreira', 'feminino', '10000000015', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '50010000', 'patricia.ferreira@example.com', 'coletor', 'desligado'),
+('Quintino Barros', 'masculino', '10000000016', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '88010000', 'quintino.barros@example.com', 'coletor', 'ativo'),
+('Renata Cardoso', 'feminino', '10000000017', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '57020050', 'renata.cardoso@example.com', 'coordenador', 'ativo'),
+('Sérgio Tavares', 'masculino', '10000000018', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '49010030', 'sergio.tavares@example.com', 'coletor', 'ativo'),
+('Tatiane Vasconcelos', 'feminino', '10000000019', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '59025250', 'tatiane.vasconcelos@example.com', 'coletor', 'ativo'),
+('Ulisses Brandão', 'masculino', '10000000020', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '79002010', 'ulisses.brandao@example.com', 'coordenador', 'desligado'),
+('Vanessa Moraes', 'feminino', '10000000021', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '78005000', 'vanessa.moraes@example.com', 'coletor', 'ativo'),
+('Wagner Pinto', 'masculino', '10000000022', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '64000020', 'wagner.pinto@example.com', 'coletor', 'ativo'),
+('Ximena Freitas', 'feminino', '10000000023', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '68900030', 'ximena.freitas@example.com', 'coordenador', 'ativo'),
+('Yasmin Correia', 'feminino', '10000000024', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '69900901', 'yasmin.correia@example.com', 'coletor', 'ativo'),
+('Zeca Drummond', 'masculino', '10000000025', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '76801030', 'zeca.drummond@example.com', 'coletor', 'desligado'),
+('Alice Salgado', 'feminino', '10000000026', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '77001002', 'alice.salgado@example.com', 'coordenador', 'ativo'),
+('Bernardo Campos', 'masculino', '10000000027', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '65010000', 'bernardo.campos@example.com', 'coletor', 'ativo'),
+('Clara Siqueira', 'feminino', '10000000028', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '58010000', 'clara.siqueira@example.com', 'coletor', 'ativo'),
+('Davi Queiroz', 'masculino', '10000000029', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '04538133', 'davi.queiroz@example.com', 'coordenador', 'desligado'),
+('Esther Neves', 'feminino', '10000000030', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '22041001', 'esther.neves@example.com', 'coletor', 'ativo'),
+('Felipe Viana', 'masculino', '10000000031', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '31270901', 'felipe.viana@example.com', 'coletor', 'ativo'),
+('Giovanna Justo', 'feminino', '10000000032', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '80240031', 'giovanna.justo@example.com', 'coordenador', 'ativo'),
+('Heitor Xavier', 'masculino', '10000000033', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '40140130', 'heitor.xavier@example.com', 'coletor', 'desligado'),
+('Íris Zanetti', 'feminino', '10000000034', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '09010100', 'iris.zanetti@example.com', 'coletor', 'ativo'),
+('Júlio Pires', 'masculino', '10000000035', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '24020004', 'julio.pires@example.com', 'coordenador', 'ativo'),
+('Lorena Ramos', 'feminino', '10000000036', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '38400100', 'lorena.ramos@example.com', 'coletor', 'ativo'),
+('Murilo Castilho', 'masculino', '10000000037', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '89201100', 'murilo.castilho@example.com', 'coletor', 'ativo'),
+('Nicole Dantas', 'feminino', '10000000038', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '86010000', 'nicole.dantas@example.com', 'coordenador', 'desligado'),
+('Otávio Guerra', 'masculino', '10000000039', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '95010000', 'otavio.guerra@example.com', 'coletor', 'ativo'),
+('Pietra Juncos', 'feminino', '10000000040', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '14010000', 'pietra.juncos@example.com', 'coletor', 'ativo'),
+('Rafael Lemos', 'masculino', '10000000041', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '11013002', 'rafael.lemos@example.com', 'coordenador', 'ativo'),
+('Sofia Arantes', 'feminino', '10000000042', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '25685006', 'sofia.arantes@example.com', 'coletor', 'desligado'),
+('Théo Borges', 'masculino', '10000000043', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '90020005', 'theo.borges@example.com', 'coletor', 'ativo'),
+('Valentina Chaves', 'feminino', '10000000044', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '71070600', 'valentina.chaves@example.com', 'coordenador', 'ativo'),
+('Arthur da Mata', 'masculino', '10000000045', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '06454000', 'arthur.da.mata@example.com', 'coletor', 'ativo'),
+('Beatriz Esteves', 'feminino', '10000000046', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '28035050', 'beatriz.esteves@example.com', 'coletor', 'ativo'),
+('Caio Fortes', 'masculino', '10000000047', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '35010170', 'caio.fortes@example.com', 'coordenador', 'desligado'),
+('Helena Guedes', 'feminino', '10000000048', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '88330000', 'helena.guedes@example.com', 'coletor', 'ativo'),
+('Isadora Ibarra', 'feminino', '10000000049', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '60175055', 'isadora.ibarra@example.com', 'coletor', 'ativo'),
+('Leonardo Jardim', 'masculino', '10000000050', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '70630100', 'leonardo.jardim@example.com', 'coordenador', 'ativo'),
+('Manuela Lobato', 'feminino', '10000000051', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '01153000', 'manuela.lobato@example.com', 'coletor', 'desligado'),
+('Noah Menezes', 'outros', '10000000052', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '05426100', 'noah.menezes@example.com', 'coletor', 'ativo'),
+('Olívia Novais', 'feminino', '10000000053', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '22793080', 'olivia.novais@example.com', 'coordenador', 'ativo'),
+('Pedro Otero', 'masculino', '10000000054', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '30110002', 'pedro.otero@example.com', 'coletor', 'ativo'),
+('Rafaela Padilha', 'feminino', '10000000055', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '41230000', 'rafaela.padilha@example.com', 'coletor', 'ativo'),
+('Samuel Quintanilha', 'masculino', '10000000056', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '12245000', 'samuel.quintanilha@example.com', 'coordenador', 'desligado'),
+('Vitória Rangel', 'feminino', '10000000057', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '13010000', 'vitoria.rangel@example.com', 'coletor', 'ativo'),
+('Benício Sales', 'masculino', '10000000058', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '97010000', 'benicio.sales@example.com', 'coletor', 'ativo'),
+('Catarina Telles', 'feminino', '10000000059', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '96010000', 'catarina.telles@example.com', 'coordenador', 'ativo'),
+('Davi Uchoa', 'masculino', '10000000060', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '29100000', 'davi.uchoa@example.com', 'coletor', 'desligado'),
+('Emanuelly Valente', 'feminino', '10000000061', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '57035000', 'emanuelly.valente@example.com', 'coletor', 'ativo'),
+('Francisco Wallner', 'masculino', '10000000062', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '58400000', 'francisco.wallner@example.com', 'coordenador', 'ativo'),
+('Vinícius Peixoto', 'masculino', '10000000100', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '09910170', 'vinicius.peixoto@example.com', 'coletor', 'ativo');
 select *from usuarios;
+
+
+INSERT INTO logs_sistema (usuario_id, nome_usuario, cargo_usuario, acao, detalhes, ip_origem, data_hora) VALUES
+
+-- ===================================================
+-- DADOS PARA O FILTRO: SEMANAL (Últimos 7 dias)
+-- ===================================================
+
+-- Hoje (Várias ações)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', NOW()),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Cheia', '::1', NOW()),
+(1, 'Coletor Joana', 'coletor', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Vazia', '::1', NOW()),
+
+-- Ontem (1 dia atrás)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 4 mudou para: Quase Cheia', '::1', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- 2 Dias atrás
+(1, 'Coordenador Carlos', 'coordenador', 'CRIACAO_PONTO_COLETA', 'Criou novo ponto: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+
+-- 3 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 5 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 5 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+
+-- 5 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Quase Cheia', '::1', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+
+-- ===================================================
+-- DADOS PARA O FILTRO: MENSAL (Últimos 30 dias)
+-- ===================================================
+
+-- 10 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+
+-- 15 Dias atrás (Um dia movimentado)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 4 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+(1, 'Coletor Marcos', 'coletor', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+
+-- 25 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Quase Cheia', '::1', DATE_SUB(NOW(), INTERVAL 25 DAY)),
+
+-- ===================================================
+-- DADOS PARA O FILTRO: ANUAL (Últimos 12 meses)
+-- ===================================================
+
+-- 2 Meses atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+
+-- 4 Meses atrás
+(1, 'Coordenador Ana', 'coordenador', 'EDICAO_PONTO_COLETA', 'Alterou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 4 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 5 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 4 MONTH)),
+
+-- 6 Meses atrás (Pico de alertas)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 6 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 6 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 4 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 6 MONTH)),
+
+-- 8 Meses atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 8 MONTH)),
+
+-- 11 Meses atrás
+(1, 'Coordenador Carlos', 'coordenador', 'CRIACAO_PONTO_COLETA', 'Criou novo ponto: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 11 MONTH));
+
 
 INSERT INTO comunicados (titulo, conteudo, autor_id) VALUES
 -- Comunicado 1: Curto e Direto
@@ -293,3 +361,9 @@ INSERT INTO historico_sensores (id_sensor, statusLixo, data_registro) VALUES
 #SELECT * FROM RotasRelatorio;
 #SELECT * FROM MensagensPendentes;
 #SELECT * FROM StatusPorDia;
+
+SELECT * FROM usuarios;
+
+UPDATE usuarios
+SET cargo = "coletor"
+WHERE id = 3;

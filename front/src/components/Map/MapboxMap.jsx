@@ -3,10 +3,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_STYLES } from "./mapStyles.js";
-
 import { useApiUrl } from "@/app/context/ApiContext.js";
 
-export default function MapboxMap({ onMapClick }) {
+export default function MapboxMap({ onMapClick, onRefreshReady }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -16,36 +15,47 @@ export default function MapboxMap({ onMapClick }) {
   const [mounted, setMounted] = useState(false);
   const [rotaInfo, setRotaInfo] = useState(null);
 
-  const refreshPoints = async () => {
-  try {
-    const response = await fetch(`${apiUrl}/statusSensor`);
-    const data = await response.json();
-    setPontos(data);
-  } catch {}
-};
-
-
   const apiUrl = useApiUrl();
 
+  // ✅ 100% working refresh function
+  const refreshPoints = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/statusSensor`);
+      const data = await response.json();
+      setPontos(data);
+    } catch (err) {
+      console.error("Erro ao buscar sensores:", err);
+    }
+  };
+
+  // local user marker coords
   const usuario = { x: -46.559689, y: -23.64434 };
 
   useEffect(() => setMounted(true), []);
 
+  // Load points on mount
   useEffect(() => {
     if (!mounted) return;
-    (async () => {
-      try {
-        const response = await fetch(`${apiUrl}/statusSensor`);
-        const data = await response.json();
-        setPontos(data);
-      } catch (err) {
-        console.error("Erro ao buscar sensores:", err);
-      }
-    })();
+    refreshPoints();
   }, [mounted]);
+
+  // ❌ OLD (causes refresh not registering)
+  // useEffect(() => {
+  //   if (mounted) {
+  //     onRefreshReady?.(refreshPoints);
+  //   }
+  // }, [mounted]);
+
+  // ✅ NEW — Register refresh function IMMEDIATELY when map loads
+  const exposeRefreshOnce = () => {
+    if (onRefreshReady) {
+      onRefreshReady(refreshPoints);
+    }
+  };
 
   useEffect(() => {
     if (!mounted) return;
+
     (async () => {
       const module = await import("mapbox-gl");
       const mapboxgl = module.default;
@@ -63,12 +73,16 @@ export default function MapboxMap({ onMapClick }) {
           antialias: true,
         });
 
-        
+        // ⭐ REGISTER REFRESH HOOK IMMEDIATELY
+        exposeRefreshOnce();
+
+        // click handler
         if (onMapClick) {
           map.on("click", (e) => {
             const { lng, lat } = e.lngLat;
 
-            onMapClick({ lat, lng })
+            onMapClick({ lat, lng });
+
             if (markerRef.current) {
               markerRef.current.setLngLat([lng, lat]);
             } else {
@@ -78,24 +92,11 @@ export default function MapboxMap({ onMapClick }) {
             }
           });
         }
+
         mapRef.current = map;
         map.addControl(new mapboxgl.NavigationControl());
-        map.on("click", (e) => {
-          if (onMapClick) {
-            onMapClick({
-              lat: e.lngLat.lat,
-              lng: e.lngLat.lng,
-            });
-          }
-        });
 
-
-        if (!apiUrl) {
-          setError("Conectando ao servidor... Por favor, tente novamente em um instante.");
-          return;
-        }
-
-        
+        // user marker
         const UsuarioMarker = document.createElement("div");
         UsuarioMarker.className = "marker";
         UsuarioMarker.style.backgroundImage = "url('https://i.imgur.com/MK4NUzI.png')";
@@ -104,43 +105,16 @@ export default function MapboxMap({ onMapClick }) {
 
         new mapboxgl.Marker(UsuarioMarker)
           .setLngLat([usuario.x, usuario.y])
-          .setPopup(
-            new mapboxgl.Popup({ offset: 25 }).setHTML(`
-    <div style="
-      font-family: Arial, sans-serif;
-      padding: 10px 14px;
-      border-radius: 10px;
-      background: white;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
-      min-width: 140px;
-      text-align: center;
-    ">
-      <div style="
-        font-size: 16px;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 4px;
-      ">
-        📍 Você está aqui
-      </div>
-
-      <div style="
-        font-size: 12px;
-        color: #666;
-      ">
-        Seu ponto atual
-      </div>
-    </div>
-  `)
-          )
-
           .addTo(map);
 
-        // 3D
         map.on("load", () => {
+          refreshPoints();
+
           const layers = map.getStyle().layers;
           const labelLayerId = layers.find(
-            (layer) => layer.type === "symbol" && layer.layout["text-field"]
+            (layer) =>
+              layer.type === "symbol" &&
+              layer.layout["text-field"]
           )?.id;
 
           map.addLayer(
@@ -185,12 +159,14 @@ export default function MapboxMap({ onMapClick }) {
     };
   }, [mounted]);
 
+  // draw markers + route
   useEffect(() => {
-    if (!mounted || !mapRef.current || !mapboxRef.current || pontos.length === 0) return;
+    if (!mounted || !mapRef.current || !mapboxRef.current) return;
 
     const map = mapRef.current;
     const mapboxgl = mapboxRef.current;
 
+    // clear old markers
     if (map.markers) map.markers.forEach((m) => m.remove());
     map.markers = [];
 
@@ -200,7 +176,38 @@ export default function MapboxMap({ onMapClick }) {
     if (map.getSource("rota")) map.removeSource("rota");
 
     setRotaInfo(null);
-    if (filtro === "-") return;
+if (filtro === "-") {
+  // Desenhar TODOS os pontos sem filtro
+  pontos.forEach((ponto) => {
+    const { x, y } = ponto.Coordenadas;
+    const color =
+      ponto.Stats === "Vazia"
+        ? "green"
+        : ponto.Stats === "Quase Cheia"
+          ? "orange"
+          : "red";
+
+    const el = document.createElement("div");
+    Object.assign(el.style, {
+      backgroundColor: color,
+      width: "20px",
+      height: "20px",
+      borderRadius: "50%",
+      border: "3px solid white",
+      boxShadow: "0 0 4px rgba(0,0,0,0.5)",
+      cursor: "pointer",
+    });
+
+    const marker = new mapboxgl.Marker(el)
+      .setLngLat([x, y])
+      .addTo(map);
+
+    map.markers.push(marker);
+  });
+
+  return;
+}
+
 
     const pontosFiltrados = pontos.filter((p) => {
       switch (filtro) {

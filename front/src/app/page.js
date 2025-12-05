@@ -20,7 +20,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-green-100 selection:text-green-800">
 
-      {/* --- NAVBAR --- */}
+     
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -42,7 +42,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button className="h-10 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg shadow-green-600/20 transition-all hover:-translate-y-0.5">
+              <Button className="h-10 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg shadow-green-600/20 transition-all hover:-translate-y-0.5 cursor-pointer">
                 Acessar Sistema
               </Button>
             </Link>
@@ -50,12 +50,11 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* --- HERO SECTION --- */}
+
       <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         <div className="container mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-16">
 
-            {/* Texto Hero */}
             <div className="lg:w-1/2 space-y-8">
               <Badge className="bg-green-50 text-green-700 hover:bg-green-100 px-4 py-1.5 text-sm font-medium border-green-200 rounded-full transition-colors">
                 🌱 Inovação para Cidades Inteligentes
@@ -83,13 +82,12 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Visual Hero (Mockup Abstrato do Dashboard) */}
             <div className="lg:w-1/2 relative w-full">
               <div className="absolute -top-20 -right-20 w-96 h-96 bg-green-200/30 rounded-full blur-3xl opacity-50 animate-pulse"></div>
               <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl opacity-50"></div>
 
               <div className="relative bg-white border border-gray-200 rounded-3xl shadow-2xl p-4 sm:p-6 lg:rotate-2 hover:rotate-0 transition-transform duration-700 ease-out">
-                {/* Header Mockup */}
+               
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
                   <div className="flex gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -99,7 +97,6 @@ export default function LandingPage() {
                   <div className="h-2 w-20 bg-gray-100 rounded-full"></div>
                 </div>
 
-                {/* Conteúdo Mockup */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-green-50 p-4 rounded-2xl border border-green-100">
                     <div className="h-8 w-8 bg-green-200 rounded-lg mb-3 flex items-center justify-center">
@@ -122,7 +119,7 @@ export default function LandingPage() {
                   <span className="relative z-10 text-gray-400 font-medium flex items-center gap-2">
                     <Map className="h-4 w-4" /> Mapa de Coleta em Tempo Real
                   </span>
-                  {/* Ponto simulado no mapa */}
+                  
                   <div className="absolute top-1/3 left-1/4 h-4 w-4 bg-red-500 rounded-full border-2 border-white shadow-md animate-bounce"></div>
                   <div className="absolute bottom-1/3 right-1/3 h-4 w-4 bg-green-500 rounded-full border-2 border-white shadow-md"></div>
                 </div>
@@ -132,7 +129,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- FEATURE CARDS --- */}
       <section id="solucao" className="py-24 bg-gray-50/50">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -142,7 +138,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div id="como-funciona" className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
@@ -154,7 +150,6 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Card 2 */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="h-14 w-14 bg-green-50 rounded-2xl flex items-center justify-center mb-6">
                 <Smartphone className="h-7 w-7 text-green-600" />
@@ -165,7 +160,6 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Card 3 */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="h-14 w-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6">
                 <Wifi className="h-7 w-7 text-orange-600" />
@@ -179,7 +173,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- BENEFÍCIOS --- */}
       <section id="beneficios" className="py-24">
         <div className="container mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-16">
@@ -232,7 +225,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- CTA FINAL --- */}
+
       <section className="py-24 bg-green-600">
         <div className="container mx-auto px-6 text-center text-white">
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">Pronto para simplificar seu trabalho?</h2>
@@ -247,7 +240,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- FOOTER --- */}
+      
       <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-8">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -262,7 +255,7 @@ export default function LandingPage() {
               <span className="text-lg font-bold text-gray-900">EcoFlow.</span>
             </div>
             <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Grupo 2. Todos os direitos reservados.
+              © {new Date().getFullYear()} Grupo EcoFlow. Todos os direitos reservados.
             </p>
           </div>
         </div>
@@ -271,7 +264,6 @@ export default function LandingPage() {
   );
 }
 
-// Icone Map Simples para o mockup
 function Map({ className }) {
   return (
     <svg
