@@ -100,8 +100,12 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
             return;
         }
 
-        if (!token) {
-            setMensagem({ tipo: "erro", texto: "Erro de autenticação. Recarregue a página." });
+        // CORREÇÃO AQUI: Tenta pegar da prop OU do localStorage
+        const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const finalToken = token || storedToken;
+
+        if (!finalToken) {
+            setMensagem({ tipo: "erro", texto: "Erro de autenticação. Faça login novamente." });
             return;
         }
 
@@ -112,7 +116,7 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}` 
+                    "Authorization": `Bearer ${finalToken}` // Usa o token resolvido
                 },
                 body: JSON.stringify({
                     statusLixo: status,
