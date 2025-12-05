@@ -49,7 +49,7 @@ export default function Error({ error, reset }) {
               variant="outline"
               className="h-14 px-8 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-green-700 hover:border-green-200 font-semibold text-lg w-full sm:w-auto"
             >
-              Voltar para Home
+              Voltar
             </Button>
           </Link>
         </div>

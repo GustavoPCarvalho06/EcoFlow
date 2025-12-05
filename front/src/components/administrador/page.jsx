@@ -83,7 +83,7 @@ export default async function PageAdmin() {
           </div>
           
           <AdminStatsCards stats={stats} />
-          <UserPreviewTable users={previewUsers} />
+          <UserPreviewTable users={previewUsers} cookies={cookieStore} />
 
         </main>
     </Layout>

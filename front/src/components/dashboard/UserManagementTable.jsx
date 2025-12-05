@@ -38,9 +38,11 @@ const formatCEP = (cep) => {
     return cleanCep;
 };
 
-export function UserManagementTable() {
+export function UserManagementTable({token}) {
   const apiUrl = useApiUrl();
   const router = useRouter(); 
+  const tokenStore = token;
+  console.log("token: ", tokenStore)
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,8 +69,7 @@ export function UserManagementTable() {
 
 
   const authFetch = useCallback(async (url, options = {}) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
+    
     const headers = {
         'Content-Type': 'application/json',
         ...options.headers,

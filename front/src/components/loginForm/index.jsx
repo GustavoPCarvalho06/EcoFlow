@@ -60,9 +60,6 @@ export function LoginForm({ className, ...props }) {
                 setError(data.erro || data.mensagem || "Erro desconhecido");
                 return;
             }
-            if (data.user && data.user.token) {
-                localStorage.setItem('token', data.user.token);
-            }
             router.push(`/dashboard`);
         } catch (err) {
             setError("Não foi possível conectar ao servidor.");
