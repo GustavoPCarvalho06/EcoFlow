@@ -71,19 +71,12 @@ export function LoginForm({ className, ...props }) {
         }
     };
 
-
     const inputClasses = "pl-10 h-12 rounded-xl transition-all duration-200 placeholder:text-gray-400 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 " +
-       
         "bg-white dark:bg-white text-gray-900 dark:text-gray-900 " +
-       
         "focus:bg-gray-100 dark:focus:bg-gray-100 " +
-       
-        
         "[&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_#ffffff] " +
-       
         "[&:-webkit-autofill]:focus:shadow-[inset_0_0_0px_1000px_#f3f4f6] " +
-       
-        "[&:-webkit-autofill]:-webkit-text-fill-color-[#111827]";
+        "[&:-webkit-autofill]:[-webkit-text-fill-color:#111827]";
 
     return (
         <>
@@ -100,16 +93,16 @@ export function LoginForm({ className, ...props }) {
                     </div>
                     <h1 className="text-3xl font-bold text-primary tracking-tight">EcoFlow</h1>
                     <div className="pt-4">
-                        <h2 className="text-2xl font-bold text-foreground">Bem-vindo(a)!</h2>
+                        <h2 className="text-2xl text-black font-bold ">Bem-vindo(a)!</h2>
                         <p className="text-muted-foreground mt-1 text-sm">Acesse sua conta para continuar</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleLogin} className="flex flex-col gap-5">
                     <div className="space-y-2">
-                        <Label htmlFor="cpf" className="text-sm font-semibold text-foreground ml-1">CPF</Label>
+                        <Label htmlFor="cpf" className="text-sm font-semibold text-black ml-1">CPF</Label>
                         <div className="relative group">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-black group-focus-within:text-green-600 transition-colors">
                                 <User className="h-5 w-5" />
                             </div>
                             <Input
@@ -125,9 +118,9 @@ export function LoginForm({ className, ...props }) {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="password" className="text-sm font-semibold text-foreground ml-1">Senha</Label>
+                        <Label htmlFor="password" className="text-sm font-semibold text-black ml-1">Senha</Label>
                         <div className="relative group">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-black group-focus-within:text-green-600 transition-colors">
                                 <Lock className="h-5 w-5" />
                             </div>
                             <Input
