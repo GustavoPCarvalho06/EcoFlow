@@ -100,7 +100,6 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
             return;
         }
 
-        // CORREÇÃO AQUI: Tenta pegar da prop OU do localStorage
         const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
         const finalToken = token || storedToken;
 
@@ -116,7 +115,7 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${finalToken}` // Usa o token resolvido
+                    "Authorization": `Bearer ${finalToken}` 
                 },
                 body: JSON.stringify({
                     statusLixo: status,

@@ -1,24 +1,19 @@
-// =================================================================================
-// Arquivo: src/components/coordenador/page.jsx
-// =================================================================================
-
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
-import os from 'os'; // Importando para detectar o IP da rede automaticamente
+import os from 'os'; 
 
 import BarChart from "@/components/coordenador/BarChart";
 import DoughnutChart from "@/components/coordenador/DoughnutChart";
 import Layout from "../dashboard/layout/Layout";
 
-// --- Função para descobrir o IP do Backend dinamicamente (Mesma lógica do servidor) ---
+
 const getBaseUrl = () => {
-  // Se estiver rodando no servidor (build ou start), tenta achar o IP da rede
   try {
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
       for (const iface of interfaces[name]) {
-        // Pega o IPv4 que não seja interno (não seja 127.0.0.1)
         if (iface.family === 'IPv4' && !iface.internal) {
+         
           return `http://${iface.address}:3001`;
         }
       }
@@ -26,19 +21,20 @@ const getBaseUrl = () => {
   } catch (error) {
     console.error("Erro ao detectar IP no server component:", error);
   }
-  // Se falhar, usa localhost
+
   return 'http://localhost:3001';
 };
 
-// --- Função para buscar dados do Backend ---
+
 async function getDashboardData(token) {
   if (!token) return null;
 
-  const baseUrl = getBaseUrl(); // Pega a URL correta (IP ou Localhost)
+  const baseUrl = getBaseUrl(); 
   
   try {
+   
     const res = await fetch(`${baseUrl}/dashboard/coordenador`, {
-      cache: 'no-store', // Dados sempre frescos
+      cache: 'no-store', 
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -46,8 +42,7 @@ async function getDashboardData(token) {
     });
 
     if (!res.ok) {
-      // Se der erro (ex: backend off), não quebra a página, retorna nulo
-      console.error(`Falha no fetch: ${res.status} ${res.statusText}`);
+      console.error(`Falha no fetch dashboard: ${res.status} ${res.statusText}`);
       return null;
     }
 
@@ -58,9 +53,6 @@ async function getDashboardData(token) {
   }
 }
 
-// =======================================================
-// STATS CARDS
-// =======================================================
 const StatsCards = ({ stats }) => (
   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
     {stats.map(stat => (
@@ -100,12 +92,36 @@ export default async function CoordenadorPage() {
     }
   }
 
-  // 1. Busca os dados reais
   const data = await getDashboardData(token);
 
-  // Valores padrão (ZERADOS) caso a API falhe ou retorne vazio
-  const cardsData = data?.cards || { totalLixeiras: 0, totalColetores: 0, lixeirasCheias: 0, eficiencia: 0 };
-  const graphData = data?.graficos || { vazias: 0, quaseCheias: 0, cheias: 0 };
+ 
+  const cardsData = data?.cards || { 
+    totalLixeiras: 0, 
+    totalColetores: 0, 
+    lixeirasCheias: 0, 
+    eficiencia: 0 
+  };
+
+  
+  const roscaSource = data?.graficoRosca || data?.graficos || { vazias: 0, quaseCheias: 0, cheias: 0 };
+  
+  const doughData = {
+    labels: ["Vazias", "Quase Cheias", "Cheias"],
+    values: [roscaSource.vazias || 0, roscaSource.quaseCheias || 0, roscaSource.cheias || 0]
+  };
+
+  
+  const barSource = data?.graficoBarra || {
+    labels: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+    coletas: [0, 0, 0, 0, 0, 0, 0],
+    alertas: [0, 0, 0, 0, 0, 0, 0]
+  };
+
+  const barData = {
+    labels: barSource.labels,
+    coletas: barSource.coletas, 
+    alertas: barSource.alertas 
+  };
 
   const stats = [
     { 
@@ -135,17 +151,6 @@ export default async function CoordenadorPage() {
     }
   ];
 
-  const barData = {
-    labels: ["Status Geral do Sistema"],
-    coletas: [graphData.vazias], 
-    alertas: [graphData.cheias + graphData.quaseCheias] 
-  };
-
-  const doughData = {
-    labels: ["Vazias", "Quase Cheias", "Cheias"],
-    values: [graphData.vazias, graphData.quaseCheias, graphData.cheias]
-  };
-
   return (
     <Layout>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-background min-h-full">
@@ -158,15 +163,17 @@ export default async function CoordenadorPage() {
           <div className="p-6 bg-card border border-border rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold text-foreground">Visão Operacional</h3>
             <p className="text-sm text-muted-foreground">
-                Monitoramento em tempo real dos sensores e status de coleta.
+                Monitoramento da atividade semanal e status atual dos sensores.
             </p>
 
             <div className="mt-4">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[360px]">
-                <div className="lg:col-span-2 h-full">
+              
+                <div className="lg:col-span-2 h-full min-h-[300px]">
                   <BarChart data={barData} />
                 </div>
-                <div className="lg:col-span-1 h-full">
+                
+                <div className="lg:col-span-1 h-full min-h-[300px]">
                   <DoughnutChart data={doughData} />
                 </div>
               </div>
