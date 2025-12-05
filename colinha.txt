@@ -1,0 +1,15 @@
+Miguel
+cargo:adiministrador
+usuario: 613.232.530-17
+senha:123
+
+Lalau
+cargo:coordenador
+usuario:530.602.750-41
+senha:123
+
+Gustavo
+cargo:coletor
+usuario:737.856.500-86
+senha:123
+

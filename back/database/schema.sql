@@ -176,9 +176,9 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 
 
 INSERT INTO usuarios (nome, sexo, cpf, estadoCivil, senha, CEP, email, cargo, statusConta) VALUES
-('Miguel', 'masculino', '00000000000', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '12345001', 'miguel@example.com', 'administrador', 'ativo'),
-('Lalau', 'masculino', '49256740810', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '23456002', 'lalau@example.com', 'coordenador', 'ativo'),
-('Gustavo', 'masculino', '00000000002', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '34567003', 'gustavo@example.com', 'coordenador', 'ativo'),
+('Miguel', 'masculino', '61323253017', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '69301410', 'miguel@example.com', 'administrador', 'ativo'),
+('Lalau', 'masculino', '53060275041', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '58011063', 'lalau@example.com', 'coordenador', 'ativo'),
+('Gustavo', 'masculino', '73785650086', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54525420', 'gustavo@example.com', 'coordenador', 'ativo'),
 ('Carla Dias', 'feminino', '10000000003', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '45678004', 'carla.dias@example.com', 'coletor', 'desligado'),
 ('Daniel Farias', 'masculino', '10000000004', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '56789005', 'daniel.farias@example.com', 'coletor', 'ativo'),
 ('Elisa Gomes', 'feminino', '10000000005', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '67890006', 'elisa.gomes@example.com', 'coordenador', 'ativo'),
@@ -242,6 +242,74 @@ INSERT INTO usuarios (nome, sexo, cpf, estadoCivil, senha, CEP, email, cargo, st
 ('Vinícius Peixoto', 'masculino', '10000000100', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '10667064', 'vinicius.peixoto@example.com', 'coletor', 'ativo');
 select *from usuarios;
 
+
+INSERT INTO logs_sistema (usuario_id, nome_usuario, cargo_usuario, acao, detalhes, ip_origem, data_hora) VALUES
+
+-- ===================================================
+-- DADOS PARA O FILTRO: SEMANAL (Últimos 7 dias)
+-- ===================================================
+
+-- Hoje (Várias ações)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', NOW()),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Cheia', '::1', NOW()),
+(1, 'Coletor Joana', 'coletor', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Vazia', '::1', NOW()),
+
+-- Ontem (1 dia atrás)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 4 mudou para: Quase Cheia', '::1', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- 2 Dias atrás
+(1, 'Coordenador Carlos', 'coordenador', 'CRIACAO_PONTO_COLETA', 'Criou novo ponto: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+
+-- 3 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 5 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 5 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+
+-- 5 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Quase Cheia', '::1', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+
+-- ===================================================
+-- DADOS PARA O FILTRO: MENSAL (Últimos 30 dias)
+-- ===================================================
+
+-- 10 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+
+-- 15 Dias atrás (Um dia movimentado)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 4 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+(1, 'Coletor Marcos', 'coletor', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+
+-- 25 Dias atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Quase Cheia', '::1', DATE_SUB(NOW(), INTERVAL 25 DAY)),
+
+-- ===================================================
+-- DADOS PARA O FILTRO: ANUAL (Últimos 12 meses)
+-- ===================================================
+
+-- 2 Meses atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+
+-- 4 Meses atrás
+(1, 'Coordenador Ana', 'coordenador', 'EDICAO_PONTO_COLETA', 'Alterou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 4 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 5 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 4 MONTH)),
+
+-- 6 Meses atrás (Pico de alertas)
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 2 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 6 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 3 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 6 MONTH)),
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 4 mudou para: Cheia', '::1', DATE_SUB(NOW(), INTERVAL 6 MONTH)),
+
+-- 8 Meses atrás
+(1, 'Sensor IoT', 'IoT', 'ATUALIZACAO_SENSOR', 'Sensor ID 1 mudou para: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 8 MONTH)),
+
+-- 11 Meses atrás
+(1, 'Coordenador Carlos', 'coordenador', 'CRIACAO_PONTO_COLETA', 'Criou novo ponto: Vazia', '::1', DATE_SUB(NOW(), INTERVAL 11 MONTH));
+
+
 INSERT INTO comunicados (titulo, conteudo, autor_id) VALUES
 -- Comunicado 1: Curto e Direto
 ('Lembrete de Segurança: Uso Obrigatório de EPIs', 'Apenas um lembrete rápido a todos: o uso de luvas e botas de segurança é obrigatório em todas as áreas de coleta e triagem. Sem exceções. A segurança de todos é nossa prioridade número um.', 1),
@@ -293,3 +361,9 @@ INSERT INTO historico_sensores (id_sensor, statusLixo, data_registro) VALUES
 #SELECT * FROM RotasRelatorio;
 #SELECT * FROM MensagensPendentes;
 #SELECT * FROM StatusPorDia;
+
+SELECT * FROM usuarios;
+
+UPDATE usuarios
+SET cargo = "coletor"
+WHERE id = 3;
