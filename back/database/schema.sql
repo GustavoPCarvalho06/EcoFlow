@@ -176,9 +176,9 @@ INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
 
 
 INSERT INTO usuarios (nome, sexo, cpf, estadoCivil, senha, CEP, email, cargo, statusConta) VALUES
-('Miguel', 'masculino', '00000000000', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '12345001', 'miguel@example.com', 'administrador', 'ativo'),
-('Lalau', 'masculino', '49256740810', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '23456002', 'lalau@example.com', 'coordenador', 'ativo'),
-('Gustavo', 'masculino', '00000000002', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '34567003', 'gustavo@example.com', 'coordenador', 'ativo'),
+('Miguel', 'masculino', '61323253017', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '69301410', 'miguel@example.com', 'administrador', 'ativo'),
+('Lalau', 'masculino', '53060275041', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '58011063', 'lalau@example.com', 'coordenador', 'ativo'),
+('Gustavo', 'masculino', '73785650086', 'solteiro(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '54525420', 'gustavo@example.com', 'coordenador', 'ativo'),
 ('Carla Dias', 'feminino', '10000000003', 'casado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '45678004', 'carla.dias@example.com', 'coletor', 'desligado'),
 ('Daniel Farias', 'masculino', '10000000004', 'divorciado(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '56789005', 'daniel.farias@example.com', 'coletor', 'ativo'),
 ('Elisa Gomes', 'feminino', '10000000005', 'viuvo(a)', '$2b$10$xRQRqdge5icnyalUz/01CufDtnfjzwQgesERApYU6AOEoejFEE3gO', '67890006', 'elisa.gomes@example.com', 'coordenador', 'ativo'),

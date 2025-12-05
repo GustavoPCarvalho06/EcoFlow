@@ -56,10 +56,22 @@ export function LoginForm({ className, ...props }) {
             });
 
             const data = await response.json();
+            
+            // Verifica erros da API (senha incorreta, usuário não encontrado, etc)
             if (!response.ok) {
                 setError(data.erro || data.mensagem || "Erro desconhecido");
                 return;
             }
+
+            // --- BLOQUEIO PARA COLETORES ---
+            // Se o login foi bem sucedido (response.ok), verificamos o cargo
+            if (data.user && data.user.cargo === 'coletor') {
+                setError("Acesso restrito. Coletores devem acessar apenas pelo aplicativo móvel.");
+                // Não salvamos o token e paramos a execução aqui
+                return;
+            }
+            // -------------------------------
+
             if (data.user && data.user.token) {
                 localStorage.setItem('token', data.user.token);
             }
