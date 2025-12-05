@@ -1,21 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet } from 'react-native';
+import MapComponent from '../components/MapComponent';
 
 export default function HomeScreen() {
+  const apiUrl = 'https://your-api-url.com'; 
+  const mapboxToken = 'pk.eyJ1Ijoic2FjYWJhbWJhc3BpcyIsImEiOiJjbWdxaDM5NHIycGxzMm1vZTk4c3oyZjI0In0.9FObgQi-9a8oDwxuEH0SrA'; 
+
   return (
     <View style={styles.container}>
-      <Ionicons name="construct-outline" size={80} color="#28a745" />
-      <Text style={styles.title}>Mapa em Desenvolvimento</Text>
-      <Text style={styles.subtitle}>
-        A funcionalidade de rotas e geolocalização estará disponível em breve.
-      </Text>
+      <MapComponent apiUrl={apiUrl} mapboxToken={mapboxToken} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 22, fontWeight: 'bold', marginTop: 20, color: '#333' },
-  subtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginTop: 10 }
+  container: { flex: 1 },
 });
