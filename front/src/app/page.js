@@ -261,7 +261,6 @@ export default function LandingPage() {
   );
 }
 
-// Icone Map Simples para o mockup
 function Map({ className }) {
   return (
     <svg
