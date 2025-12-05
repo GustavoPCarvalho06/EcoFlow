@@ -76,9 +76,7 @@ export default function LandingPage() {
                     Começar Agora <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="h-14 px-8 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-green-700 hover:border-green-200 font-semibold text-lg w-full sm:w-auto">
-                  Saiba Mais
-                </Button>
+               
               </div>
             </div>
 
@@ -261,7 +259,7 @@ export default function LandingPage() {
               <span className="text-lg font-bold text-gray-900">EcoFlow.</span>
             </div>
             <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Grupo 2. Todos os direitos reservados.
+              © {new Date().getFullYear()} Grupo EcoFlow. Todos os direitos reservados.
             </p>
           </div>
         </div>
