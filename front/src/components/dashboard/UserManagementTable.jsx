@@ -385,11 +385,11 @@ export function UserManagementTable({token}) {
                         <Pencil className="h-4 w-4" />
                       </Button>
                       {user.statusConta === 'ativo' ? (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={() => handleOpenDeleteAlert(user)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={() => handleOpenDeleteAlert(user)}>
                             <PowerOff className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-900/30 transition-colors cursor-pointer" onClick={() => handleOpenReactivateAlert(user)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-900/30 transition-colors cursor-pointer" onClick={() => handleOpenReactivateAlert(user)}>
                             <Power className="h-4 w-4" />
                         </Button>
                       )}
