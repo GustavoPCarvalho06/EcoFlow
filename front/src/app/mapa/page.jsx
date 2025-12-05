@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import MapBoxCriarWrapper from "@/components/Map/MapBoxCriarWrapper.jsx";
 import MapBoxManejarWrapper from "@/components/Map/MapBoxManejarWrapper.jsx";
+import MainMapWrapper from "@/components/Map/MainMapWrapper";
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -58,7 +59,7 @@ export default async function MapaPage() {
                     Clique no mapa para selecionar o local do novo ponto.
                   </p>
                   <div className="flex-1 min-h-0 relative">
-                   
+
                     <MapBoxCriarWrapper token={tokenValue} />
                   </div>
                 </DialogContent>
@@ -89,7 +90,8 @@ export default async function MapaPage() {
         </div>
 
         <div className="flex-1 rounded-lg border border-border overflow-hidden shadow-sm">
-          <MapboxMap latitude={-23.647222} longitude={-46.557282} zoom={14} />
+          <MainMapWrapper latitude={-23.647222} longitude={-46.557282} zoom={14} />
+
         </div>
       </main>
     </Layout>

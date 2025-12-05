@@ -24,6 +24,7 @@ export default function MapBoxCriarWrapper({ token }) {
                     coords={coords}
                     setCoords={setCoords}
                     onCreate={() => refreshPointsRef.current?.()}
+                    token={token}
                 />
             </div>
 

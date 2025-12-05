@@ -42,18 +42,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input"; 
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Trash2, MapPin, Pencil, Loader2, RefreshCw, Search } from "lucide-react"; 
+import { Trash2, MapPin, Pencil, Loader2, RefreshCw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function MapBoxManejarWrapper({ token, onUpdate }) {
   const apiUrl = useApiUrl();
   const [lixo, setLixo] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -117,9 +117,9 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
     const idToUpdate = itemToEdit.ID || itemToEdit.id || itemToEdit.id_Sensor;
 
     if (!idToUpdate) {
-        alert("Erro: ID do item não encontrado.");
-        setIsUpdating(false);
-        return;
+      alert("Erro: ID do item não encontrado.");
+      setIsUpdating(false);
+      return;
     }
 
     try {
@@ -139,9 +139,11 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
 
       await fetchData();
       setIsEditOpen(false);
-      
+
       // Atualiza o mapa principal
+      window.dispatchEvent(new Event("sensorUpdated"));
       if (onUpdate) onUpdate();
+
 
     } catch (error) {
       console.error("Erro ao atualizar:", error);
@@ -164,9 +166,9 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
     const idToDelete = itemToDelete.ID || itemToDelete.id || itemToDelete.id_Sensor;
 
     if (!idToDelete) {
-        alert("Erro crítico: ID não encontrado.");
-        setIsDeleting(false);
-        return;
+      alert("Erro crítico: ID não encontrado.");
+      setIsDeleting(false);
+      return;
     }
 
     try {
@@ -191,7 +193,9 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
       setIsDeleteOpen(false);
 
       // Atualiza o mapa principal
+      window.dispatchEvent(new Event("sensorDeleted")); // 🔹 ADD THIS
       if (onUpdate) onUpdate();
+
 
     } catch (error) {
       console.error("Erro ao deletar:", error);
@@ -221,7 +225,7 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            
+
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -248,7 +252,7 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
           <Table className="min-w-[800px]">
             <TableHeader className="bg-muted/50 sticky top-0 z-10">
               <TableRow className="border-border hover:bg-transparent">
-               
+
                 <TableHead className="pl-6 text-xs font-semibold uppercase tracking-wide">
                   Endereço
                 </TableHead>
@@ -289,8 +293,8 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
                             displayStatus === "Cheia"
                               ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400"
                               : displayStatus === "Quase Cheia"
-                              ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
-                              : "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400"
+                                ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
+                                : "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400"
                           )}
                         >
                           {displayStatus}
@@ -323,7 +327,7 @@ export default function MapBoxManejarWrapper({ token, onUpdate }) {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan="3" 
+                    colSpan="3"
                     className="h-32 text-center text-sm text-muted-foreground"
                   >
                     {loading ? "Carregando..." : "Nenhum sensor encontrado."}
