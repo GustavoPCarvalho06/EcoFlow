@@ -6,7 +6,8 @@ import { MAPBOX_STYLES } from "./mapStyles.js";
 
 import { useApiUrl } from "@/app/context/ApiContext.js";
 
-export default function MapboxMap({ onMapClick }) {
+export default function MapboxMap({ onMapClick, onRefreshReady }) {
+ 
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -16,16 +17,17 @@ export default function MapboxMap({ onMapClick }) {
   const [mounted, setMounted] = useState(false);
   const [rotaInfo, setRotaInfo] = useState(null);
 
-  const refreshPoints = async () => {
-  try {
-    const response = await fetch(`${apiUrl}/statusSensor`);
-    const data = await response.json();
-    setPontos(data);
-  } catch {}
-};
-
-
   const apiUrl = useApiUrl();
+
+  const refreshPoints = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/statusSensor`);
+      const data = await response.json();
+      setPontos(data);
+    } catch (err) {
+      console.error("Erro ao buscar sensores:", err);
+    }
+  };
 
   const usuario = { x: -46.559689, y: -23.64434 };
 
@@ -33,16 +35,15 @@ export default function MapboxMap({ onMapClick }) {
 
   useEffect(() => {
     if (!mounted) return;
-    (async () => {
-      try {
-        const response = await fetch(`${apiUrl}/statusSensor`);
-        const data = await response.json();
-        setPontos(data);
-      } catch (err) {
-        console.error("Erro ao buscar sensores:", err);
-      }
-    })();
+    refreshPoints();
   }, [mounted]);
+
+  useEffect(() => {
+  if (mounted) {
+    onRefreshReady?.(refreshPoints);
+  }
+}, [mounted]);
+
 
   useEffect(() => {
     if (!mounted) return;
@@ -51,6 +52,7 @@ export default function MapboxMap({ onMapClick }) {
       const mapboxgl = module.default;
       mapboxRef.current = mapboxgl;
       mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
 
       if (mapContainer.current && !mapRef.current) {
         const map = new mapboxgl.Map({
@@ -138,6 +140,7 @@ export default function MapboxMap({ onMapClick }) {
 
         // 3D
         map.on("load", () => {
+          refreshPoints();
           const layers = map.getStyle().layers;
           const labelLayerId = layers.find(
             (layer) => layer.type === "symbol" && layer.layout["text-field"]
@@ -185,8 +188,9 @@ export default function MapboxMap({ onMapClick }) {
     };
   }, [mounted]);
 
-  useEffect(() => {
-    if (!mounted || !mapRef.current || !mapboxRef.current || pontos.length === 0) return;
+useEffect(() => {
+    if (!mounted || !mapRef.current || !mapboxRef.current) return;
+
 
     const map = mapRef.current;
     const mapboxgl = mapboxRef.current;
@@ -200,7 +204,38 @@ export default function MapboxMap({ onMapClick }) {
     if (map.getSource("rota")) map.removeSource("rota");
 
     setRotaInfo(null);
-    if (filtro === "-") return;
+if (filtro === "-") {
+  // Desenhar TODOS os pontos sem filtro
+  pontos.forEach((ponto) => {
+    const { x, y } = ponto.Coordenadas;
+    const color =
+      ponto.Stats === "Vazia"
+        ? "green"
+        : ponto.Stats === "Quase Cheia"
+          ? "orange"
+          : "red";
+
+    const el = document.createElement("div");
+    Object.assign(el.style, {
+      backgroundColor: color,
+      width: "20px",
+      height: "20px",
+      borderRadius: "50%",
+      border: "3px solid white",
+      boxShadow: "0 0 4px rgba(0,0,0,0.5)",
+      cursor: "pointer",
+    });
+
+    const marker = new mapboxgl.Marker(el)
+      .setLngLat([x, y])
+      .addTo(map);
+
+    map.markers.push(marker);
+  });
+
+  return;
+}
+
 
     const pontosFiltrados = pontos.filter((p) => {
       switch (filtro) {

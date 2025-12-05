@@ -42,7 +42,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button className="h-10 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg shadow-green-600/20 transition-all hover:-translate-y-0.5">
+              <Button className="h-10 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg shadow-green-600/20 transition-all hover:-translate-y-0.5 cursor-pointer">
                 Acessar Sistema
               </Button>
             </Link>

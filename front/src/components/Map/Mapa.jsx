@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import MapBoxCriarWrapper from "@/components/Map/MapBoxCriarWrapper.jsx";
 import MapBoxManejarWrapper from "@/components/Map/MapBoxManejarWrapper.jsx";
+import MainMapWrapper from "@/components/Map/MainMapWrapper";
 
 import {
   Popover,
@@ -115,7 +116,7 @@ export default async function MapaPage() {
         
         <div className="flex-1 rounded-lg border border-border overflow-hidden shadow-sm">
        
-          <MapboxMap
+          <MainMapWrapper
             latitude={-23.647222}
             longitude={-46.557282}
             zoom={14}

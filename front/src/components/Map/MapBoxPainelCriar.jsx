@@ -133,8 +133,12 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
             }
 
             setMensagem({ tipo: "sucesso", texto: "Criado com sucesso!" });
-            
-            if (onCreate) onCreate();
+            onCreate?.();
+
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("sensorCreated"));
+            }
+
 
         } catch (err) {
             console.error("Erro ao enviar:", err);
@@ -153,11 +157,10 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
 
             {mensagem.texto && (
                 <div
-                    className={`text-xs font-bold text-center px-3 py-1 rounded-full ${
-                        mensagem.tipo === "erro" 
-                            ? "bg-destructive/10 text-destructive" 
+                    className={`text-xs font-bold text-center px-3 py-1 rounded-full ${mensagem.tipo === "erro"
+                            ? "bg-destructive/10 text-destructive"
                             : "bg-green-500/10 text-green-600 dark:text-green-400"
-                    }`}
+                        }`}
                 >
                     {mensagem.texto}
                 </div>
@@ -191,21 +194,21 @@ export default function MapBoxPainelCriar({ coords, setCoords, onCreate, token }
 
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Latitude</label>
-                    <input 
-                        type="text" 
-                        value={coords.lat} 
-                        readOnly 
-                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground font-mono focus:outline-none cursor-not-allowed" 
+                    <input
+                        type="text"
+                        value={coords.lat}
+                        readOnly
+                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground font-mono focus:outline-none cursor-not-allowed"
                     />
                 </div>
 
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Longitude</label>
-                    <input 
-                        type="text" 
-                        value={coords.lng} 
-                        readOnly 
-                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground font-mono focus:outline-none cursor-not-allowed" 
+                    <input
+                        type="text"
+                        value={coords.lng}
+                        readOnly
+                        className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs text-foreground font-mono focus:outline-none cursor-not-allowed"
                     />
                 </div>
 
