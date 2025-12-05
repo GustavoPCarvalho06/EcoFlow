@@ -1,19 +1,53 @@
-// mobile/src/components/MapComponent.js
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import { View, Text, StyleSheet, Platform, PermissionsAndroid } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
 import { filtrarPontos, routeToLatLngArray } from "../components/mapLogic";
 
-const usuario = { latitude: -23.64434, longitude: -46.559689 };
-
 export default function MapComponent({ apiUrl, mapboxToken }) {
   const [pontos, setPontos] = useState([]);
-  const [filtro, setFiltro] = useState("-"); 
+  const [filtro, setFiltro] = useState("-");
   const [routeCoords, setRouteCoords] = useState([]);
+  const [usuario, setUsuario] = useState({ latitude: -23.64434, longitude: -46.559689 });
   const mapRef = useRef(null);
 
-  // Fetch sensor points
+  async function requestLocationPermission() {
+    if (Platform.OS === "android") {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  }
+
+  useEffect(() => {
+    (async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          setUsuario({ latitude, longitude });
+          if (mapRef.current) {
+            mapRef.current.animateToRegion(
+              {
+                latitude,
+                longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              },
+              1000
+            );
+          }
+        },
+        error => console.error("Erro ao obter localização:", error),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      );
+    })();
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -26,17 +60,10 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
     })();
   }, [apiUrl]);
 
-  // Fix: use all points when filter is "-"
   const pontosFiltrados = filtro === "-" ? pontos : filtrarPontos(pontos, filtro);
 
-  // Calculate route using Mapbox
   async function calcularRota() {
-    if (!mapboxToken) {
-      console.warn("Mapbox token missing");
-      return;
-    }
-
-    if (pontosFiltrados.length === 0) {
+    if (!mapboxToken || pontosFiltrados.length === 0) {
       setRouteCoords([]);
       return;
     }
@@ -44,27 +71,33 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
     const coords = [
       [usuario.longitude, usuario.latitude],
       ...pontosFiltrados.map(p => [
-        p.Coordenadas?.x ?? p.x,
-        p.Coordenadas?.y ?? p.y
-      ])
+        Number(p.Coordenadas?.x ?? p.x),
+        Number(p.Coordenadas?.y ?? p.y),
+      ]),
     ];
 
-    const optimizedUrl = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coords
-      .map(c => c.join(","))
-      .join(";")}?geometries=geojson&overview=full&roundtrip=false&source=first&access_token=${mapboxToken}`;
-
     try {
-      const resp = await fetch(optimizedUrl);
-      const json = await resp.json();
-      console.log("Mapbox response:", json); // Debugging
+      let resp = await fetch(
+        `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coords
+          .map(c => c.join(","))
+          .join(";")}?geometries=geojson&overview=full&source=first&roundtrip=false&access_token=${mapboxToken}`
+      );
+      let json = await resp.json();
 
       if (!json.trips || !json.trips.length) {
-        console.warn("Mapbox optimized-trips did not return a route");
+        const directionsUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coords
+          .map(c => c.join(","))
+          .join(";")}?geometries=geojson&overview=full&access_token=${mapboxToken}`;
+        resp = await fetch(directionsUrl);
+        json = await resp.json();
+      }
+
+      const geometry = json.trips?.[0]?.geometry || json.routes?.[0]?.geometry;
+      if (!geometry) {
         setRouteCoords([]);
         return;
       }
 
-      const geometry = json.trips[0].geometry;
       const latLngArray = routeToLatLngArray(geometry);
       setRouteCoords(latLngArray);
 
@@ -85,10 +118,9 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
     }
   }
 
-  // Recalculate route whenever points or filter changes
   useEffect(() => {
     calcularRota();
-  }, [filtro, pontos]);
+  }, [filtro, pontos, usuario]);
 
   return (
     <View style={styles.container}>
@@ -99,16 +131,16 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
         initialRegion={{
           latitude: usuario.latitude,
           longitude: usuario.longitude,
-          latitudeDelta: 0.03,
-          longitudeDelta: 0.03,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
         }}
         showsUserLocation={true}
       >
         <Marker coordinate={usuario} title="Você está aqui" pinColor="blue" />
 
         {pontosFiltrados.map(p => {
-          const lat = p.Coordenadas?.y ?? p.y;
-          const lng = p.Coordenadas?.x ?? p.x;
+          const lat = Number(p.Coordenadas?.y ?? p.y);
+          const lng = Number(p.Coordenadas?.x ?? p.x);
           const color =
             p.Stats === "Vazia"
               ? "green"
@@ -118,24 +150,25 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
 
           return (
             <Marker key={p.ID} coordinate={{ latitude: lat, longitude: lng }} pinColor={color}>
-              <Callout>
-                <View style={{ width: 220 }}>
-                  <Text style={{ fontWeight: "700" }}>🗑️ Sensor {p.ID}</Text>
-                  <Text numberOfLines={2}>{p.Endereco}</Text>
+              <Callout tooltip>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>🗑️ Sensor {p.ID}</Text>
+                  <Text style={styles.calloutAddress}>{p.Endereco}</Text>
+
                   <View
-                    style={{
-                      marginTop: 6,
-                      padding: 6,
-                      borderRadius: 6,
-                      backgroundColor:
-                        p.Stats === "Vazia"
-                          ? "#d4f8d4"
-                          : p.Stats === "Quase Cheia"
-                          ? "#ffe9b3"
-                          : "#ffcdcd",
-                    }}
+                    style={[
+                      styles.calloutStatus,
+                      {
+                        backgroundColor:
+                          p.Stats === "Vazia"
+                            ? "#d4f8d4"
+                            : p.Stats === "Quase Cheia"
+                            ? "#ffe9b3"
+                            : "#ffcdcd",
+                      },
+                    ]}
                   >
-                    <Text style={{ fontWeight: "700" }}>Status: {p.Stats}</Text>
+                    <Text style={styles.calloutStatusText}>Status: {p.Stats}</Text>
                     <Text>Lat: {lat.toFixed(6)}</Text>
                     <Text>Lng: {lng.toFixed(6)}</Text>
                   </View>
@@ -146,7 +179,7 @@ export default function MapComponent({ apiUrl, mapboxToken }) {
         })}
 
         {routeCoords.length > 0 && (
-          <Polyline coordinates={routeCoords} strokeWidth={5} lineJoin="round" />
+          <Polyline coordinates={routeCoords} strokeWidth={5} lineJoin="round" strokeColor="#007BFF" />
         )}
       </MapView>
 
@@ -187,5 +220,36 @@ const styles = StyleSheet.create({
   picker: {
     width: Platform.OS === "ios" ? 220 : 200,
     height: 44,
+  },
+  calloutContainer: {
+    width: 220,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  calloutTitle: {
+    fontWeight: "700",
+    fontSize: 16,
+    marginBottom: 4,
+    color: "#333",
+  },
+  calloutAddress: {
+    fontSize: 14,
+    color: "#444",
+    marginBottom: 6,
+  },
+  calloutStatus: {
+    padding: 6,
+    borderRadius: 6,
+  },
+  calloutStatusText: {
+    fontWeight: "700",
+    marginBottom: 4,
+    color: "#333",
   },
 });
