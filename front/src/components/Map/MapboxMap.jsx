@@ -17,7 +17,6 @@ export default function MapboxMap({ onMapClick, onRefreshReady }) {
 
   const apiUrl = useApiUrl();
 
-  // ✅ 100% working refresh function
   const refreshPoints = async () => {
     try {
       const response = await fetch(`${apiUrl}/statusSensor`);
@@ -28,25 +27,15 @@ export default function MapboxMap({ onMapClick, onRefreshReady }) {
     }
   };
 
-  // local user marker coords
   const usuario = { x: -46.559689, y: -23.64434 };
 
   useEffect(() => setMounted(true), []);
 
-  // Load points on mount
   useEffect(() => {
     if (!mounted) return;
     refreshPoints();
   }, [mounted]);
 
-  // ❌ OLD (causes refresh not registering)
-  // useEffect(() => {
-  //   if (mounted) {
-  //     onRefreshReady?.(refreshPoints);
-  //   }
-  // }, [mounted]);
-
-  // ✅ NEW — Register refresh function IMMEDIATELY when map loads
   const exposeRefreshOnce = () => {
     if (onRefreshReady) {
       onRefreshReady(refreshPoints);
@@ -73,10 +62,8 @@ export default function MapboxMap({ onMapClick, onRefreshReady }) {
           antialias: true,
         });
 
-        // ⭐ REGISTER REFRESH HOOK IMMEDIATELY
         exposeRefreshOnce();
 
-        // click handler
         if (onMapClick) {
           map.on("click", (e) => {
             const { lng, lat } = e.lngLat;
@@ -96,7 +83,6 @@ export default function MapboxMap({ onMapClick, onRefreshReady }) {
         mapRef.current = map;
         map.addControl(new mapboxgl.NavigationControl());
 
-        // user marker
         const UsuarioMarker = document.createElement("div");
         UsuarioMarker.className = "marker";
         UsuarioMarker.style.backgroundImage = "url('https://i.imgur.com/MK4NUzI.png')";
@@ -159,14 +145,12 @@ export default function MapboxMap({ onMapClick, onRefreshReady }) {
     };
   }, [mounted]);
 
-  // draw markers + route
   useEffect(() => {
     if (!mounted || !mapRef.current || !mapboxRef.current) return;
 
     const map = mapRef.current;
     const mapboxgl = mapboxRef.current;
 
-    // clear old markers
     if (map.markers) map.markers.forEach((m) => m.remove());
     map.markers = [];
 
@@ -177,6 +161,8 @@ export default function MapboxMap({ onMapClick, onRefreshReady }) {
 
     setRotaInfo(null);
 if (filtro === "-") {
+
+  
   // Desenhar TODOS os pontos sem filtro
   pontos.forEach((ponto) => {
     const { x, y } = ponto.Coordenadas;
