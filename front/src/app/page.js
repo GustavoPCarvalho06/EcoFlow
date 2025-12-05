@@ -20,14 +20,14 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-green-100 selection:text-green-800">
 
-     
+
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Image
               src="/imagen/Logo.png"
               alt="EcoFlow logo"
-              width={60}   
+              width={60}
               height={50}
               className="object-contain"
             />
@@ -76,9 +76,11 @@ export default function LandingPage() {
                     Entrar no sistema <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="h-14 px-8 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-green-700 hover:border-green-200 font-semibold text-lg w-full sm:w-auto">
-                  Sobre nós
-                </Button>
+                <Link href="/sobreNos">
+                  <Button variant="outline" size="lg" className="h-14 px-8 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-green-700 hover:border-green-200 font-semibold text-lg w-full sm:w-auto">
+                    Sobre nós
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -87,7 +89,7 @@ export default function LandingPage() {
               <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl opacity-50"></div>
 
               <div className="relative bg-white border border-gray-200 rounded-3xl shadow-2xl p-4 sm:p-6 lg:rotate-2 hover:rotate-0 transition-transform duration-700 ease-out">
-               
+
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
                   <div className="flex gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -119,7 +121,7 @@ export default function LandingPage() {
                   <span className="relative z-10 text-gray-400 font-medium flex items-center gap-2">
                     <Map className="h-4 w-4" /> Mapa de Coleta em Tempo Real
                   </span>
-                  
+
                   <div className="absolute top-1/3 left-1/4 h-4 w-4 bg-red-500 rounded-full border-2 border-white shadow-md animate-bounce"></div>
                   <div className="absolute bottom-1/3 right-1/3 h-4 w-4 bg-green-500 rounded-full border-2 border-white shadow-md"></div>
                 </div>
@@ -240,18 +242,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      
+
       <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-8">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Image
-              src="/imagen/Logo.png"
-              alt="EcoFlow logo"
-              width={60}   
-              height={50}
-              className="object-contain"
-            />
+                src="/imagen/Logo.png"
+                alt="EcoFlow logo"
+                width={60}
+                height={50}
+                className="object-contain"
+              />
               <span className="text-lg font-bold text-gray-900">EcoFlow.</span>
             </div>
             <p className="text-gray-500 text-sm">
