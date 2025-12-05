@@ -51,7 +51,8 @@ export function NavUser({
   const handleLogoutClick = async () => {
      
       if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
+          localStorage.removeItem('mapbox.eventData.uuid:c2FjYWJhbWJhc3Bpcw==');
+          localStorage.removeItem('mapbox.eventData:c2FjYWJhbWJhc3Bpcw==')
       }
       
       await logout();
@@ -64,7 +65,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-green-100 data-[state=open]:text-sidebar-accent-foreground hover:bg-green-200/50 hover:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarFallback className="rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">

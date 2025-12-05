@@ -58,7 +58,7 @@ export default function DoughnutChart({ data }) {
 
     <div className="flex flex-col h-full w-full">
       <h3 className="text-sm font-semibold text-foreground mb-4">
-        Composição de Resíduos
+        status dos pontos de coleta
       </h3>
       <div className="flex-1 w-full min-h-0 flex items-center justify-center relative">
         <Doughnut data={chartData} options={options} />

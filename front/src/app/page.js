@@ -66,16 +66,19 @@ export default function LandingPage() {
 
               <p className="text-lg text-gray-500 leading-relaxed max-w-xl">
                 Otimize rotas, reduza custos e monitore lixeiras em tempo real.
-                Uma solução integrada via Web, Mobile e IoT para cooperativas modernas.
+                Uma solução integrada via Web, Mobile e IoT.
+                Atualmente a maior empresa de coleta seletiva de são caetano do sul.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/login">
                   <Button size="lg" className="h-14 px-8 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold text-lg shadow-xl shadow-green-600/20 transition-all hover:-translate-y-1 w-full sm:w-auto">
-                    Começar Agora <ArrowRight className="ml-2 h-5 w-5" />
+                    Entrar no sistema <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-               
+                <Button variant="outline" size="lg" className="h-14 px-8 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-green-700 hover:border-green-200 font-semibold text-lg w-full sm:w-auto">
+                  Sobre nós
+                </Button>
               </div>
             </div>
 
@@ -136,7 +139,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-        
+            {/* Card 1 */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <LayoutDashboard className="h-7 w-7 text-blue-600" />
@@ -198,7 +201,7 @@ export default function LandingPage() {
 
             <div className="lg:w-1/2 space-y-8">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-                Por que escolher o <span className="text-green-600">EcoFlow?</span>
+                Por que funciona o <span className="text-green-600">EcoFlow?</span>
               </h2>
               <p className="text-lg text-gray-500">
                 Nosso sistema elimina a adivinhação da coleta de lixo. Ao invés de rotas fixas e ineficientes, usamos dados para tomar decisões.
@@ -225,9 +228,9 @@ export default function LandingPage() {
 
       <section className="py-24 bg-green-600">
         <div className="container mx-auto px-6 text-center text-white">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-6">Pronto para modernizar sua cooperativa?</h2>
+          <h2 className="text-3xl lg:text-4xl font-bold mb-6">Pronto para simplificar seu trabalho?</h2>
           <p className="text-green-100 text-lg mb-10 max-w-2xl mx-auto">
-            Junte-se à VerdeClaro e outras cooperativas que estão transformando a gestão de resíduos com tecnologia de ponta.
+            Junte-se à EcoFlow e transforme gestão de resíduos com tecnologia de ponta.
           </p>
           <Link href="/login">
             <Button size="lg" className="h-16 px-10 rounded-2xl bg-white text-green-700 hover:bg-green-50 font-bold text-xl shadow-2xl transition-transform hover:scale-105">

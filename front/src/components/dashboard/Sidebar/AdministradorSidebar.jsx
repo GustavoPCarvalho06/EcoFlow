@@ -48,7 +48,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
         "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 group",
         isActive
             ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md" 
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            : "text-sidebar-foreground/70 hover:bg-green-200/50 hover:text-sidebar-accent-foreground"
     );
 
     return (
@@ -83,7 +83,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                         <Button 
                             size="icon" 
                             variant="ghost" 
-                            className="relative h-8 w-8 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors cursor-pointer"
+                            className="relative h-8 w-8 hover:bg-green-200/50 hover:text-sidebar-accent-foreground transition-colors cursor-pointer"
                             onClick={clearComunicadoCount}
                         >
                             <IconBell className="h-5 w-5 text-primary" />

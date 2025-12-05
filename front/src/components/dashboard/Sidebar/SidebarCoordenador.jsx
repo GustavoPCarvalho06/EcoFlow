@@ -81,7 +81,7 @@ export function CoordenadorSidebar({ usuario, ...props }) {
                             href={item.href}
                             className={getLinkClasses(pathname === item.href)}
                         >
-                            <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-white" : "text-gray-400")} />
+                            <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-white" : "text-green-600")} />
                             <span>{item.title}</span>
 
                             {item.title === "Mensagem" && totalMsgUnread > 0 && (
