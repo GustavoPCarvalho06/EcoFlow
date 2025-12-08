@@ -78,7 +78,7 @@ export default function SobreNos() {
             <div className="relative bg-white border border-gray-200 rounded-3xl shadow-2xl p-4 sm:p-6">
               <div className="flex items-center justify-center h-64">
                 <Image
-                  src="/imagen/logo.png"
+                  src="/imagen/Logo.png"
                   alt="Coleta seletiva Verde Claro"
                   width={400}
                   height={250}
