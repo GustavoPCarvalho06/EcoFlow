@@ -1,23 +1,22 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import io from "socket.io-client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PlusCircle, Pencil, Trash2, Megaphone, User, CalendarDays, Clock, ChevronDown, Loader2 } from "lucide-react";
-import { useApiUrl } from "../../app/context/ApiContext"; 
+import { useApiUrl } from "@/app/context/ApiContext"; 
+import { useUnreadCount } from "@/app/context/UnreadCountContext"; // Importação do Contexto do Socket
 import { cn } from "@/lib/utils";
 
 const inputStyles = "rounded-xl bg-muted/50 border-input text-foreground focus:bg-background focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all duration-200 placeholder:text-muted-foreground";
 const primaryButtonStyles = "rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 font-medium transition-all hover:-translate-y-0.5";
-
 
 function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
   if (!comunicado) return null;
@@ -84,9 +83,9 @@ function ComunicadoForm({ onSubmit, initialData = null, onClose }) {
     );
 }
 
-
 export function ComunicadosComponenteCoordenador({ user, token }) {
     const apiUrl = useApiUrl();
+    const { socket } = useUnreadCount(); // Usando o socket do contexto
     
     const [todosComunicados, setTodosComunicados] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -132,14 +131,21 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
         finally { setLoading(false); }
     }, [user, apiUrl, token]);
 
+    // Busca inicial
     useEffect(() => { fetchData(); }, [fetchData]);
 
+    // Listener do Socket (CORRIGIDO)
     useEffect(() => {
-        if (!apiUrl) return;
-        const socket = io(apiUrl);
+        if (!socket) return;
+
+        // Ouve o evento vindo do servidor
         socket.on('comunicados_atualizados', fetchData);
-        return () => { socket.off('comunicados_atualizados', fetchData); socket.disconnect(); };
-    }, [fetchData, apiUrl]);
+
+        return () => { 
+            // Remove apenas o listener, NÃO desconecta o socket global
+            socket.off('comunicados_atualizados', fetchData); 
+        };
+    }, [fetchData, socket]);
 
     const handleOpenForm = (comunicado = null) => { setEditingComunicado(comunicado); setIsFormOpen(true); };
     const handleCloseForm = () => { setIsFormOpen(false); setEditingComunicado(null); };
@@ -186,6 +192,7 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
             });
             if (!res.ok) throw new Error('Falha ao salvar');
             handleCloseForm();
+            // fetchData será chamado automaticamente pelo socket
         } catch (error) { console.error("Erro ao salvar:", error); }
     };
 
@@ -196,6 +203,7 @@ export function ComunicadosComponenteCoordenador({ user, token }) {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             }); 
+            // fetchData será chamado automaticamente pelo socket
         }
         catch (error) { console.error("Erro ao deletar:", error); }
     };

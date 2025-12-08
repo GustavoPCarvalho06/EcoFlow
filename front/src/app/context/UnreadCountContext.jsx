@@ -6,7 +6,6 @@ import { useApiUrl } from './ApiContext';
 
 const UnreadCountContext = createContext();
 
-
 export function UnreadCountProvider({ children, user, token }) {
   const apiUrl = useApiUrl();
   const meuUserId = user?.id;
@@ -16,82 +15,69 @@ export function UnreadCountProvider({ children, user, token }) {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
-
+  // Busca mensagens não lidas
   const fetchTotalMsgUnread = useCallback(async () => {
-
-    if (!meuUserId || !apiUrl || !token) {
-      setTotalMsgUnread(0);
-      return;
-    }
+    if (!meuUserId || !apiUrl || !token) return;
     try {
       const response = await fetch(`${apiUrl}/msg/unread-counts`, {
-
-        headers: { 
-            'x-user-id': meuUserId.toString(),
-            'Authorization': `Bearer ${token}` 
-        }
+        headers: { 'x-user-id': meuUserId.toString(), 'Authorization': `Bearer ${token}` }
       });
-      if (!response.ok) throw new Error("Falha na busca de mensagens");
+      if (!response.ok) return;
       const countsBySender = await response.json();
       const total = Object.values(countsBySender).reduce((sum, current) => sum + current, 0);
       setTotalMsgUnread(total);
-    } catch (error) {
-      console.error("Erro ao buscar contagem de mensagens:", error);
-    }
-  }, [meuUserId, apiUrl, token]); 
+    } catch (error) { console.error(error); }
+  }, [meuUserId, apiUrl, token]);
 
-
+  // Busca comunicados não lidos
   const fetchTotalComunicadoUnread = useCallback(async () => {
-
-    if (!meuUserId || !apiUrl || !token) {
-      setTotalComunicadoUnread(0);
-      return;
-    }
+    if (!meuUserId || !apiUrl || !token) return;
     try {
       const response = await fetch(`${apiUrl}/comunicados/unseen-count`, {
-
-        headers: { 
-            'x-user-id': meuUserId.toString(),
-            'Authorization': `Bearer ${token}` 
-        }
+        headers: { 'x-user-id': meuUserId.toString(), 'Authorization': `Bearer ${token}` }
       });
-      
+      if (response.ok) {
+        const data = await response.json();
+        setTotalComunicadoUnread(data.count);
+      }
+    } catch (error) { console.error(error); }
+  }, [meuUserId, apiUrl, token]);
 
-      if (response.status === 401 || response.status === 403) return;
+  const clearComunicadoCount = () => setTotalComunicadoUnread(0);
 
-      if (!response.ok) throw new Error("Falha na busca de comunicados");
-      const data = await response.json();
-      setTotalComunicadoUnread(data.count);
-    } catch (error) {
-      console.error("Erro ao buscar contagem de comunicados:", error);
-    }
-  }, [meuUserId, apiUrl, token]); 
-
-  const clearComunicadoCount = () => {
-    setTotalComunicadoUnread(0);
-  };
-
+  // --- LÓGICA DE CONEXÃO ROBUSTA ---
   useEffect(() => {
     if (!meuUserId || !apiUrl) return;
 
+    // Conecta apenas se não existir socket ou se estiver desconectado
     const newSocket = io(apiUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 3000,
     });
 
     setSocket(newSocket);
 
-    newSocket.on('connect', () => {
+    const handleConnect = () => {
+      console.log("🟢 Socket conectado! ID:", newSocket.id);
       setIsConnected(true);
-      newSocket.emit('join', meuUserId);
+      newSocket.emit('join', meuUserId); // Entra na sala pessoal
       
-
+      // Atualiza contadores ao conectar
       fetchTotalMsgUnread();
       fetchTotalComunicadoUnread();
-    });
+    };
 
-    newSocket.on('disconnect', () => setIsConnected(false));
-    
+    const handleDisconnect = () => {
+      console.warn("🔴 Socket desconectado.");
+      setIsConnected(false);
+    };
+
+    newSocket.on('connect', handleConnect);
+    newSocket.on('disconnect', handleDisconnect);
+
+    // Listeners globais de atualização
     newSocket.on('new_message', (mensagem) => {
       if (mensagem.destinatario_id === meuUserId) {
         fetchTotalMsgUnread();
@@ -103,22 +89,22 @@ export function UnreadCountProvider({ children, user, token }) {
     });
 
     return () => {
+      // IMPORTANTE: Só desconecta se o componente desmontar (ex: logout)
+      // Não desconecta em navegação simples dentro do layout
+      console.log("🧹 Limpando conexão socket...");
       newSocket.disconnect();
-      setSocket(null);
     };
-  }, [meuUserId, apiUrl, fetchTotalMsgUnread, fetchTotalComunicadoUnread]);
-
-  const value = { 
-    socket,
-    isConnected,
-    totalMsgUnread, 
-    totalComunicadoUnread, 
-    fetchTotalMsgUnread,
-    clearComunicadoCount,
-  };
+  }, [meuUserId, apiUrl]); // Dependências mínimas para evitar re-conexão
 
   return (
-    <UnreadCountContext.Provider value={value}>
+    <UnreadCountContext.Provider value={{ 
+      socket, 
+      isConnected, 
+      totalMsgUnread, 
+      totalComunicadoUnread, 
+      fetchTotalMsgUnread, 
+      clearComunicadoCount 
+    }}>
       {children}
     </UnreadCountContext.Provider>
   );
@@ -126,8 +112,6 @@ export function UnreadCountProvider({ children, user, token }) {
 
 export const useUnreadCount = () => {
   const context = useContext(UnreadCountContext);
-  if (!context) {
-    throw new Error('useUnreadCount deve ser usado dentro de UnreadCountProvider');
-  }
+  if (!context) throw new Error('useUnreadCount deve ser usado dentro de UnreadCountProvider');
   return context;
 };

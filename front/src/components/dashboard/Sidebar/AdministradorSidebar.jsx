@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: front/src/components/dashboard/Sidebar/AdministradorSidebar.jsx
+// =================================================================================
+
 "use client";
 
 import * as React from "react";
@@ -43,7 +47,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
     const pathname = usePathname();
     const { totalMsgUnread, totalComunicadoUnread, clearComunicadoCount } = useUnreadCount();
 
-    // Função ajustada para usar as cores do tema (Dark/Light)
+    // Função para estilização dos links
     const getLinkClasses = (isActive) => cn(
         "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 group",
         isActive
@@ -77,6 +81,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
             </SidebarHeader>
 
             <SidebarContent className="px-3 py-2">
+                {/* Botão de Notificação (Sino) */}
                 <div className="mb-6 px-2 flex items-center justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Notificações</span>
                     <Link href="/comunicados" passHref>
@@ -96,22 +101,31 @@ export function AdministradorSidebar({ usuario, ...props }) {
                     </Link>
                 </div>
 
+                {/* Menu Principal */}
                 <nav className="flex flex-col gap-2">
                     {navItems.map((item, index) => (
                         <Link
                             key={index}
                             href={item.href}
+                            // --- LÓGICA DE RECARREGAMENTO (F5) ---
+                            onClick={(e) => {
+                                if (item.href === '/mensagens') {
+                                    e.preventDefault(); // Impede a navegação SPA padrão
+                                    window.location.href = '/mensagens'; // Força o navegador a recarregar a página
+                                }
+                            }}
+                            // -------------------------------------
                             className={getLinkClasses(pathname === item.href)}
                         >
                             <item.icon
                                 className={cn(
                                     "h-5 w-5",
-                                    // Se ativo, usa a cor de texto do primary (branco/preto), se não, usa a cor primária (verde)
                                     pathname === item.href ? "text-sidebar-primary-foreground" : "text-primary"
                                 )}
                             />
                             <span>{item.title}</span>
                             
+                            {/* Badge de mensagens não lidas */}
                             {item.title === "Mensagem" && totalMsgUnread > 0 && (
                                 <span className="ml-auto bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-5 px-2 flex items-center justify-center">
                                     {totalMsgUnread > 99 ? '+99' : totalMsgUnread}
@@ -121,6 +135,7 @@ export function AdministradorSidebar({ usuario, ...props }) {
                     ))}
                 </nav>
 
+                {/* Menu Coletor */}
                 <div className="mt-8">
                     <div className="px-3 pb-2">
                         <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">Coletor</span>

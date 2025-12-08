@@ -1,3 +1,7 @@
+// =================================================================================
+// Arquivo: front/src/components/dashboard/Sidebar/SidebarCoordenador.jsx
+// =================================================================================
+
 "use client";
 
 import { usePathname } from 'next/navigation';
@@ -15,7 +19,7 @@ import {
     SidebarMenuButton, 
     SidebarMenuItem 
 } from "@/components/ui/sidebar";
-import { useUnreadCount } from "@/app/context/UnreadCountContext"; // Fixed path
+import { useUnreadCount } from "@/app/context/UnreadCountContext";
 import { cn } from "@/lib/utils";
 
 const navItemsCoordenador = [
@@ -79,6 +83,14 @@ export function CoordenadorSidebar({ usuario, ...props }) {
                         <Link
                             key={index}
                             href={item.href}
+                            // --- ALTERAÇÃO: Forçar refresh (F5) ao clicar em Mensagem ---
+                            onClick={(e) => {
+                                if (item.href === '/mensagens') {
+                                    e.preventDefault();
+                                    window.location.href = '/mensagens';
+                                }
+                            }}
+                            // ----------------------------------------------------------
                             className={getLinkClasses(pathname === item.href)}
                         >
                             <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-white" : "text-green-600")} />

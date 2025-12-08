@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import io from "socket.io-client";
+// Removido: import io from "socket.io-client"; 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useApiUrl } from "@/app/context/ApiContext";
+import { useUnreadCount } from "@/app/context/UnreadCountContext"; // <--- IMPORTADO
 import { CalendarDays, User, Edit3, Megaphone, Loader2, Clock, ChevronDown, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -69,6 +70,7 @@ function ComunicadoCompletoDialog({ comunicado, isOpen, onOpenChange }) {
 
 export function ComunicadosComponenteAdministrador({ user, token }) {
   const apiUrl = useApiUrl();
+  const { socket } = useUnreadCount(); // <--- USANDO SOCKET DO CONTEXTO
   
   const [todosComunicados, setTodosComunicados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +87,7 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
       return;
     }
     
-    setLoading(true);
+    // Não seta loading=true aqui para evitar "piscar" a tela quando atualiza via socket
     setError("");
     
     const headers = {
@@ -113,21 +115,25 @@ export function ComunicadosComponenteAdministrador({ user, token }) {
     finally { setLoading(false); }
   }, [user, apiUrl, token]);
 
+  // Efeito inicial para buscar dados
   useEffect(() => { 
     if (apiUrl) {
       fetchData();
     }
   }, [fetchData, apiUrl]);
 
+  // Efeito do Socket (CORRIGIDO)
   useEffect(() => {
-    if (!apiUrl) return;
-    const socket = io(apiUrl);
+    if (!socket) return;
+
+    // Ouve o evento usando a conexão global
     socket.on('comunicados_atualizados', fetchData);
+
     return () => { 
+      // Remove apenas o ouvinte, NÃO desconecta o socket
       socket.off('comunicados_atualizados', fetchData); 
-      socket.disconnect(); 
     };
-  }, [fetchData, apiUrl]);
+  }, [fetchData, socket]);
 
   const truncarTexto = (texto, limite) => (texto.length > limite ? { texto: texto.substring(0, limite) + "...", truncado: true } : { texto, truncado: false });
 
