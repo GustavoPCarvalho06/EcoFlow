@@ -155,13 +155,13 @@ DELIMITER ;
 
 
 #--- INSERTS PARA TEST -----------------------------------------------------------------------------------------------------------------
-INSERT INTO SistemaSensor (statusLixo, localizacao) VALUES
-('Vazia', ST_GeomFromText('POINT(-46.557282 -23.647222)')),
-('Quase Cheia', ST_GeomFromText('POINT(-46.555083 -23.645723)')),
-('Cheia', ST_GeomFromText('POINT(-46.552413 -23.644962)')),
-('Vazia', ST_GeomFromText('POINT(-46.556209 -23.640472)')),
-('Quase Cheia', ST_GeomFromText('POINT(-46.560171 -23.643114)')),
-('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)'));
+INSERT INTO SistemaSensor (statusLixo, localizacao,Endereco) VALUES
+('Vazia', ST_GeomFromText('POINT(-46.557282 -23.647222)'),'Avenida Carlos Gomes 319, Vila Palmares, Santo André - São Paulo, 09061-590, Brazil'),
+('Quase Cheia', ST_GeomFromText('POINT(-46.555083 -23.645723)'),'Avenida Gago Coutinho 1464, Boa Vista, São Caetano do Sul - São Paulo, 09070-000, Brazil'),
+('Cheia', ST_GeomFromText('POINT(-46.552413 -23.644962)'),'Rua Marcílio Dias 257, Santa Maria, Santo André - São Paulo, 09070-040, Brazil'),
+('Vazia', ST_GeomFromText('POINT(-46.556209 -23.640472)'),'Alameda Conde De Porto Alegre 1666, Santa Maria, São Caetano do Sul - São Paulo, 09561-001, Brazil'),
+('Quase Cheia', ST_GeomFromText('POINT(-46.560171 -23.643114)'),'Rua Michel Glebochi 90, Boa Vista, São Caetano do Sul - São Paulo, 09572-120, Brazil'),
+('Cheia', ST_GeomFromText('POINT(-46.560212 -23.646610)'),'Rua Armando Rocha 705, Vila Palmares, Santo André - São Paulo, 09061-530, Brazil');
 
 
 # Usuários
@@ -367,3 +367,6 @@ SELECT * FROM usuarios;
 UPDATE usuarios
 SET cargo = "coletor"
 WHERE id = 3;
+
+
+select *from SistemaSensor;
